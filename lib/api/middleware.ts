@@ -5,6 +5,7 @@ import type { User } from "@/lib/types/database"
 export function getTokenFromRequest(request: NextRequest): string | null {
   const authHeader = request.headers.get("Authorization")
   if (!authHeader?.startsWith("Bearer ")) return null
+  console.log("Extracted token:", authHeader.slice(7));
   return authHeader.slice(7)
 }
 
@@ -39,6 +40,7 @@ export function getUserFromToken(token: string): User | null {
 
 // Check if user has admin access
 export function isAdmin(user: User | null): boolean {
+  console.log("Checking admin for user:", user);
   return user?.role === "admin" || user?.role === "manager"
 }
 

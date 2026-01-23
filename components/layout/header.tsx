@@ -29,6 +29,11 @@ export function Header() {
   // Ensure component is mounted before rendering auth-dependent content
   useEffect(() => {
     setMounted(true)
+    console.log("Header mounted:", mounted);
+    console.log("Header isAuthenticated :", isAuthenticated);
+    console.log("Header user:", user);
+
+
   }, [])
 
   const handleSearch = (e: React.FormEvent) => {
@@ -137,19 +142,29 @@ export function Header() {
               </Link>
             </Button>
 
+
             {mounted && isAuthenticated ? (
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger>
                   <Button variant="ghost" size="icon">
                     <User className="h-5 w-5" />
                     <span className="sr-only">User menu</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
+                {/* <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-muted"
+                  >
+                    <User className="h-5 w-5" />
+                  </button>
+                </DropdownMenuTrigger> */}
+
+                <DropdownMenuContent align="end" className="w-56 bg-white text-black border shadow-lg z-[9999]">
                   <DropdownMenuLabel>
                     <div className="flex flex-col">
-                      <span className="font-medium">{user.full_name || "User"}</span>
-                      <span className="text-xs text-muted-foreground">{user.email}</span>
+                      <span className="font-medium">{user?.full_name || "User"}</span>
+                      <span className="text-xs text-muted-foreground">{user?.email}</span>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -162,7 +177,7 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/wishlist">Wishlist</Link>
                   </DropdownMenuItem>
-                  {(user.role === "admin" || user.role === "manager") && (
+                  {(user?.role === "admin" || user?.role === "manager") && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>

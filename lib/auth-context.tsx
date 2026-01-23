@@ -51,9 +51,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Store user and token
-      localStorage.setItem("auth_user", JSON.stringify(data.user))
-      localStorage.setItem("authToken", data.token)
-      setUser(data.user)
+      localStorage.setItem("auth_user", JSON.stringify(data.data.user))
+      localStorage.setItem("authToken", data.data.token)
+      setUser(data.data.user)
+      console.log("Login Data:", data.data.user);
+      console.log("Login isAuthenticated:", isAuthenticated);
       return { success: true }
     } catch (error) {
       console.error("Login error:", error)
