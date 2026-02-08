@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { User } from "./types/database"
 import { mockUser, mockAdminUser } from "./mock-data"
+import { cookies } from "next/headers";
 
 interface AuthContextType {
   user: User | null
@@ -50,6 +51,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, error: data.error || "Login failed" }
       }
 
+      //  cookies().set("authToken", data.data.token, {
+      //     httpOnly: true, // ⭐ SECURITY
+      //     secure: true,
+      //     sameSite: "lax",
+      //     path: "/",
+      //   });
       // Store user and token
       localStorage.setItem("auth_user", JSON.stringify(data.data.user))
       localStorage.setItem("authToken", data.data.token)

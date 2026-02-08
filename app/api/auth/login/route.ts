@@ -3,14 +3,16 @@ import { validateRequestBody, LoginSchema } from "@/lib/api/validation"
 import { errorResponse, successResponse } from "@/lib/api/middleware"
 import { userQueries } from "@/lib/db/queries"
 import crypto from "crypto"
+import { cookies } from "next/headers"
+import { generateToken } from "@/lib/jwt.js"
 
 function hashPassword(password: string): string {
   return crypto.createHash("sha256").update(password).digest("hex")
 }
 
-function generateToken(userId: string): string {
-  return crypto.randomBytes(32).toString("hex")
-}
+// function generateToken(userId: string): string {
+//   return crypto.randomBytes(32).toString("hex")
+// }
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,7 +37,14 @@ export async function POST(request: NextRequest) {
       return errorResponse("Invalid email or password", 401)
     }
 
-    const token = generateToken(user.id)
+    const token = generateToken(user)
+
+      cookies().set("authToken", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  });
 
     return successResponse({
       user: {
@@ -46,7 +55,7 @@ export async function POST(request: NextRequest) {
         email_verified: user.email_verified,
       },
       token,
-      expiresIn: 86400,
+      expiresIn: process.env.JWT_EXPIRES_IN,
     })
   } catch (error) {
     console.error("Login error:", error)

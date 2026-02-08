@@ -58,14 +58,37 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
   return null
 }
 
-export async function getCategories(): Promise<Category[]> {
-  if (USE_MOCK_DATA) {
+// export async function getCategories(): Promise<Category[]> {
+//   if (USE_MOCK_DATA) {
+//     return mockCategories
+//   }
+
+//   // TODO: Replace with actual database query
+//   return []
+// }
+
+export async function getCategories(token?: string): Promise<Category[]> {
+try {
+    const headers: Record<string, string> = {}
+    if (token) headers['Authorization'] = `Bearer ${token}`
+
+   // const res = await fetch("/api/categories", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/categories`, {
+      method: 'GET',
+      headers,
+      cache: 'no-store',
+    })
+
+    if (!res.ok) throw new Error('Failed to fetch categories')
+
+    const data = await res.json()
+    return data.data.categories || mockCategories
+  } catch (error) {
+    console.error('Fetch categories failed, using mock', error)
     return mockCategories
   }
-
-  // TODO: Replace with actual database query
-  return []
 }
+
 
 export async function getBanners(): Promise<Banner[]> {
   if (USE_MOCK_DATA) {

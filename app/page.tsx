@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button"
 import { getBanners, getCategories, getProducts } from "@/lib/db-utils"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import { cookies } from "next/headers";
 
 export default async function HomePage() {
+   const token = cookies().get("authToken")?.value;
   const banners = await getBanners()
-  const categories = await getCategories()
+  const categories = await getCategories(token)
   const featuredProducts = await getProducts({ featured: true, limit: 4 })
   const newProducts = await getProducts({ limit: 8 })
 

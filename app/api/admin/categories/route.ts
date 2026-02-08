@@ -1,7 +1,8 @@
 import type { NextRequest } from "next/server"
-import { getTokenFromRequest, getUserFromToken, isAdmin, errorResponse, successResponse } from "@/lib/api/middleware"
+import { getTokenFromRequest, isAdmin, errorResponse, successResponse } from "@/lib/api/middleware"
 import { validateRequestBody, CreateCategorySchema } from "@/lib/api/validation"
 import { categoryQueries } from "@/lib/db/queries"
+import { getUserFromToken } from "@/lib/jwt"
 
 // GET /api/admin/categories
 export async function GET(request: NextRequest) {

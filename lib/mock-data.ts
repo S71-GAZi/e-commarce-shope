@@ -244,7 +244,8 @@ export const mockBanners: Banner[] = [
   {
     id: "1",
     title: "Summer Sale - Up to 50% Off",
-    image_url: "/summer-sale-banner.png",
+    //image_url: "/summer-sale-banner.png",
+    image_url: "/e_com_banner.jpg",
     link_url: "/products?sale=true",
     description: "Limited time offer on selected items",
     display_order: 1,
@@ -255,7 +256,8 @@ export const mockBanners: Banner[] = [
   {
     id: "2",
     title: "New Arrivals",
-    image_url: "/new-products-banner.png",
+    //image_url: "/new-products-banner.png",
+    image_url: "/e_com_banner.jpg",
     link_url: "/products?sort=newest",
     description: "Check out our latest products",
     display_order: 2,

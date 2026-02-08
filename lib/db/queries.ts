@@ -221,11 +221,19 @@ export const cartQueries = {
 }
 
 export const categoryQueries = {
-  async listAll(limit = 100, offset = 0) {
+  async listAll(limit?: number, offset?: number) {
+     const safeLimit = Number(limit ?? 100);
+    const safeOffset = Number(offset ?? 0);
+    console.log("Executing category query with:", safeLimit, safeOffset);
+
+    // return executeQuery<Category>(
+    //   "SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ? OFFSET ?",
+    //   [safeLimit, safeOffset],
+    // )
+
     return executeQuery<Category>(
-      "SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ? OFFSET ?",
-      [limit, offset],
-    )
+  `SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ${safeLimit} OFFSET ${safeOffset}`
+)
   },
 
   async findById(id: string) {

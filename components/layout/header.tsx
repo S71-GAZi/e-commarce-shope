@@ -84,8 +84,9 @@ export function Header() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <Package className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl hidden sm:inline-block">ShopHub</span>
+            {/* <Package className="h-6 w-6 text-primary" /> */}
+            <img src="/e_com_brand_Logo.jpeg" alt="ShopHub Logo" width={130} height={40} />
+            {/* <span className="font-bold text-xl hidden sm:inline-block">ShopHub</span> */}
           </Link>
 
           {/* Desktop Navigation */}
