@@ -3,7 +3,7 @@ import jwt, { SignOptions } from "jsonwebtoken";
 
 
 const SECRET_KEY: string = process.env.JWT_SECRET || "default_secret";
-export interface UserPayload {
+export interface IUserPayload {
   id: number;
   email: string;
   role: string;
@@ -18,7 +18,7 @@ export interface UserPayload {
 // };
 
 
-export const generateToken = (user: UserPayload): string => {
+export const generateToken = (user: IUserPayload): string => {
   const payload = {
     id: user.id,
     email: user.email,
@@ -41,9 +41,9 @@ export const generateToken = (user: UserPayload): string => {
 //   }
 // };
 
-export const verifyToken = (token: string): UserPayload | null => {
+export const verifyToken = (token: string): IUserPayload | null => {
   try {
-    return jwt.verify(token, SECRET_KEY) as UserPayload;
+    return jwt.verify(token, SECRET_KEY) as IUserPayload;
   } catch (err) {
     console.error("Invalid token:", err);
     return null;
@@ -52,9 +52,9 @@ export const verifyToken = (token: string): UserPayload | null => {
 
 
 
-export function getUserFromToken(token: string): UserPayload | null {
+export function getUserFromToken(token: string): IUserPayload | null {
   try {
-    const decoded = jwt.verify(token, SECRET_KEY) as UserPayload;
+    const decoded = jwt.verify(token, SECRET_KEY) as IUserPayload;
     return decoded;
   } catch (err) {
     console.error("Invalid token:", err);

@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server"
 import { getTokenFromRequest, isAdmin, errorResponse, successResponse } from "@/lib/api/middleware"
 import { validateRequestBody, CreateCategorySchema } from "@/lib/api/validation"
 import { categoryQueries } from "@/lib/db/queries"
-import { getUserFromToken, UserPayload } from "@/lib/jwt"
+import { getUserFromToken, IUserPayload } from "@/lib/jwt"
 
 // GET /api/admin/categories
 export async function GET(request: NextRequest) {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
   try {
     const token = getTokenFromRequest(request)
     console.log(token)
-    const user: UserPayload | null = token ? getUserFromToken(token) : null
+    const user: IUserPayload | null = token ? getUserFromToken(token) : null
     console.log("User from token:", user)
     if (!user || !isAdmin(user)) {
       return errorResponse("Unauthorized", 401)
