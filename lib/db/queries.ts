@@ -1,13 +1,13 @@
 import { executeQuery, executeQuerySingle } from "./mysql"
-import type { User, Product, Order, Category, Coupon, CartItem } from "@/lib/types/database"
+import type { IUser, IProduct, IOrder, ICategory, ICoupon, ICartItem } from "@/lib/types/database"
 
 export const userQueries = {
   async findByEmail(email: string) {
-    return executeQuerySingle<User>("SELECT * FROM users WHERE email = ? LIMIT 1", [email])
+    return executeQuerySingle<IUser>("SELECT * FROM users WHERE email = ? LIMIT 1", [email])
   },
 
   async findById(id: string) {
-    return executeQuerySingle<User>("SELECT * FROM users WHERE id = ? LIMIT 1", [id])
+    return executeQuerySingle<IUser>("SELECT * FROM users WHERE id = ? LIMIT 1", [id])
   },
 
   async create(email: string, full_name: string, password_hash: string) {
@@ -16,10 +16,10 @@ export const userQueries = {
       "INSERT INTO users (id, email, full_name, password_hash, role, email_verified) VALUES (?, ?, ?, ?, 'customer', 0)",
       [userId, email, full_name, password_hash],
     )
-    return executeQuerySingle<User>("SELECT * FROM users WHERE id = ?", [userId])
+    return executeQuerySingle<IUser>("SELECT * FROM users WHERE id = ?", [userId])
   },
 
-  async update(id: string, data: Partial<User>) {
+  async update(id: string, data: Partial<IUser>) {
     const fields: string[] = []
     const values: any[] = []
 
@@ -35,17 +35,17 @@ export const userQueries = {
     values.push(id)
     const query = `UPDATE users SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
     await executeQuery(query, values)
-    return executeQuerySingle<User>("SELECT * FROM users WHERE id = ?", [id])
+    return executeQuerySingle<IUser>("SELECT * FROM users WHERE id = ?", [id])
   },
 
   async listAll(limit = 50, offset = 0) {
-    return executeQuery<User>("SELECT * FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
+    return executeQuery<IUser>("SELECT * FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
   },
 }
 
 export const productQueries = {
   async findById(id: string) {
-    return executeQuerySingle<Product>(
+    return executeQuerySingle<IProduct>(
       `SELECT p.*, c.name as category_name
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
@@ -55,7 +55,7 @@ export const productQueries = {
   },
 
   async findBySlug(slug: string) {
-    return executeQuerySingle<Product>(
+    return executeQuerySingle<IProduct>(
       `SELECT p.*, c.name as category_name
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
@@ -81,11 +81,11 @@ export const productQueries = {
     query += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
     params.push(limit, offset)
 
-    return executeQuery<Product>(query, params)
+    return executeQuery<IProduct>(query, params)
   },
 
   async search(query: string, limit = 20) {
-    return executeQuery<Product>(
+    return executeQuery<IProduct>(
       `SELECT * FROM products
        WHERE MATCH(name, description, short_description) AGAINST(? IN BOOLEAN MODE)
        AND is_active = true
@@ -95,8 +95,8 @@ export const productQueries = {
     )
   },
 
-  async create(data: Partial<Product>) {
-    const result = await executeQuery<Product>(
+  async create(data: Partial<IProduct>) {
+    const result = await executeQuery<IProduct>(
       `INSERT INTO products (
         name, slug, description, short_description, category_id,
         price, stock_quantity, is_featured, is_active
@@ -116,7 +116,7 @@ export const productQueries = {
     return result[0]
   },
 
-  async update(id: string, data: Partial<Product>) {
+  async update(id: string, data: Partial<IProduct>) {
     const fields: string[] = []
     const values: any[] = []
 
@@ -132,7 +132,7 @@ export const productQueries = {
     values.push(id)
     const query = `UPDATE products SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
     await executeQuery(query, values)
-    return executeQuerySingle<Product>("SELECT * FROM products WHERE id = ?", [id])
+    return executeQuerySingle<IProduct>("SELECT * FROM products WHERE id = ?", [id])
   },
 
   async delete(id: string) {
@@ -142,11 +142,11 @@ export const productQueries = {
 
 export const orderQueries = {
   async findById(id: string) {
-    return executeQuerySingle<Order>("SELECT * FROM orders WHERE id = ? LIMIT 1", [id])
+    return executeQuerySingle<IOrder>("SELECT * FROM orders WHERE id = ? LIMIT 1", [id])
   },
 
   async findByUserId(userId: string, limit = 20, offset = 0) {
-    return executeQuery<Order>("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", [
+    return executeQuery<IOrder>("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", [
       userId,
       limit,
       offset,
@@ -154,12 +154,12 @@ export const orderQueries = {
   },
 
   async listAll(limit = 20, offset = 0) {
-    return executeQuery<Order>("SELECT * FROM orders ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
+    return executeQuery<IOrder>("SELECT * FROM orders ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
   },
 
-  async create(data: Partial<Order>) {
+  async create(data: Partial<IOrder>) {
     const orderNumber = `ORD-${Date.now()}`
-    const result = await executeQuery<Order>(
+    const result = await executeQuery<IOrder>(
       `INSERT INTO orders (
         order_number, user_id, status, payment_status, subtotal,
         total_amount, currency, coupon_code
@@ -178,13 +178,13 @@ export const orderQueries = {
     } else {
       await executeQuery("UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", [status, id])
     }
-    return executeQuerySingle<Order>("SELECT * FROM orders WHERE id = ?", [id])
+    return executeQuerySingle<IOrder>("SELECT * FROM orders WHERE id = ?", [id])
   },
 }
 
 export const cartQueries = {
   async findByUserId(userId: string) {
-    return executeQuery<CartItem & { product_name: string; price: number; slug: string }>(
+    return executeQuery<ICartItem & { product_name: string; price: number; slug: string }>(
       `SELECT ci.*, p.name as product_name, p.price, p.slug
        FROM cart_items ci
        LEFT JOIN products p ON ci.product_id = p.id
@@ -194,7 +194,7 @@ export const cartQueries = {
   },
 
   async addItem(userId: string, productId: string, quantity: number, variantId?: string) {
-    const result = await executeQuery<CartItem>(
+    const result = await executeQuery<ICartItem>(
       `INSERT INTO cart_items (user_id, product_id, variant_id, quantity)
        VALUES (?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE quantity = quantity + ?`,
@@ -208,7 +208,7 @@ export const cartQueries = {
       quantity,
       id,
     ])
-    return executeQuerySingle<CartItem>("SELECT * FROM cart_items WHERE id = ?", [id])
+    return executeQuerySingle<ICartItem>("SELECT * FROM cart_items WHERE id = ?", [id])
   },
 
   async removeItem(id: string) {
@@ -222,33 +222,33 @@ export const cartQueries = {
 
 export const categoryQueries = {
   async listAll(limit?: number, offset?: number) {
-     const safeLimit = Number(limit ?? 100);
+    const safeLimit = Number(limit ?? 100);
     const safeOffset = Number(offset ?? 0);
     console.log("Executing category query with:", safeLimit, safeOffset);
 
-    // return executeQuery<Category>(
+    // return executeQuery<ICategory>(
     //   "SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ? OFFSET ?",
     //   [safeLimit, safeOffset],
     // )
 
-    return executeQuery<Category>(
-  `SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ${safeLimit} OFFSET ${safeOffset}`
-)
+    return executeQuery<ICategory>(
+      `SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ${safeLimit} OFFSET ${safeOffset}`
+    )
   },
 
   async findById(id: string) {
-    return executeQuerySingle<Category>("SELECT * FROM categories WHERE id = ? LIMIT 1", [id])
+    return executeQuerySingle<ICategory>("SELECT * FROM categories WHERE id = ? LIMIT 1", [id])
   },
 
-  async create(data: Partial<Category>) {
-    const result = await executeQuery<Category>(
+  async create(data: Partial<ICategory>) {
+    const result = await executeQuery<ICategory>(
       "INSERT INTO categories (name, slug, description, is_active) VALUES (?, ?, ?, ?)",
       [data.name, data.slug, data.description, data.is_active !== false ? 1 : 0],
     )
     return result[0]
   },
 
-  async update(id: string, data: Partial<Category>) {
+  async update(id: string, data: Partial<ICategory>) {
     const fields: string[] = []
     const values: any[] = []
 
@@ -274,7 +274,7 @@ export const categoryQueries = {
     values.push(id)
     const query = `UPDATE categories SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
     await executeQuery(query, values)
-    return executeQuerySingle<Category>("SELECT * FROM categories WHERE id = ?", [id])
+    return executeQuerySingle<ICategory>("SELECT * FROM categories WHERE id = ?", [id])
   },
 
   async delete(id: string) {
@@ -284,15 +284,15 @@ export const categoryQueries = {
 
 export const couponQueries = {
   async findByCode(code: string) {
-    return executeQuerySingle<Coupon>("SELECT * FROM coupons WHERE code = ? AND is_active = true LIMIT 1", [code])
+    return executeQuerySingle<ICoupon>("SELECT * FROM coupons WHERE code = ? AND is_active = true LIMIT 1", [code])
   },
 
   async listAll(limit = 50, offset = 0) {
-    return executeQuery<Coupon>("SELECT * FROM coupons ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
+    return executeQuery<ICoupon>("SELECT * FROM coupons ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
   },
 
-  async create(data: Partial<Coupon>) {
-    const result = await executeQuery<Coupon>(
+  async create(data: Partial<ICoupon>) {
+    const result = await executeQuery<ICoupon>(
       "INSERT INTO coupons (code, discount_type, discount_value, is_active) VALUES (?, ?, ?, true)",
       [data.code, data.discount_type, data.discount_value],
     )

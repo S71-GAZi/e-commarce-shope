@@ -4,7 +4,7 @@ import { errorResponse, successResponse } from "@/lib/api/middleware"
 import { userQueries } from "@/lib/db/queries"
 import crypto from "crypto"
 import { cookies } from "next/headers"
-import { generateToken } from "@/lib/jwt.js"
+import { generateToken } from "@/lib/jwt"
 
 function hashPassword(password: string): string {
   return crypto.createHash("sha256").update(password).digest("hex")
@@ -39,12 +39,12 @@ export async function POST(request: NextRequest) {
 
     const token = generateToken(user)
 
-      cookies().set("authToken", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-  });
+    cookies().set("authToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    });
 
     return successResponse({
       user: {

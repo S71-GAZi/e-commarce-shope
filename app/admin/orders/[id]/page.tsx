@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, Package, CreditCard, User, MapPin, Loader2, Mail, Printer } from "lucide-react"
-import type { OrderStatus } from "@/lib/types/database"
+import type { IOrderStatus } from "@/lib/types/database"
 
 export default function OrderDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -24,7 +24,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
   const order = {
     id: params.id,
     order_number: "ORD-2024-001",
-    status: "processing" as OrderStatus,
+    status: "processing" as IOrderStatus,
     payment_status: "paid",
     payment_method: "Credit Card",
     subtotal: 299.99,
@@ -63,7 +63,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
     notes: "",
   }
 
-  const [orderStatus, setOrderStatus] = useState<OrderStatus>(order.status)
+  const [orderStatus, setOrderStatus] = useState<IOrderStatus>(order.status)
   const [trackingNumber, setTrackingNumber] = useState(order.tracking_number)
 
   const handleUpdateOrder = async () => {
@@ -225,7 +225,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select value={orderStatus} onValueChange={(value) => setOrderStatus(value as OrderStatus)}>
+                <Select value={orderStatus} onValueChange={(value) => setOrderStatus(value as IOrderStatus)}>
                   <SelectTrigger id="status">
                     <SelectValue />
                   </SelectTrigger>

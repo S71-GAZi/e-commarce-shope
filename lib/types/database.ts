@@ -2,7 +2,7 @@
 
 export type UserRole = "customer" | "admin" | "manager" | "support"
 
-export interface User {
+export interface IUser {
   id: string
   email: string
   full_name?: string
@@ -13,7 +13,7 @@ export interface User {
   updated_at: string
 }
 
-export interface Category {
+export interface ICategory {
   id: string
   name: string
   slug: string
@@ -26,7 +26,7 @@ export interface Category {
   updated_at: string
 }
 
-export interface Product {
+export interface IProduct {
   id: string
   name: string
   slug: string
@@ -54,15 +54,17 @@ export interface Product {
   seo_description?: string
   created_at: string
   updated_at: string
-  category?: Category
-  images?: ProductImage[]
-  variants?: ProductVariant[]
-  reviews?: Review[]
+  category?: ICategory
+  images?: IProductImage[]
+  variants?: IProductVariant[]
+  reviews?: IReview[]
   average_rating?: number
   review_count?: number
+  meta_title?: string
+  meta_description?: string
 }
 
-export interface ProductImage {
+export interface IProductImage {
   id: string
   product_id: string
   image_url: string
@@ -72,7 +74,7 @@ export interface ProductImage {
   created_at: string
 }
 
-export interface ProductVariant {
+export interface IProductVariant {
   id: string
   product_id: string
   name: string
@@ -85,7 +87,7 @@ export interface ProductVariant {
   updated_at: string
 }
 
-export interface Review {
+export interface IReview {
   id: string
   product_id: string
   user_id: string
@@ -96,10 +98,10 @@ export interface Review {
   is_approved: boolean
   created_at: string
   updated_at: string
-  user?: User
+  user?: IUser
 }
 
-export interface Address {
+export interface IAddress {
   id: string
   user_id: string
   full_name: string
@@ -116,15 +118,15 @@ export interface Address {
   updated_at: string
 }
 
-export type OrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded"
-export type PaymentStatus = "pending" | "paid" | "failed" | "refunded"
+export type IOrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded"
+export type IPaymentStatus = "pending" | "paid" | "failed" | "refunded"
 
-export interface Order {
+export interface IOrder {
   id: string
   order_number: string
   user_id?: string
-  status: OrderStatus
-  payment_status: PaymentStatus
+  status: IOrderStatus
+  payment_status: IPaymentStatus
   payment_method?: string
   payment_intent_id?: string
   subtotal: number
@@ -142,13 +144,13 @@ export interface Order {
   delivered_at?: string
   created_at: string
   updated_at: string
-  user?: User
-  items?: OrderItem[]
-  shipping_address?: Address
-  billing_address?: Address
+  user?: IUser
+  items?: IOrderItem[]
+  shipping_address?: IAddress
+  billing_address?: IAddress
 }
 
-export interface OrderItem {
+export interface IOrderItem {
   id: string
   order_id: string
   product_id?: string
@@ -160,10 +162,10 @@ export interface OrderItem {
   unit_price: number
   total_price: number
   created_at: string
-  product?: Product
+  product?: IProduct
 }
 
-export interface CartItem {
+export interface ICartItem {
   id: string
   user_id?: string
   session_id?: string
@@ -172,19 +174,19 @@ export interface CartItem {
   quantity: number
   created_at: string
   updated_at: string
-  product?: Product
-  variant?: ProductVariant
+  product?: IProduct
+  variant?: IProductVariant
 }
 
-export interface WishlistItem {
+export interface IWishlistItem {
   id: string
   user_id: string
   product_id: string
   created_at: string
-  product?: Product
+  product?: IProduct
 }
 
-export interface Coupon {
+export interface ICoupon {
   id: string
   code: string
   description?: string
@@ -201,7 +203,7 @@ export interface Coupon {
   updated_at: string
 }
 
-export interface InventoryLog {
+export interface IInventoryLog {
   id: string
   product_id: string
   variant_id?: string
@@ -214,7 +216,7 @@ export interface InventoryLog {
   created_at: string
 }
 
-export interface ContentPage {
+export interface IContentPage {
   id: string
   title: string
   slug: string
@@ -226,7 +228,7 @@ export interface ContentPage {
   updated_at: string
 }
 
-export interface Banner {
+export interface IBanner {
   id: string
   title: string
   image_url: string

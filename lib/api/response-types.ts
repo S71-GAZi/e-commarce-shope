@@ -22,3 +22,25 @@ export interface ApiErrorResponse {
   error: string
   details?: Record<string, any>
 }
+
+
+/* ================= SUCCESS RESPONSE ================= */
+export function successResponse<T>(
+  data?: T,
+  message = "Request successful"
+): ApiResponse<T> {
+  return {
+    success: true,
+    data,
+  }
+}
+
+/* ================= ERROR RESPONSE ================= */
+export function errorResponse(
+  message = "Something went wrong"
+): ApiResponse {
+  return {
+    success: false,
+    error: message,
+  }
+}

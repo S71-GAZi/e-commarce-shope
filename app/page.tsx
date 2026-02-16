@@ -10,7 +10,7 @@ import { ArrowRight } from "lucide-react"
 import { cookies } from "next/headers";
 
 export default async function HomePage() {
-   const token = cookies().get("authToken")?.value;
+  const token = cookies().get("authToken")?.value;
   const banners = await getBanners()
   const categories = await getCategories(token)
   const featuredProducts = await getProducts({ featured: true, limit: 4 })

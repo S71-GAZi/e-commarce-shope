@@ -43,31 +43,31 @@ const menuItems = [
     href: "/admin/categories",
     icon: Tag,
   },
-  // {
-  //   title: "Coupons",
-  //   href: "/admin/coupons",
-  //   icon: Tag,
-  // },
-  // {
-  //   title: "Banners",
-  //   href: "/admin/banners",
-  //   icon: ImageIcon,
-  // },
-  // {
-  //   title: "Content Pages",
-  //   href: "/admin/pages",
-  //   icon: FileText,
-  // },
-  // {
-  //   title: "Analytics",
-  //   href: "/admin/analytics",
-  //   icon: BarChart3,
-  // },
-  // {
-  //   title: "Settings",
-  //   href: "/admin/settings",
-  //   icon: Settings,
-  // },
+  {
+    title: "Coupons",
+    href: "/admin/coupons",
+    icon: Tag,
+  },
+  {
+    title: "Banners",
+    href: "/admin/banners",
+    icon: ImageIcon,
+  },
+  {
+    title: "Content Pages",
+    href: "/admin/pages",
+    icon: FileText,
+  },
+  {
+    title: "Analytics",
+    href: "/admin/analytics",
+    icon: BarChart3,
+  },
+  {
+    title: "Settings",
+    href: "/admin/settings",
+    icon: Settings,
+  },
 ]
 
 export function AdminSidebar() {

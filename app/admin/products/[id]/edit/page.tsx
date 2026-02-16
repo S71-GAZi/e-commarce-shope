@@ -15,14 +15,14 @@ import { useToast } from "@/hooks/use-toast"
 import { Loader2, ArrowLeft, Upload } from "lucide-react"
 import Link from "next/link"
 import { mockCategories, mockProducts } from "@/lib/mock-data"
-import type { Product } from "@/lib/types/database"
+import type { IProduct } from "@/lib/types/database"
 
 export default function EditProductPage() {
   const router = useRouter()
   const params = useParams()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
-  const [product, setProduct] = useState<Product | null>(null)
+  const [product, setProduct] = useState<IProduct | null>(null)
 
   // Load product data
   useEffect(() => {
@@ -274,15 +274,15 @@ export default function EditProductPage() {
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="length">Length (cm)</Label>
-                    <Input id="length" type="number" step="0.01" placeholder="0" defaultValue={product.length || ""} />
+                    <Input id="length" type="number" step="0.01" placeholder="0" defaultValue={product.dimensions?.length || ""} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="width">Width (cm)</Label>
-                    <Input id="width" type="number" step="0.01" placeholder="0" defaultValue={product.width || ""} />
+                    <Input id="width" type="number" step="0.01" placeholder="0" defaultValue={product.dimensions?.width || ""} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="height">Height (cm)</Label>
-                    <Input id="height" type="number" step="0.01" placeholder="0" defaultValue={product.height || ""} />
+                    <Input id="height" type="number" step="0.01" placeholder="0" defaultValue={product.dimensions?.height || ""} />
                   </div>
                 </div>
               </CardContent>

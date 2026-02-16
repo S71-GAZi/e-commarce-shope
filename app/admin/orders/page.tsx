@@ -10,14 +10,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Eye, Download, Filter } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import type { Order, OrderStatus } from "@/lib/types/database"
+import type { IOrder, IOrderStatus } from "@/lib/types/database"
 
 export default function OrdersPage() {
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState("")
 
   // Mock orders data - replace with real data from database
-  const [orders] = useState<Order[]>([
+  const [orders] = useState<IOrder[]>([
     {
       id: "1",
       order_number: "ORD-2024-001",
@@ -89,7 +89,7 @@ export default function OrdersPage() {
 
   const [statusFilter, setStatusFilter] = useState<string>("all")
 
-  const getStatusColor = (status: OrderStatus) => {
+  const getStatusColor = (status: IOrderStatus) => {
     const colors = {
       pending: "secondary",
       processing: "default",
@@ -104,7 +104,7 @@ export default function OrdersPage() {
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.order_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.user_id.toLowerCase().includes(searchQuery.toLowerCase())
+      order?.user_id?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesStatus = statusFilter === "all" || order.status === statusFilter
     return matchesSearch && matchesStatus
   })
