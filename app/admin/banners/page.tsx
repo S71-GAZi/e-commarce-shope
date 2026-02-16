@@ -32,16 +32,16 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { Plus, Edit, Trash2, Loader2 } from "lucide-react"
 import { mockBanners } from "@/lib/mock-data"
-import type { Banner } from "@/lib/types/database"
+import type { IBanner } from "@/lib/types/database"
 
 export default function BannersPage() {
   const { toast } = useToast()
   const [banners, setBanners] = useState(mockBanners)
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  const [editingBanner, setEditingBanner] = useState<Banner | null>(null)
+  const [editingBanner, setEditingBanner] = useState<IBanner | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [bannerToDelete, setBannerToDelete] = useState<Banner | null>(null)
+  const [bannerToDelete, setBannerToDelete] = useState<IBanner | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -104,12 +104,12 @@ export default function BannersPage() {
     }
   }
 
-  const handleEdit = (banner: Banner) => {
+  const handleEdit = (banner: IBanner) => {
     setEditingBanner(banner)
     setIsOpen(true)
   }
 
-  const handleDelete = (banner: Banner) => {
+  const handleDelete = (banner: IBanner) => {
     setBannerToDelete(banner)
     setDeleteDialogOpen(true)
   }
@@ -274,11 +274,11 @@ export default function BannersPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(banner)}>
+                        <Button variant="ghost" size="icon" className="cursor-pointer" onClick={() => handleEdit(banner)}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(banner)}>
+                        <Button variant="ghost" size="icon" className="cursor-pointer" onClick={() => handleDelete(banner)}>
                           <Trash2 className="h-4 w-4" />
                           <span className="sr-only">Delete</span>
                         </Button>
@@ -301,10 +301,10 @@ export default function BannersPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
             >
               Delete
             </AlertDialogAction>

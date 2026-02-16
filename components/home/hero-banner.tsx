@@ -5,10 +5,10 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import type { Banner } from "@/lib/types/database"
+import type { IBanner } from "@/lib/types/database"
 
 interface HeroBannerProps {
-  banners: Banner[]
+  banners: IBanner[]
 }
 
 export function HeroBanner({ banners }: HeroBannerProps) {
@@ -88,9 +88,8 @@ export function HeroBanner({ banners }: HeroBannerProps) {
             {banners.map((_, index) => (
               <button
                 key={index}
-                className={`h-2 rounded-full transition-all ${
-                  index === currentIndex ? "w-8 bg-primary" : "w-2 bg-background/50"
-                }`}
+                className={`h-2 rounded-full transition-all ${index === currentIndex ? "w-8 bg-primary" : "w-2 bg-background/50"
+                  }`}
                 onClick={() => setCurrentIndex(index)}
               >
                 <span className="sr-only">Go to banner {index + 1}</span>

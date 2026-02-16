@@ -1,16 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server"
-import type { User } from "@/lib/types/database"
+import type { IUser } from "@/lib/types/database"
+import { UserPayload } from "../jwt"
 
 // Parse JWT token from request headers
 export function getTokenFromRequest(request: NextRequest): string | null {
+  const token = request.cookies.get("authToken")?.value
   const authHeader = request.headers.get("Authorization")
-  if (!authHeader?.startsWith("Bearer ")) return null
-  console.log("Extracted token:", authHeader.slice(7));
-  return authHeader.slice(7)
+  return token ? token : authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
 }
+// export function getTokenFromRequest(request: NextRequest): string | null {
+//   const authHeader = request.headers.get("Authorization")
+//   if (!authHeader?.startsWith("Bearer ")) return null
+//   console.log("Extracted token:", authHeader.slice(7));
+//   return authHeader.slice(7)
+// }
 
 // Mock user extraction (replace with real JWT verification)
-export function getUserFromToken(token: string): User | null {
+export function getUserFromToken(token: string): IUser | null {
   // In production, verify JWT token here
   // For now, returning mock user for demo
   if (token === "mock-token-customer") {
@@ -39,8 +45,8 @@ export function getUserFromToken(token: string): User | null {
 }
 
 // Check if user has admin access
-export function isAdmin(user: User | null): boolean {
-  console.log("Checking admin for user:", user);
+export function isAdmin(user: UserPayload | null): boolean {
+  // console.log("Checking admin for user:", user);
   return user?.role === "admin" || user?.role === "manager"
 }
 

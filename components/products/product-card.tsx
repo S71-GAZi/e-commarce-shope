@@ -8,14 +8,14 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Star, ShoppingCart, Heart } from "lucide-react"
-import type { Product } from "@/lib/types/database"
+import type { IProduct } from "@/lib/types/database"
 import { useCart } from "@/lib/cart-context"
 
-interface ProductCardProps {
-  product: Product
+interface IProductCardProps {
+  product: IProduct
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product }: IProductCardProps) {
   const { addItem } = useCart()
 
   const discount = product.compare_at_price
@@ -67,11 +67,10 @@ export function ProductCard({ product }: ProductCardProps) {
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`h-4 w-4 ${
-                  i < Math.floor(product.average_rating || 0)
+                className={`h-4 w-4 ${i < Math.floor(product.average_rating || 0)
                     ? "fill-yellow-400 text-yellow-400"
                     : "fill-muted text-muted"
-                }`}
+                  }`}
               />
             ))}
           </div>

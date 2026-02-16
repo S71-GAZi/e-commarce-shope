@@ -29,14 +29,14 @@ import {
 import { Search, Plus, MoreHorizontal, Edit, Trash2, Eye } from "lucide-react"
 import { mockProducts } from "@/lib/mock-data"
 import { useToast } from "@/hooks/use-toast"
-import type { Product } from "@/lib/types/database"
+import type { IProduct } from "@/lib/types/database"
 
 export default function ProductsPage() {
   const { toast } = useToast()
   const [products, setProducts] = useState(mockProducts)
   const [searchQuery, setSearchQuery] = useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [productToDelete, setProductToDelete] = useState<Product | null>(null)
+  const [productToDelete, setProductToDelete] = useState<IProduct | null>(null)
 
   const filteredProducts = products.filter(
     (product) =>
@@ -44,7 +44,7 @@ export default function ProductsPage() {
       product.sku?.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  const handleDeleteProduct = (product: Product) => {
+  const handleDeleteProduct = (product: IProduct) => {
     setProductToDelete(product)
     setDeleteDialogOpen(true)
   }

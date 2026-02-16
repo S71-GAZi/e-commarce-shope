@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,16 +31,58 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { Plus, Edit, Trash2, Loader2 } from "lucide-react"
 import Image from "next/image"
-import type { Category } from "@/lib/types/database"
+import type { ICategory } from "@/lib/types/database"
 
 export default function CategoriesPage() {
   const { toast } = useToast()
-  const [categories, setCategories] = useState<Category[]>([])
+  const [categories, setCategories] = useState<ICategory[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [editingCategory, setEditingCategory] = useState<ICategory | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null)
+  const [categoryToDelete, setCategoryToDelete] = useState<ICategory | null>(null)
+  /* ================= FETCH CATEGORIES ================= */
+  const fetchCategories = useCallback(async () => {
+    try {
+      setIsLoading(true)
+
+      const res = await fetch("/api/admin/categories")
+      const result = await res.json()
+
+      if (!res.ok) {
+        toast({
+          title: "Error",
+          description: result?.error || "Failed to load categories",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // ✅ Ensure ARRAY only
+      const categoriesArray =
+        Array.isArray(result)
+          ? result
+          : Array.isArray(result?.data?.categories)
+            ? result.data.categories
+            : []
+
+      setCategories(categoriesArray)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong while loading categories",
+        variant: "destructive",
+      })
+      console.error(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [toast])
+
+
+  useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -76,18 +118,21 @@ export default function CategoriesPage() {
       }
 
       if (editingCategory) {
-        setCategories(categories.map((cat) => (cat.id === editingCategory.id ? data : cat)))
+        // setCategories(categories.map((cat) => (cat.id === editingCategory.id ? data : cat)))
         toast({
           title: "Category updated",
           description: "Your category has been updated successfully.",
         })
       } else {
-        setCategories([...categories, data])
+        // setCategories([...categories, data])
         toast({
           title: "Category created",
           description: "Your category has been created successfully.",
         })
       }
+      // ✅ REFETCH
+      await fetchCategories()
+
       setIsOpen(false)
       setEditingCategory(null)
     } catch (error) {
@@ -102,12 +147,12 @@ export default function CategoriesPage() {
     }
   }
 
-  const handleEdit = (category: Category) => {
+  const handleEdit = (category: ICategory) => {
     setEditingCategory(category)
     setIsOpen(true)
   }
 
-  const handleDelete = (category: Category) => {
+  const handleDelete = (category: ICategory) => {
     setCategoryToDelete(category)
     setDeleteDialogOpen(true)
   }
@@ -128,7 +173,9 @@ export default function CategoriesPage() {
           return
         }
 
-        setCategories(categories.filter((cat) => cat.id !== categoryToDelete.id))
+        // ✅ REFETCH
+        await fetchCategories()
+
         toast({
           title: "Category deleted",
           description: `${categoryToDelete.name} has been removed.`,
@@ -233,7 +280,7 @@ export default function CategoriesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px]">Image</TableHead>
+                  <TableHead className="w-20">Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Slug</TableHead>
                   <TableHead>Description</TableHead>

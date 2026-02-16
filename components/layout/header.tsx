@@ -147,7 +147,7 @@ export function Header() {
             {mounted && isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="cursor-pointer">
                     <User className="h-5 w-5" />
                     <span className="sr-only">User menu</span>
                   </Button>

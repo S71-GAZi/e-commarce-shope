@@ -1,13 +1,13 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
-import type { Category } from "@/lib/types/database"
+import type { ICategory } from "@/lib/types/database"
 
-interface CategoryGridProps {
-  categories: Category[]
+interface ICategoryGridProps {
+  categories: ICategory[]
 }
 
-export function CategoryGrid({ categories }: CategoryGridProps) {
+export function CategoryGrid({ categories }: ICategoryGridProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {categories.map((category) => (
