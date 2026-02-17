@@ -22,7 +22,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<IUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const isAuthenticated = !!user && !isLoading
-    const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [accessToken, setAccessToken] = useState<string | null>(null)
 
 
   // useEffect(() => {
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const data = await res.json()
-        console.log("Refresh Token data",data)
+        console.log("Refresh Token data", data)
         setAccessToken(data.accessToken)
         setUser(data.user)
       } catch (err) {
@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         return { success: false, error: data.error || "Login failed" }
       }
-      console.log("Login user :" , data);
+      console.log("Login user :", data);
       setUser(data.data.user)
       setAccessToken(data.data.token)
 
@@ -150,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   //   localStorage.removeItem("authToken")
   // }
 
-const logout = async () => {
+  const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" })
 
     setUser(null)

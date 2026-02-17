@@ -42,12 +42,10 @@ export interface IProduct {
   stock_quantity: number
   low_stock_threshold: number
   weight?: number
-  dimensions?: {
-    length?: number
-    width?: number
-    height?: number
-    unit?: string
-  }
+  length?: number
+  width?: number
+  height?: number
+  unit?: string
   is_featured: boolean
   is_active: boolean
   seo_title?: string
@@ -55,7 +53,7 @@ export interface IProduct {
   created_at: string
   updated_at: string
   category?: ICategory
-  images?: IProductImage[]
+  images?: IProductImage[] | string[]
   variants?: IProductVariant[]
   reviews?: IReview[]
   average_rating?: number

@@ -1,8 +1,8 @@
 // Mock data for development (until database is connected)
 
-import type { Product, Category, User, Banner } from "./types/database"
+import type { IProduct, ICategory, IUser, IBanner } from "./types/database"
 
-export const mockCategories: Category[] = [
+export const mockCategories: ICategory[] = [
   {
     id: "1",
     name: "Electronics",
@@ -49,7 +49,7 @@ export const mockCategories: Category[] = [
   },
 ]
 
-export const mockProducts: Product[] = [
+export const mockProducts: IProduct[] = [
   {
     id: "1",
     name: "Wireless Noise-Cancelling Headphones",
@@ -240,7 +240,7 @@ export const mockProducts: Product[] = [
   },
 ]
 
-export const mockBanners: Banner[] = [
+export const mockBanners: IBanner[] = [
   {
     id: "1",
     title: "Summer Sale - Up to 50% Off",
@@ -267,7 +267,7 @@ export const mockBanners: Banner[] = [
   },
 ]
 
-export const mockUser: User = {
+export const mockUser: IUser = {
   id: "user-1",
   email: "demo@example.com",
   full_name: "Demo User",
@@ -278,7 +278,7 @@ export const mockUser: User = {
   updated_at: new Date().toISOString(),
 }
 
-export const mockAdminUser: User = {
+export const mockAdminUser: IUser = {
   id: "admin-1",
   email: "admin@example.com",
   full_name: "Admin User",

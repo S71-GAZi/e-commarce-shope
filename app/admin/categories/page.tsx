@@ -32,53 +32,21 @@ import { useToast } from "@/hooks/use-toast"
 import { Plus, Edit, Trash2, Loader2 } from "lucide-react"
 import Image from "next/image"
 import type { ICategory } from "@/lib/types/database"
+import { useCategories } from "@/hooks/useCategories"
 
 export default function CategoriesPage() {
   const { toast } = useToast()
-  const [categories, setCategories] = useState<ICategory[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+
   const [isOpen, setIsOpen] = useState(false)
   const [editingCategory, setEditingCategory] = useState<ICategory | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [categoryToDelete, setCategoryToDelete] = useState<ICategory | null>(null)
   /* ================= FETCH CATEGORIES ================= */
-  const fetchCategories = useCallback(async () => {
-    try {
-      setIsLoading(true)
-
-      const res = await fetch("/api/admin/categories")
-      const result = await res.json()
-
-      if (!res.ok) {
-        toast({
-          title: "Error",
-          description: result?.error || "Failed to load categories",
-          variant: "destructive",
-        })
-        return
-      }
-
-      // ✅ Ensure ARRAY only
-      const categoriesArray =
-        Array.isArray(result)
-          ? result
-          : Array.isArray(result?.data?.categories)
-            ? result.data.categories
-            : []
-
-      setCategories(categoriesArray)
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something went wrong while loading categories",
-        variant: "destructive",
-      })
-      console.error(error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [toast])
-
+  const {
+    categories,
+    isLoading,
+    fetchCategories
+  } = useCategories()
 
   useEffect(() => {
     fetchCategories()
@@ -86,7 +54,6 @@ export default function CategoriesPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    setIsLoading(true)
 
     try {
       const formData = new FormData(e.currentTarget)
@@ -113,23 +80,14 @@ export default function CategoriesPage() {
           description: data.error || "Failed to save category",
           variant: "destructive",
         })
-        setIsLoading(false)
         return
       }
 
-      if (editingCategory) {
-        // setCategories(categories.map((cat) => (cat.id === editingCategory.id ? data : cat)))
-        toast({
-          title: "Category updated",
-          description: "Your category has been updated successfully.",
-        })
-      } else {
-        // setCategories([...categories, data])
-        toast({
-          title: "Category created",
-          description: "Your category has been created successfully.",
-        })
-      }
+      toast({
+        title: editingCategory ? "Category updated" : "Category created",
+        description: `Your category has been ${editingCategory ? "updated" : "created"} successfully.`,
+      })
+
       // ✅ REFETCH
       await fetchCategories()
 
@@ -142,8 +100,6 @@ export default function CategoriesPage() {
         variant: "destructive",
       })
       console.error(error)
-    } finally {
-      setIsLoading(false)
     }
   }
 

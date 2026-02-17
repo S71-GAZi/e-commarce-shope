@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,12 +14,79 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { Loader2, ArrowLeft, Upload } from "lucide-react"
 import Link from "next/link"
-import { mockCategories } from "@/lib/mock-data"
+import { useCategories } from "@/hooks/useCategories"
+// import { mockCategories } from "@/lib/mock-data"
 
 export default function NewProductPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
+  const [images, setImages] = useState<File[]>([])
+
+  // ✅ Handle file selection or drop
+  const handleFiles = useCallback(
+    (files: FileList | null) => {
+      if (!files) return
+
+      const newFiles = Array.from(files)
+
+      // 🔹 Check max number of images
+      if (images.length + newFiles.length > 4) {
+        toast({
+          title: "Too many images",
+          description: "You can only upload up to 4 images.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // 🔹 Check max size 600KB per image
+      for (let file of newFiles) {
+        if (file.size > 600 * 1024) {
+          toast({
+            title: "File too large",
+            description: `${file.name} exceeds 600KB.`,
+            variant: "destructive",
+          })
+          return
+        }
+      }
+
+      // ✅ Add valid images
+      setImages((prev) => [...prev, ...newFiles])
+    },
+    [images, toast]
+  )
+
+  // ✅ Handle input change
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFiles(e.target.files)
+  }
+
+  // ✅ Handle drag & drop
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    handleFiles(e.dataTransfer.files)
+  }
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+  }
+
+  // ✅ Remove single image
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index))
+  }
+
+
+  const {
+    categories,
+    fetchCategories
+  } = useCategories()
+
+  useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -27,32 +94,34 @@ export default function NewProductPage() {
 
     try {
       const formData = new FormData(e.currentTarget)
-      const productPayload = {
-        name: formData.get("name"),
-        description: formData.get("description"),
-        short_description: formData.get("shortDescription"),
-        price: Number.parseFloat(formData.get("price") as string),
-        compare_price: formData.get("comparePrice") ? Number.parseFloat(formData.get("comparePrice") as string) : null,
-        cost_price: formData.get("costPrice") ? Number.parseFloat(formData.get("costPrice") as string) : null,
-        sku: formData.get("sku"),
-        barcode: formData.get("barcode"),
-        stock_quantity: Number.parseInt(formData.get("stock") as string),
-        low_stock_threshold: Number.parseInt(formData.get("lowStock") as string),
-        weight: formData.get("weight") ? Number.parseFloat(formData.get("weight") as string) : null,
-        length: formData.get("length") ? Number.parseFloat(formData.get("length") as string) : null,
-        width: formData.get("width") ? Number.parseFloat(formData.get("width") as string) : null,
-        height: formData.get("height") ? Number.parseFloat(formData.get("height") as string) : null,
-        category_id: formData.get("category"),
-        is_active: true,
-        is_featured: formData.get("featured") ? true : false,
-        seo_title: formData.get("seoTitle"),
-        seo_description: formData.get("seoDescription"),
-      }
+      images.forEach((image) => formData.append("images", image))
 
+
+      formData.append("name", formData.get("name") as string)
+      formData.append("slug", formData.get("slug") as string)
+      formData.append("description", formData.get("description") as string)
+      formData.append("short_description", formData.get("shortDescription") as string)
+      formData.append("category_id", formData.get("category") as string)
+      formData.append("price", String(formData.get("price")))
+      formData.append("compare_price", String(formData.get("comparePrice") || ""))
+      formData.append("cost_price", String(formData.get("costPrice") || ""))
+      formData.append("sku", formData.get("sku") as string)
+      formData.append("barcode", formData.get("barcode") as string)
+      formData.append("stock_quantity", String(formData.get("stock")))
+      formData.append("low_stock", String(formData.get("lowStock")))
+      formData.append("weight", String(formData.get("weight") || ""))
+      formData.append("length", String(formData.get("length") || ""))
+      formData.append("width", String(formData.get("width") || ""))
+      formData.append("height", String(formData.get("height") || ""))
+      formData.append("unit", formData.get("unit") as string)
+      formData.append("is_active", "true")
+      formData.append("is_featured", formData.get("featured") ? "true" : "false")
+      formData.append("seo_title", formData.get("seoTitle") as string)
+      formData.append("seo_description", formData.get("seoDescription") as string)
+      // ✅ Fetch request
       const response = await fetch("/api/products", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(productPayload),
+        body: formData, // multipart/form-data automatically set by browser
       })
 
       const data = await response.json()
@@ -70,6 +139,7 @@ export default function NewProductPage() {
         title: "Product created",
         description: "Your product has been created successfully.",
       })
+
       router.push("/admin/products")
     } catch (error) {
       toast({
@@ -82,6 +152,7 @@ export default function NewProductPage() {
       setIsLoading(false)
     }
   }
+
 
   return (
     <div className="space-y-6">
@@ -110,17 +181,17 @@ export default function NewProductPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Product Name</Label>
-                  <Input id="name" placeholder="Enter product name" required />
+                  <Input id="name" name="name" placeholder="Enter product name" required />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
-                  <Textarea id="description" placeholder="Enter product description" rows={5} />
+                  <Textarea id="description" name="description" placeholder="Enter product description" rows={5} />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="shortDescription">Short Description</Label>
-                  <Textarea id="shortDescription" placeholder="Brief product summary" rows={2} />
+                  <Textarea id="shortDescription" name="shortDescription" placeholder="Brief product summary" rows={2} />
                 </div>
               </CardContent>
             </Card>
@@ -130,16 +201,64 @@ export default function NewProductPage() {
                 <CardTitle>Product Images</CardTitle>
                 <CardDescription>Upload product images</CardDescription>
               </CardHeader>
+
               <CardContent>
-                <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-sm text-muted-foreground mb-2">Drag and drop images here, or click to browse</p>
-                  <Button type="button" variant="outline" size="sm">
-                    Choose Files
-                  </Button>
+                <div>
+                  <div
+                    className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onClick={() => document.getElementById("product-images")?.click()}
+                  >
+                    <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Drag and drop images here, or click to browse
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Max 4 images, each ≤ 600 KB
+                    </p>
+
+                    {/* Hidden input */}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      id="product-images"
+                      className="hidden"
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  {/* ✅ Preview */}
+                  {images.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                      {images.map((file, index) => (
+                        <div
+                          key={index}
+                          className="relative w-full h-32 rounded-md overflow-hidden border"
+                        >
+                          {/* ❌ Remove button */}
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-1 right-1 z-10 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                          >
+                            ❌
+                          </button>
+
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`preview-${index}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
+
 
             <Card>
               <CardHeader>
@@ -150,17 +269,17 @@ export default function NewProductPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="price">Price</Label>
-                    <Input id="price" type="number" step="0.01" placeholder="0.00" required />
+                    <Input id="price" name="price" type="number" step="0.01" placeholder="0.00" required />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="comparePrice">Compare at Price</Label>
-                    <Input id="comparePrice" type="number" step="0.01" placeholder="0.00" />
+                    <Input id="comparePrice" name="comparePrice" type="number" step="0.01" placeholder="0.00" />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="costPrice">Cost per Item</Label>
-                  <Input id="costPrice" type="number" step="0.01" placeholder="0.00" />
+                  <Input id="costPrice" name="costPrice" type="number" step="0.01" placeholder="0.00" />
                   <p className="text-xs text-muted-foreground">Customers won't see this</p>
                 </div>
               </CardContent>
@@ -175,11 +294,11 @@ export default function NewProductPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="sku">SKU</Label>
-                    <Input id="sku" placeholder="PROD-001" />
+                    <Input id="sku" name="sku" placeholder="PROD-001" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="barcode">Barcode</Label>
-                    <Input id="barcode" placeholder="123456789" />
+                    <Input id="barcode" name="barcode" placeholder="123456789" />
                   </div>
                 </div>
 
@@ -194,11 +313,11 @@ export default function NewProductPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="stock">Stock Quantity</Label>
-                    <Input id="stock" type="number" defaultValue="0" />
+                    <Input id="stock" name="stock" type="number" defaultValue="0" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lowStock">Low Stock Threshold</Label>
-                    <Input id="lowStock" type="number" defaultValue="10" />
+                    <Input id="lowStock" name="lowStock" type="number" defaultValue="10" />
                   </div>
                 </div>
               </CardContent>
@@ -212,21 +331,21 @@ export default function NewProductPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="weight">Weight (kg)</Label>
-                  <Input id="weight" type="number" step="0.01" placeholder="0.00" />
+                  <Input id="weight" name="weight" type="number" step="0.01" placeholder="0.00" />
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="length">Length (cm)</Label>
-                    <Input id="length" type="number" step="0.01" placeholder="0" />
+                    <Input id="length" name="length" type="number" step="0.01" placeholder="0" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="width">Width (cm)</Label>
-                    <Input id="width" type="number" step="0.01" placeholder="0" />
+                    <Input id="width" name="width" type="number" step="0.01" placeholder="0" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="height">Height (cm)</Label>
-                    <Input id="height" type="number" step="0.01" placeholder="0" />
+                    <Input id="height" name="height" type="number" step="0.01" placeholder="0" />
                   </div>
                 </div>
               </CardContent>
@@ -242,12 +361,12 @@ export default function NewProductPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="active">Active</Label>
-                  <Switch id="active" defaultChecked />
+                  <Switch id="active" name="active" defaultChecked />
                 </div>
 
                 <div className="flex items-center justify-between">
                   <Label htmlFor="featured">Featured</Label>
-                  <Switch id="featured" />
+                  <Switch id="featured" name="featured" />
                 </div>
               </CardContent>
             </Card>
@@ -260,11 +379,11 @@ export default function NewProductPage() {
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
                   <Select>
-                    <SelectTrigger id="category">
+                    <SelectTrigger id="category" name="category">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockCategories.map((category) => (
+                      {categories.map((category) => (
                         <SelectItem key={category.id} value={category.id}>
                           {category.name}
                         </SelectItem>
@@ -283,12 +402,12 @@ export default function NewProductPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="seoTitle">SEO Title</Label>
-                  <Input id="seoTitle" placeholder="Product title for search engines" />
+                  <Input id="seoTitle" name="seoTitle" placeholder="Product title for search engines" />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="seoDescription">SEO Description</Label>
-                  <Textarea id="seoDescription" placeholder="Product description for search engines" rows={3} />
+                  <Textarea id="seoDescription" name="seoDescription" placeholder="Product description for search engines" rows={3} />
                 </div>
               </CardContent>
             </Card>
