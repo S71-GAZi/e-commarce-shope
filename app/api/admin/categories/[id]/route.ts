@@ -1,7 +1,8 @@
 import type { NextRequest } from "next/server"
-import { getTokenFromRequest, getUserFromToken, isAdmin, errorResponse, successResponse } from "@/lib/api/middleware"
+import { getTokenFromRequest, isAdmin, errorResponse, successResponse } from "@/lib/api/middleware"
 import { validateRequestBody, CreateCategorySchema } from "@/lib/api/validation"
 import { categoryQueries } from "@/lib/db/queries"
+import { getUserFromToken, IUserPayload } from "@/lib/jwt"
 
 type RouteParams = { params: { id: string } }
 
@@ -35,7 +36,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const token = getTokenFromRequest(request)
-    const user = token ? getUserFromToken(token) : null
+    const user: IUserPayload | null = token ? getUserFromToken(token) : null
 
     if (!user || !isAdmin(user as any)) {
       return errorResponse("Unauthorized", 401)
