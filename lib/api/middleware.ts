@@ -8,12 +8,6 @@ export function getTokenFromRequest(request: NextRequest): string | null {
   const authHeader = request.headers.get("Authorization")
   return token ? token : authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
 }
-// export function getTokenFromRequest(request: NextRequest): string | null {
-//   const authHeader = request.headers.get("Authorization")
-//   if (!authHeader?.startsWith("Bearer ")) return null
-//   console.log("Extracted token:", authHeader.slice(7));
-//   return authHeader.slice(7)
-// }
 
 // Mock user extraction (replace with real JWT verification)
 export function getUserFromToken(token: string): IUser | null {

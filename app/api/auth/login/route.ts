@@ -4,7 +4,7 @@ import { errorResponse, successResponse } from "@/lib/api/middleware"
 import { userQueries } from "@/lib/db/queries"
 import crypto from "crypto"
 import { cookies } from "next/headers"
-import { generateToken } from "@/lib/jwt"
+import { generateRefreshToken, generateToken } from "@/lib/jwt"
 
 function hashPassword(password: string): string {
   return crypto.createHash("sha256").update(password).digest("hex")
@@ -37,12 +37,20 @@ export async function POST(request: NextRequest) {
       return errorResponse("Invalid email or password", 401)
     }
 
-    const token = generateToken(user)
+    const token = generateToken(user as any)
+    const refreshToken = generateRefreshToken(user as any);
 
     cookies().set("authToken", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      path: "/",
+    });
+
+    cookies().set("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
       path: "/",
     });
 
