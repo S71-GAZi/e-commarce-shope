@@ -1,12 +1,12 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import type { Product, ProductVariant } from "./types/database"
+import type { IProduct, IProductVariant } from "./types/database"
 import { useToast } from "@/hooks/use-toast"
 
 interface CartItem {
-  product: Product
-  variant?: ProductVariant
+  product: IProduct
+  variant?: IProductVariant
   quantity: number
 }
 
@@ -14,7 +14,7 @@ interface CartContextType {
   items: CartItem[]
   itemCount: number
   subtotal: number
-  addItem: (product: Product, variant?: ProductVariant, quantity?: number) => void
+  addItem: (product: IProduct, variant?: IProductVariant, quantity?: number) => void
   removeItem: (productId: string, variantId?: string) => void
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void
   clearCart: () => void
@@ -43,7 +43,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("shopping_cart", JSON.stringify(items))
   }, [items])
 
-  const addItem = (product: Product, variant?: ProductVariant, quantity = 1) => {
+  const addItem = (product: IProduct, variant?: IProductVariant, quantity = 1) => {
     setItems((currentItems) => {
       const existingItemIndex = currentItems.findIndex(
         (item) => item.product.id === product.id && item.variant?.id === variant?.id,

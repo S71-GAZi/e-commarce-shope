@@ -1,6 +1,8 @@
 // API client for frontend to communicate with backend
 // Handles authentication headers, error handling, and response parsing
 
+import { cookies } from "next/headers"
+
 interface RequestOptions extends RequestInit {
   headers?: Record<string, string>
 }
@@ -16,8 +18,10 @@ class ApiClient {
 
   private loadToken() {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("auth_token")
-      this.token = stored
+      //const stored = localStorage.getItem("auth_token")
+        const cookieStore = cookies();   // ✅ correct way
+        const storedToken = cookieStore.get("auth_token")?.value ?? null;
+      this.token = storedToken
     }
   }
 

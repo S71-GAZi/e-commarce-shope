@@ -11,7 +11,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const token = getTokenFromRequest(request)
     const user = token ? getUserFromToken(token) : null
 
-    if (!user || !isAdmin(user)) {
+    if (!user || !isAdmin(user as any)) {
       return errorResponse("Unauthorized", 401)
     }
 
@@ -37,7 +37,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const token = getTokenFromRequest(request)
     const user = token ? getUserFromToken(token) : null
 
-    if (!user || !isAdmin(user)) {
+    if (!user || !isAdmin(user as any)) {
       return errorResponse("Unauthorized", 401)
     }
 

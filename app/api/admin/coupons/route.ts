@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const token = getTokenFromRequest(request)
     const user = token ? getUserFromToken(token) : null
 
-    if (!user || !isAdmin(user)) {
+    if (!user || !isAdmin(user as any)) {
       return errorResponse("Unauthorized", 401)
     }
 
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     const token = getTokenFromRequest(request)
     const user = token ? getUserFromToken(token) : null
 
-    if (!user || !isAdmin(user)) {
+    if (!user || !isAdmin(user as any)) {
       return errorResponse("Unauthorized", 401)
     }
 
