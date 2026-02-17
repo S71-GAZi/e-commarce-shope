@@ -1,24 +1,24 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import type { User } from "./types/database"
+import type { IUser } from "./types/database"
 import { mockUser, mockAdminUser } from "./mock-data"
 import { cookies } from "next/headers";
 
 interface AuthContextType {
-  user: User | null
+  user: IUser | null
   isLoading: boolean
   isAuthenticated: boolean
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>
   register: (email: string, password: string, fullName: string) => Promise<{ success: boolean; error?: string }>
   logout: () => Promise<void>
-  updateProfile: (data: Partial<User>) => Promise<{ success: boolean; error?: string }>
+  updateProfile: (data: Partial<IUser>) => Promise<{ success: boolean; error?: string }>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<IUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const isAuthenticated = !!user && !isLoading
 
@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("authToken")
   }
 
-  const updateProfile = async (data: Partial<User>) => {
+  const updateProfile = async (data: Partial<IUser>) => {
     if (!user) return { success: false, error: "Not authenticated" }
 
     const updatedUser = { ...user, ...data, updated_at: new Date().toISOString() }

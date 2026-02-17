@@ -98,17 +98,29 @@ export const productQueries = {
   async create(data: Partial<IProduct>) {
     const result = await executeQuery<IProduct>(
       `INSERT INTO products (
-        name, slug, description, short_description, category_id,
-        price, stock_quantity, is_featured, is_active
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        name, slug, images, description, short_description, category_id, price, compare_at_price, cost_price, sku, barcode, stock_quantity, low_stock_threshold, weight, length, width, height, unit, seo_title, seo_discription is_featured, is_active
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         data.name,
         data.slug,
+        data.images,
         data.description,
         data.short_description,
         data.category_id,
         data.price,
+        data.compare_at_price,
+        data.cost_price,
+        data.sku,
+        data.barcode,
         data.stock_quantity || 0,
+        data.low_stock_threshold || 0,
+        data.weight,
+        data.length,
+        data.width,
+        data.height,
+        data.unit,
+        data.seo_title,
+        data.seo_description,
         data.is_featured ? 1 : 0,
         data.is_active !== false ? 1 : 0,
       ],

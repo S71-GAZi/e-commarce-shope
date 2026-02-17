@@ -13,19 +13,56 @@ export const RegisterSchema = z.object({
 })
 
 // Product schemas
+
 export const CreateProductSchema = z.object({
+  // 🔹 Basic info
   name: z.string().min(1, "Product name is required"),
-  slug: z.string().min(1, "Product slug is required"),
+  slug: z.string().optional(),
+  images: z.array(z.string()).optional(),
+
   description: z.string().optional(),
   short_description: z.string().optional(),
+
+  // 🔹 Category
   category_id: z.string().optional(),
-  price: z.number().positive("Price must be positive"),
-  compare_at_price: z.number().optional(),
-  cost_price: z.number().optional(),
+
+  // 🔹 Pricing
+  price: z.number().positive("Price must be greater than 0"),
+  compare_at_price: z.number().positive().optional(),
+  cost_price: z.number().positive().optional(),
+
+  // 🔹 Inventory
   sku: z.string().optional(),
-  stock_quantity: z.number().int().default(0),
-  is_featured: z.boolean().default(false),
+  barcode: z.string().optional(),
+
+
+  stock_quantity: z
+    .number()
+    .int()
+    .min(0, "Stock cannot be negative")
+    .default(0),
+
+  low_stock_threshold: z
+    .number()
+    .int()
+    .min(0)
+    .default(0),
+
+  // 🔹 Shipping
+  weight: z.number().positive().optional(),
+  length: z.number().positive().optional(),
+  width: z.number().positive().optional(),
+  height: z.number().positive().optional(),
+  unit: z.string().optional(),
+
+  // 🔹 Status
   is_active: z.boolean().default(true),
+  is_featured: z.boolean().default(false),
+
+  // 🔹 SEO
+  seo_title: z.string().optional(),
+  seo_description: z.string().optional(),
+
 })
 
 export const UpdateProductSchema = CreateProductSchema.partial()

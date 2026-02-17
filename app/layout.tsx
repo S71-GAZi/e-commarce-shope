@@ -34,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
-      <body className="font-sans">
+      <body className="font-sans h-screen">
         <LoadingProvider>
           <Suspense fallback={<div>Loading...</div>}>
             <AuthProvider>
