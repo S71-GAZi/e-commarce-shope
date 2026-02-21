@@ -18,6 +18,7 @@ export function HeroBanner({ banners }: HeroBannerProps) {
     if (banners.length <= 1) return
 
     const interval = setInterval(() => {
+      console.log("Auto-advancing banner running..." );
       setCurrentIndex((prev) => (prev + 1) % banners.length)
     }, 5000)
 

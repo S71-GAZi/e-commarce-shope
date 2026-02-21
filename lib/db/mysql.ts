@@ -4,17 +4,27 @@ let pool: mysql.Pool | null = null
 
 export function getMySQLPool(): mysql.Pool {
   if (!pool) {
+    // const config = {
+    //   host: "sql.freedb.tech",
+    //   port: 3306,
+    //   user: "freedb_dbroot1",
+    //   password: "k5CEfrR?Mns6BuU",
+    //   database: "freedb_eCom_Db",
+    //   waitForConnections: true,
+    //   connectionLimit: 10,
+    //   queueLimit: 0,
+    // }
+
     const config = {
-      host: "sql.freedb.tech",
+      host: "localhost",
       port: 3306,
-      user: "freedb_dbroot1",
-      password: "k5CEfrR?Mns6BuU",
-      database: "freedb_eCom_Db",
+      user: "tayeenfa_eCom_DbUser",
+      password: "Root123@eComDb2026?Mns6BuU",
+      database: "tayeenfa_eCom_Db",
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
     }
-
     pool = mysql.createPool(config)
   }
 

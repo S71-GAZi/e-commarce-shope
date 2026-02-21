@@ -2,8 +2,8 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 
 
-const SECRET_KEY: string = process.env.JWT_SECRET || "default_secret";
-const REFRESH_SECRET = process.env.REFRESH_SECRET!;
+const SECRET_KEY: string = process.env.NEXT_PUBLIC_JWT_SECRET || "default_secret";
+const REFRESH_SECRET = process.env.NEXT_PUBLIC_REFRESH_SECRET!;
 export interface IUserPayload {
   id: number;
   email: string;
@@ -18,7 +18,7 @@ export const generateToken = (user: IUserPayload): string => {
   };
 
   //const options: SignOptions = { expiresIn: process.env.JWT_EXPIRES_IN || "1h" };
-  const options: SignOptions = { expiresIn: (process.env.JWT_EXPIRES_IN || "1d") as any };
+  const options: SignOptions = { expiresIn: (process.env.NEXT_PUBLIC_JWT_EXPIRES_IN || "1d") as any };
 
 
   return jwt.sign(payload, SECRET_KEY, options);

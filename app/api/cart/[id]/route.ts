@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import type { NextRequest } from "next/server"
 import { getTokenFromRequest, getUserFromToken, errorResponse, successResponse } from "@/lib/api/middleware"
 import { validateRequestBody, UpdateCartItemSchema } from "@/lib/api/validation"

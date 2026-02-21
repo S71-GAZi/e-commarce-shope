@@ -3,6 +3,8 @@ import { Footer } from "@/components/layout/footer"
 import { CategoryGrid } from "@/components/home/category-grid"
 import { getCategories } from "@/lib/db-utils"
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Categories - E-Commerce Store",
   description: "Browse products by category",

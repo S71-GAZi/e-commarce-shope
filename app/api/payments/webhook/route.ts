@@ -1,3 +1,5 @@
+//export const dynamic = "force-dynamic";
+
 import type { NextRequest } from "next/server"
 import { successResponse, errorResponse } from "@/lib/api/middleware"
 import { orderQueries } from "@/lib/db/queries"
