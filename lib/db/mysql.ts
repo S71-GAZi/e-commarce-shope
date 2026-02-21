@@ -19,6 +19,16 @@ export function getMySQLPool(): mysql.Pool {
       queueLimit: 0,
     }
 
+    // const config = {
+    //   host: "localhost",
+    //   port: 3306,
+    //   user: "tayeenfa_eCom_DbUser",
+    //   password: "Root123@eComDb2026?Mns6BuU",
+    //   database: "tayeenfa_eCom_Db",
+    //   waitForConnections: true,
+    //   connectionLimit: 10,
+    //   queueLimit: 0,
+    // }
     pool = mysql.createPool(config)
   }
 

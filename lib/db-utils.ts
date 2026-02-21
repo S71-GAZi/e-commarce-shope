@@ -68,24 +68,38 @@ export async function getProductBySlug(slug: string): Promise<IProduct | null> {
 // }
 
 export async function getCategories(token?: string): Promise<ICategory[]> {
-  try {
-    const headers: Record<string, string> = {}
-    if (token) headers['Authorization'] = `Bearer ${token}`
+  // For public access, return mock data directly
+  // Only try to fetch from API if we have a valid admin token
+  // if (!token) {
+  //   return mockCategories
+  // }
 
-    // const res = await fetch("/api/categories", {
+  try {
+    // Validate token first
+    // const { verifyToken } = await import("@/lib/jwt")
+    // const user = verifyToken(token)
+    // if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
+    //   // Invalid or non-admin token, return mock data
+    //   return mockCategories
+    // }
+
+    const headers: Record<string, string> = {
+      'Authorization': `Bearer ${token}`
+    }
+
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/categories`, {
       method: 'GET',
       headers,
-      cache: 'no-store',
     })
 
     if (!res.ok) throw new Error('Failed to fetch categories')
 
     const data = await res.json()
-    return data.data.categories || mockCategories
+    //|| mockCategories
+    return data.data.categories 
   } catch (error) {
     console.error('Fetch categories failed, using mock', error)
-    return mockCategories
+    //return mockCategories
   }
 }
 

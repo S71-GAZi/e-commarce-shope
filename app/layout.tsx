@@ -3,13 +3,8 @@ import type { Metadata } from "next"
 //import { Geist, Geist_Mono } from "next/font/google"
 import { GeistSans, GeistMono } from "geist/font"
 import { Analytics } from "@vercel/analytics/next"
-import { AuthProvider } from "@/lib/auth-context"
-import { CartProvider } from "@/lib/cart-context"
-import { LoadingProvider } from "@/lib/loading-context"
-import { GlobalLoadingIndicator } from "@/components/global-loading-indicator"
-import { Toaster } from "@/components/ui/toaster"
+import { ClientProviders } from "@/components/client-providers"
 import "./globals.css"
-import { Suspense } from "react"
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -35,17 +30,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
       <body className="font-sans h-screen">
-        <LoadingProvider>
-          <Suspense fallback={<div>Loading...</div>}>
-            <AuthProvider>
-              <CartProvider>
-                <GlobalLoadingIndicator />
-                {children}
-                <Toaster />
-              </CartProvider>
-            </AuthProvider>
-          </Suspense>
-        </LoadingProvider>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
         <Analytics />
       </body>
     </html>

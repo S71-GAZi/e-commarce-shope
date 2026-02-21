@@ -1,3 +1,5 @@
+//export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { verifyRefreshToken, generateToken, generateRefreshToken } from "@/lib/jwt";
 import { userQueries } from "@/lib/db/queries"

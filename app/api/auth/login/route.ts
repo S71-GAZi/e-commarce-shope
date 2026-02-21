@@ -1,3 +1,5 @@
+//export const dynamic = "force-dynamic";
+
 import type { NextRequest } from "next/server"
 import { validateRequestBody, LoginSchema } from "@/lib/api/validation"
 import { errorResponse, successResponse } from "@/lib/api/middleware"
@@ -63,7 +65,7 @@ export async function POST(request: NextRequest) {
         email_verified: user.email_verified,
       },
       token,
-      expiresIn: process.env.JWT_EXPIRES_IN,
+      expiresIn: process.env.NEXT_PUBLIC_JWT_EXPIRES_IN,
     })
   } catch (error) {
     console.error("Login error:", error)

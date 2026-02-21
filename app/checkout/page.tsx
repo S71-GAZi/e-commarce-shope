@@ -1,8 +1,10 @@
 "use client"
 
+export const dynamic = "force-dynamic";
+
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
@@ -24,87 +26,33 @@ export default function CheckoutPage() {
   const { items, subtotal, clearCart } = useCart()
   const { user, isAuthenticated } = useAuth()
   const { toast } = useToast()
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState("card")
+  const [mounted, setMounted] = useState(false)
 
-  const shipping = subtotal > 50 ? 0 : 9.99
-  const tax = subtotal * 0.1
-  const total = subtotal + shipping + tax
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsProcessing(true)
-
-    try {
-      const formData = new FormData(e.currentTarget)
-      const orderPayload = {
-        items: items.map((item) => ({
-          product_id: item.id,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-        shipping_address: {
-          first_name: formData.get("firstName"),
-          last_name: formData.get("lastName"),
-          email: formData.get("email"),
-          phone: formData.get("phone"),
-          street: formData.get("street"),
-          city: formData.get("city"),
-          state: formData.get("state"),
-          postal_code: formData.get("postalCode"),
-          country: formData.get("country"),
-        },
-        payment_method: paymentMethod,
-        coupon_code: formData.get("couponCode") || null,
-        subtotal,
-        shipping,
-        tax,
-        total,
-      }
-
-      const response = await fetch("/api/payments/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderPayload),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        toast({
-          title: "Checkout failed",
-          description: data.error || "Unable to process your order",
-          variant: "destructive",
-        })
-        return
-      }
-
-      const orderNumber = data.order_id || `ORD-${Date.now()}`
-      clearCart()
-      toast({
-        title: "Order placed successfully!",
-        description: `Your order ${orderNumber} has been confirmed.`,
-      })
-      router.push(`/account/orders?success=true&order=${orderNumber}`)
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An error occurred during checkout",
-        variant: "destructive",
-      })
-      console.error(error)
-    } finally {
-      setIsProcessing(false)
+  useEffect(() => {
+    if (mounted && items.length === 0) {
+      router.push("/cart")
     }
+  }, [mounted, items.length, router])
+
+  useEffect(() => {
+    if (mounted && !isAuthenticated) {
+      router.push("/auth/login?redirect=/checkout")
+    }
+  }, [mounted, isAuthenticated, router])
+
+  if (!mounted) {
+    return null // or a loading spinner
   }
 
   if (items.length === 0) {
-    router.push("/cart")
     return null
   }
 
   if (!isAuthenticated) {
-    router.push("/auth/login?redirect=/checkout")
     return null
   }
 

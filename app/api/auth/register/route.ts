@@ -1,3 +1,5 @@
+//export const dynamic = "force-dynamic";
+
 import type { NextRequest } from "next/server"
 import { validateRequestBody, RegisterSchema } from "@/lib/api/validation"
 import { errorResponse, successResponse } from "@/lib/api/middleware"

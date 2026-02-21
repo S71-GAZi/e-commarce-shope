@@ -1,3 +1,5 @@
+//export const dynamic = "force-dynamic";
+
 import type { NextRequest } from "next/server"
 // import { getProducts } from "@/lib/db-utils"
 
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
 }
 
 
-export const config = { api: { bodyParser: false } };
+//export const config = { api: { bodyParser: false } };
 
 export async function POST(req: NextRequest) {
   try {
