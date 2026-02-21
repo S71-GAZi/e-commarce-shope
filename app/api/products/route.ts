@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server"
-import { getProducts } from "@/lib/db-utils"
+// import { getProducts } from "@/lib/db-utils"
 
 import {
   getTokenFromRequest,
@@ -22,14 +22,10 @@ export async function GET(request: NextRequest) {
     const search = request.nextUrl.searchParams.get("search")
     const featured = request.nextUrl.searchParams.get("featured") === "true"
 
-    const products = await getProducts({
-      category: category || undefined,
-      search: search || undefined,
-      featured,
-      limit,
-      offset,
+    const products = await productQueries.getAllProducts(limit, offset, {
+      category_id: category || undefined,
+      is_active: featured !== undefined ? true : undefined, // if "featured" means active products
     })
-
     return successResponse({
       products,
       pagination: {
@@ -39,7 +35,6 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error("Get products error:", error)
     return errorResponse("Failed to fetch products", 500)
   }
 }
@@ -89,12 +84,12 @@ export async function POST(req: NextRequest) {
       short_description: formData.get("short_description") || null,
       category_id: formData.get("category_id") || null,
       price: formData.get("price") ? parseFloat(formData.get("price") as string) : null,
-      compare_at_price: formData.get("compare_price") ? parseFloat(formData.get("comparePrice") as string) : null,
+      compare_at_price: formData.get("compare_at_price") ? parseFloat(formData.get("compare_at_price") as string) : null,
       cost_price: formData.get("cost_price") ? parseFloat(formData.get("costPrice") as string) : null,
       sku: formData.get("sku") || null,
       barcode: formData.get("barcode") || null,
       stock_quantity: formData.get("stock_quantity") ? parseInt(formData.get("stock") as string) : 0,
-      low_stock_threshold: formData.get("low_stock") ? parseInt(formData.get("lowStock") as string) : 0,
+      low_stock_threshold: formData.get("low_stock_threshold") ? parseInt(formData.get("low_stock_threshold") as string) : 0,
       weight: formData.get("weight") ? parseFloat(formData.get("weight") as string) : null,
       length: formData.get("length") ? parseFloat(formData.get("length") as string) : null,
       width: formData.get("width") ? parseFloat(formData.get("width") as string) : null,
@@ -111,13 +106,11 @@ export async function POST(req: NextRequest) {
     if (!validation.success) {
       return errorResponse(validation.error.message, 400);
     }
-    console.log("Validated product data:", validation.data);
     // ✅ Save to DB
     const newProduct = await productQueries.create(validation.data);
 
     return successResponse(newProduct, 201);
   } catch (err) {
-    console.error("Create product error:", err);
     return errorResponse(err instanceof Error ? err.message : "Failed to create product", 500);
   }
 }
