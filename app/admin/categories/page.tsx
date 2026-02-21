@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import type React from "react"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -34,7 +34,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Plus, Edit, Trash2, Loader2 } from "lucide-react"
 import Image from "next/image"
 import type { ICategory } from "@/lib/types/database"
-import { useCategories } from "@/hooks/useCategories"
+import { useFetchResource } from "@/hooks/useFetchResource"
 
 export default function CategoriesPage() {
   const { toast } = useToast()
@@ -45,10 +45,18 @@ export default function CategoriesPage() {
   const [categoryToDelete, setCategoryToDelete] = useState<ICategory | null>(null)
   /* ================= FETCH CATEGORIES ================= */
   const {
-    categories,
+    data: categories,
     isLoading,
-    fetchCategories
-  } = useCategories()
+    fetchData: fetchCategories,
+  } = useFetchResource<ICategory>({
+    url: "/api/admin/categories",
+    extractData: (result) =>
+      Array.isArray(result)
+        ? result
+        : Array.isArray(result?.data?.categories)
+          ? result.data.categories
+          : [],
+  })
 
   useEffect(() => {
     fetchCategories()

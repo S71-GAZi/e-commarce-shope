@@ -5,10 +5,14 @@ let pool: mysql.Pool | null = null
 export function getMySQLPool(): mysql.Pool {
   if (!pool) {
     const config = {
-      host: "sql.freedb.tech",
+      // host: "sql.freedb.tech",
+      // port: 3306,
+      // user: "freedb_dbroot1",
+      // password: "k5CEfrR?Mns6BuU",
+      host: "localhost",      // ✅ change
       port: 3306,
-      user: "freedb_dbroot1",
-      password: "k5CEfrR?Mns6BuU",
+      user: "root",           // ✅ default in XAMPP
+      password: "",           // ✅ default empty in XAMPP
       database: "freedb_eCom_Db",
       waitForConnections: true,
       connectionLimit: 10,

@@ -7,15 +7,16 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { getProductBySlug, getProducts } from "@/lib/db-utils"
+import { getProducts } from "@/lib/db-utils"
 import { Star, ShoppingCart, Heart, Truck, Shield, RotateCcw } from "lucide-react"
+import { productQueries } from "@/lib/db"
 
 export default async function ProductDetailPage({
   params,
 }: {
   params: { slug: string }
 }) {
-  const product = await getProductBySlug(params.slug)
+  const product = await productQueries.findBySlug(params.slug)
 
   if (!product) {
     notFound()
@@ -62,11 +63,10 @@ export default async function ProductDetailPage({
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-5 w-5 ${
-                        i < Math.floor(product.average_rating || 0)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "fill-muted text-muted"
-                      }`}
+                      className={`h-5 w-5 ${i < Math.floor(product.average_rating || 0)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "fill-muted text-muted"
+                        }`}
                     />
                   ))}
                 </div>
@@ -76,10 +76,12 @@ export default async function ProductDetailPage({
               </div>
 
               <div className="flex items-baseline gap-3 mb-4">
-                <span className="text-4xl font-bold">${product.price.toFixed(2)}</span>
+                <span className="text-4xl font-bold">
+                  ${Number(product.price).toFixed(2)}
+                </span>
                 {product.compare_at_price && (
                   <span className="text-xl text-muted-foreground line-through">
-                    ${product.compare_at_price.toFixed(2)}
+                    ${Number(product.compare_at_price).toFixed(2)}
                   </span>
                 )}
               </div>

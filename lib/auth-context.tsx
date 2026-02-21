@@ -85,8 +85,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   //      localStorage.setItem("auth_user", JSON.stringify(data.data.user))
   //     // localStorage.setItem("authToken", data.data.token)
   //     setUser(data.data.user)
-  //     console.log("Login Data:", data.data.user);
-  //     console.log("Login isAuthenticated:", isAuthenticated);
   //     return { success: true }
   //   } catch (error) {
   //     console.error("Login error:", error)
