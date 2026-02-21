@@ -55,6 +55,7 @@ export const productQueries = {
   },
 
   async findBySlug(slug: string) {
+    console.log(slug)
     return executeQuerySingle<IProduct>(
       `SELECT p.*, c.name as category_name
        FROM products p
@@ -64,7 +65,12 @@ export const productQueries = {
     )
   },
 
-  async listAll(limit = 20, offset = 0, filters?: { category_id?: string; is_active?: boolean }) {
+  // Service / Repository method
+  async getAllProducts(
+    limit = 20,
+    offset = 0,
+    filters?: { category_id?: string; is_active?: boolean }
+  ) {
     let query = "SELECT * FROM products WHERE 1=1"
     const params: any[] = []
 
@@ -98,12 +104,12 @@ export const productQueries = {
   async create(data: Partial<IProduct>) {
     const result = await executeQuery<IProduct>(
       `INSERT INTO products (
-        name, slug, images, description, short_description, category_id, price, compare_at_price, cost_price, sku, barcode, stock_quantity, low_stock_threshold, weight, length, width, height, unit, seo_title, seo_discription is_featured, is_active
+        name, slug, images, description, short_description, category_id, price, compare_at_price, cost_price, sku, barcode, stock_quantity, low_stock_threshold, weight, length, width, height, unit, seo_title, 	seo_description, is_featured, is_active
        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         data.name,
         data.slug,
-        data.images,
+        JSON.stringify(data.images || []),
         data.description,
         data.short_description,
         data.category_id,
@@ -236,7 +242,6 @@ export const categoryQueries = {
   async listAll(limit?: number, offset?: number) {
     const safeLimit = Number(limit ?? 100);
     const safeOffset = Number(offset ?? 0);
-    console.log("Executing category query with:", safeLimit, safeOffset);
 
     // return executeQuery<ICategory>(
     //   "SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ? OFFSET ?",

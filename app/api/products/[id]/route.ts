@@ -11,7 +11,7 @@ type RouteParams = { params: { id: string } }
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = params
-
+    console.log(id)
     const product = await productQueries.findById(id)
 
     if (!product) {

@@ -16,7 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast"
 import { Loader2, ArrowLeft, Upload } from "lucide-react"
 import Link from "next/link"
-import { useCategories } from "@/hooks/useCategories"
+import { useFetchResource } from "@/hooks/useFetchResource"
+import { ICategory } from "@/lib/types/database"
 // import { mockCategories } from "@/lib/mock-data"
 
 export default function NewProductPage() {
@@ -24,6 +25,9 @@ export default function NewProductPage() {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [images, setImages] = useState<File[]>([])
+  const [active, setActive] = useState(true)
+  const [featured, setFeatured] = useState(false)
+  const [category, setCategory] = useState("")
 
   // ✅ Handle file selection or drop
   const handleFiles = useCallback(
@@ -82,13 +86,22 @@ export default function NewProductPage() {
 
 
   const {
-    categories,
-    fetchCategories
-  } = useCategories()
+    data: categories,
+    fetchData: fetchCategories,
+  } = useFetchResource<ICategory>({
+    url: "/api/admin/categories",
+    extractData: (result) =>
+      Array.isArray(result)
+        ? result
+        : Array.isArray(result?.data?.categories)
+          ? result.data.categories
+          : [],
+  })
 
   useEffect(() => {
     fetchCategories()
   }, [fetchCategories])
+
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -96,39 +109,51 @@ export default function NewProductPage() {
 
     try {
       const formData = new FormData(e.currentTarget)
+
+      const name = (formData.get("name") as string) || ""
+
+      const slug = name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+
+      formData.append("slug", slug)
+
+      // Safe string fields
+      formData.set("short_description", (formData.get("shortDescription") as string) || "")
+      formData.set("seo_title", (formData.get("seoTitle") as string) || "")
+      formData.set("seo_description", (formData.get("seoDescription") as string) || "")
+      formData.set("unit", "cm") // or default unit
+
+      // Safe number fields
+      formData.set("compare_at_price", formData.get("comparePrice")?.toString() || "0")
+      formData.set("cost_price", formData.get("costPrice")?.toString() || "0")
+
       images.forEach((image) => formData.append("images", image))
 
+      if (!category) {
+        toast({
+          title: "Category required",
+          description: "Please select a category",
+          variant: "destructive",
+        })
+        return
+      }
 
-      formData.append("name", formData.get("name") as string)
-      formData.append("slug", formData.get("slug") as string)
-      formData.append("description", formData.get("description") as string)
-      formData.append("short_description", formData.get("shortDescription") as string)
-      formData.append("category_id", formData.get("category") as string)
-      formData.append("price", String(formData.get("price")))
-      formData.append("compare_price", String(formData.get("comparePrice") || ""))
-      formData.append("cost_price", String(formData.get("costPrice") || ""))
-      formData.append("sku", formData.get("sku") as string)
-      formData.append("barcode", formData.get("barcode") as string)
-      formData.append("stock_quantity", String(formData.get("stock")))
-      formData.append("low_stock", String(formData.get("lowStock")))
-      formData.append("weight", String(formData.get("weight") || ""))
-      formData.append("length", String(formData.get("length") || ""))
-      formData.append("width", String(formData.get("width") || ""))
-      formData.append("height", String(formData.get("height") || ""))
-      formData.append("unit", formData.get("unit") as string)
-      formData.append("is_active", "true")
-      formData.append("is_featured", formData.get("featured") ? "true" : "false")
-      formData.append("seo_title", formData.get("seoTitle") as string)
-      formData.append("seo_description", formData.get("seoDescription") as string)
-      // ✅ Fetch request
+      formData.append("category_id", category)
+      formData.append("is_active", active ? "1" : "0")
+      formData.append("is_featured", featured ? "1" : "0")
+
       const response = await fetch("/api/products", {
         method: "POST",
-        body: formData, // multipart/form-data automatically set by browser
+        body: formData,
       })
 
       const data = await response.json()
 
       if (!response.ok) {
+        console.error("Error response:", data)
         toast({
           title: "Error",
           description: data.error || "Failed to create product",
@@ -138,23 +163,21 @@ export default function NewProductPage() {
       }
 
       toast({
-        title: "Product created",
-        description: "Your product has been created successfully.",
+        title: "Success",
+        description: "Product created successfully",
       })
 
       router.push("/admin/products")
     } catch (error) {
       toast({
         title: "Error",
-        description: "An error occurred while creating the product",
+        description: "Something went wrong",
         variant: "destructive",
       })
-      console.error(error)
     } finally {
       setIsLoading(false)
     }
   }
-
 
   return (
     <div className="space-y-6">
@@ -319,7 +342,7 @@ export default function NewProductPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lowStock">Low Stock Threshold</Label>
-                    <Input id="lowStock" name="lowStock" type="number" defaultValue="10" />
+                    <Input id="lowStock" name="low_stock_threshold" type="number" defaultValue="10" />
                   </div>
                 </div>
               </CardContent>
@@ -363,12 +386,18 @@ export default function NewProductPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="active">Active</Label>
-                  <Switch id="active" name="active" defaultChecked />
+                  <Switch
+                    checked={active}
+                    onCheckedChange={setActive}
+                  />
                 </div>
 
                 <div className="flex items-center justify-between">
                   <Label htmlFor="featured">Featured</Label>
-                  <Switch id="featured" name="featured" />
+                  <Switch
+                    checked={featured}
+                    onCheckedChange={setFeatured}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -380,14 +409,14 @@ export default function NewProductPage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="category">Category</Label>
-                  <Select>
-                    <SelectTrigger id="category" name="category">
+                  <Select onValueChange={setCategory}>
+                    <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={String(cat.id)}>
+                          {cat.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
