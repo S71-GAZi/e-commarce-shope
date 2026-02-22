@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Eye, Download, Filter } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import type { IOrder, IOrderStatus } from "@/lib/types/database"
+import type { IOrder, IOrderStatus } from "@/lib/types/intrerface"
 
 export default function OrdersPage() {
   const { toast } = useToast()

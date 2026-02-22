@@ -2,7 +2,7 @@
 // These will work with real database when connected, or use mock data for now
 
 import { mockProducts, mockCategories, mockBanners } from "./mock-data"
-import type { IProduct, ICategory, IBanner } from "./types/database"
+import type { IProduct, ICategory, IBanner } from "./types/intrerface"
 
 // Flag to determine if using mock data (set to false when database is connected)
 const USE_MOCK_DATA = true
@@ -96,7 +96,7 @@ export async function getCategories(token?: string): Promise<ICategory[]> {
 
     const data = await res.json()
     //|| mockCategories
-    return data.data.categories 
+    return data.data.categories
   } catch (error) {
     console.error('Fetch categories failed, using mock', error)
     //return mockCategories

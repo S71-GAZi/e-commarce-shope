@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import type { IProduct, IProductVariant } from "./types/database"
+import type { IProduct, IProductVariant } from "./types/intrerface"
 import { useToast } from "@/hooks/use-toast"
 
 interface CartItem {

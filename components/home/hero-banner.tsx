@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import type { IBanner } from "@/lib/types/database"
+import type { IBanner } from "@/lib/types/intrerface"
 
 interface HeroBannerProps {
   banners: IBanner[]
@@ -18,7 +18,7 @@ export function HeroBanner({ banners }: HeroBannerProps) {
     if (banners.length <= 1) return
 
     const interval = setInterval(() => {
-      console.log("Auto-advancing banner running..." );
+      console.log("Auto-advancing banner running...");
       setCurrentIndex((prev) => (prev + 1) % banners.length)
     }, 5000)
 

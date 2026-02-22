@@ -55,7 +55,7 @@ export default function CartPage() {
                 <Card key={`${item.product.id}-${item.variant?.id || "default"}`}>
                   <CardContent className="p-4">
                     <div className="flex gap-4">
-                      <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+                      <div className="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-muted">
                         <Image
                           src={item.product.images?.[0]?.image_url || "/placeholder.svg?height=96&width=96"}
                           alt={item.product.name}

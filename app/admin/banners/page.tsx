@@ -32,7 +32,7 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { Plus, Edit, Trash2, Loader2 } from "lucide-react"
 import { mockBanners } from "@/lib/mock-data"
-import type { IBanner } from "@/lib/types/database"
+import type { IBanner } from "@/lib/types/intrerface"
 
 export default function BannersPage() {
   const { toast } = useToast()

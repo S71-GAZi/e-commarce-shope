@@ -9,6 +9,10 @@ export interface IUser {
   phone?: string
   role: UserRole
   email_verified: boolean
+  total_spent: number
+  orders: number
+  status: "active" | "inactive"
+  joinedDate: string
   created_at: string
   updated_at: string
 }
@@ -53,7 +57,7 @@ export interface IProduct {
   created_at: string
   updated_at: string
   category?: ICategory
-  images?: IProductImage[] | string[]
+  images?: IProductImage[] | string[] | string
   variants?: IProductVariant[]
   reviews?: IReview[]
   average_rating?: number

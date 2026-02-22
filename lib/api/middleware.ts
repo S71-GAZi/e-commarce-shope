@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import type { IUser } from "@/lib/types/database"
+import type { IUser } from "@/lib/types/intrerface"
 import { IUserPayload } from "../jwt"
 
 // Parse JWT token from request headers
@@ -40,7 +40,6 @@ export function getUserFromToken(token: string): IUser | null {
 
 // Check if user has admin access
 export function isAdmin(user: IUserPayload | null): boolean {
-  // console.log("Checking admin for user:", user);
   return user?.role === "admin" || user?.role === "manager"
 }
 
