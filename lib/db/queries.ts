@@ -1,5 +1,5 @@
 import { executeQuery, executeQuerySingle } from "./mysql"
-import type { IUser, IProduct, IOrder, ICategory, ICoupon, ICartItem } from "@/lib/types/database"
+import type { IUser, IProduct, IOrder, ICategory, ICoupon, ICartItem } from "@/lib/types/intrerface"
 
 export const userQueries = {
   async findByEmail(email: string) {
@@ -41,6 +41,16 @@ export const userQueries = {
   async listAll(limit = 50, offset = 0) {
     return executeQuery<IUser>("SELECT * FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
   },
+  async listAllCustomers(limit = 50, offset = 0) {
+    return executeQuery<IUser>(
+      `SELECT *
+     FROM users
+     WHERE role = ?
+     ORDER BY created_at DESC
+     LIMIT ? OFFSET ?`,
+      ['customer', limit, offset]
+    );
+  }
 }
 
 export const productQueries = {
@@ -55,7 +65,6 @@ export const productQueries = {
   },
 
   async findBySlug(slug: string) {
-    console.log(slug)
     return executeQuerySingle<IProduct>(
       `SELECT p.*, c.name as category_name
        FROM products p

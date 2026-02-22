@@ -11,7 +11,7 @@ export function useAuth() {
   const login = useCallback(
     async (email: string, password: string) => {
       try {
-        const response = await apiClient.post("/api/auth/login", { email, password })
+        const response: any = await apiClient.post("/api/auth/login", { email, password })
         if (response.success) {
           apiClient.setToken(response.data.token)
           return { success: true, user: response.data.user }
@@ -30,7 +30,7 @@ export function useAuth() {
   const register = useCallback(
     async (email: string, password: string, fullName: string) => {
       try {
-        const response = await apiClient.post("/api/auth/register", { email, password, full_name: fullName })
+        const response: any = await apiClient.post("/api/auth/register", { email, password, full_name: fullName })
         if (response.success) {
           apiClient.setToken(response.data.token)
           return { success: true, user: response.data.user }
@@ -76,7 +76,7 @@ export function useProducts() {
         if (filters?.page) params.append("page", filters.page.toString())
         if (filters?.limit) params.append("limit", filters.limit.toString())
 
-        const response = await apiClient.get(`/api/products?${params.toString()}`)
+        const response: any = await apiClient.get(`/api/products?${params.toString()}`)
         setLoading(false)
         if (response.success) return { success: true, data: response.data }
         toast({ title: "Error", description: response.error, variant: "destructive" })
@@ -94,7 +94,7 @@ export function useProducts() {
   const getProduct = useCallback(
     async (id: string) => {
       try {
-        const response = await apiClient.get(`/api/products/${id}`)
+        const response: any = await apiClient.get(`/api/products/${id}`)
         if (response.success) return { success: true, data: response.data }
         toast({ title: "Error", description: response.error, variant: "destructive" })
         return { success: false, error: response.error }
@@ -110,7 +110,7 @@ export function useProducts() {
   const createProduct = useCallback(
     async (productData: any) => {
       try {
-        const response = await apiClient.post("/api/products", productData)
+        const response: any = await apiClient.post("/api/products", productData)
         if (response.success) {
           toast({ title: "Success", description: "Product created successfully" })
           return { success: true, data: response.data }
@@ -129,7 +129,7 @@ export function useProducts() {
   const updateProduct = useCallback(
     async (id: string, productData: any) => {
       try {
-        const response = await apiClient.patch(`/api/products/${id}`, productData)
+        const response: any = await apiClient.patch(`/api/products/${id}`, productData)
         if (response.success) {
           toast({ title: "Success", description: "Product updated successfully" })
           return { success: true, data: response.data }
@@ -148,7 +148,7 @@ export function useProducts() {
   const deleteProduct = useCallback(
     async (id: string) => {
       try {
-        const response = await apiClient.delete(`/api/products/${id}`)
+        const response: any = await apiClient.delete(`/api/products/${id}`)
         if (response.success) {
           toast({ title: "Success", description: "Product deleted successfully" })
           return { success: true }
@@ -173,7 +173,7 @@ export function useOrders() {
 
   const getOrders = useCallback(async () => {
     try {
-      const response = await apiClient.get("/api/orders")
+      const response: any = await apiClient.get("/api/orders")
       if (response.success) return { success: true, data: response.data }
       toast({ title: "Error", description: response.error, variant: "destructive" })
       return { success: false, error: response.error }
@@ -187,7 +187,7 @@ export function useOrders() {
   const getOrder = useCallback(
     async (id: string) => {
       try {
-        const response = await apiClient.get(`/api/orders/${id}`)
+        const response: any = await apiClient.get(`/api/orders/${id}`)
         if (response.success) return { success: true, data: response.data }
         toast({ title: "Error", description: response.error, variant: "destructive" })
         return { success: false, error: response.error }
@@ -203,7 +203,7 @@ export function useOrders() {
   const createOrder = useCallback(
     async (orderData: any) => {
       try {
-        const response = await apiClient.post("/api/orders", orderData)
+        const response: any = await apiClient.post("/api/orders", orderData)
         if (response.success) {
           toast({ title: "Success", description: "Order created successfully" })
           return { success: true, data: response.data }
@@ -222,7 +222,7 @@ export function useOrders() {
   const updateOrderStatus = useCallback(
     async (id: string, status: string, trackingNumber?: string) => {
       try {
-        const response = await apiClient.patch(`/api/orders/${id}`, { status, tracking_number: trackingNumber })
+        const response: any = await apiClient.patch(`/api/orders/${id}`, { status, tracking_number: trackingNumber })
         if (response.success) {
           toast({ title: "Success", description: "Order updated successfully" })
           return { success: true, data: response.data }
@@ -247,7 +247,7 @@ export function useShoppingCart() {
 
   const getCart = useCallback(async () => {
     try {
-      const response = await apiClient.get("/api/cart")
+      const response: any = await apiClient.get("/api/cart")
       if (response.success) return { success: true, data: response.data }
       return { success: false, error: response.error }
     } catch (error) {
@@ -258,7 +258,7 @@ export function useShoppingCart() {
   const addToCart = useCallback(
     async (productId: string, quantity: number, variantId?: string) => {
       try {
-        const response = await apiClient.post("/api/cart", { product_id: productId, quantity, variant_id: variantId })
+        const response: any = await apiClient.post("/api/cart", { product_id: productId, quantity, variant_id: variantId })
         if (response.success) {
           toast({ title: "Success", description: "Item added to cart" })
           return { success: true, data: response.data }
@@ -277,7 +277,7 @@ export function useShoppingCart() {
   const removeFromCart = useCallback(
     async (itemId: string) => {
       try {
-        const response = await apiClient.delete(`/api/cart/${itemId}`)
+        const response: any = await apiClient.delete(`/api/cart/${itemId}`)
         if (response.success) {
           toast({ title: "Success", description: "Item removed from cart" })
           return { success: true }
@@ -295,7 +295,7 @@ export function useShoppingCart() {
 
   const clearCart = useCallback(async () => {
     try {
-      const response = await apiClient.delete("/api/cart")
+      const response: any = await apiClient.delete("/api/cart")
       if (response.success) {
         toast({ title: "Success", description: "Cart cleared" })
         return { success: true }

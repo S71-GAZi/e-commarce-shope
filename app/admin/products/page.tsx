@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Search, Plus, MoreHorizontal, Edit, Trash2, Eye } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import type { IProduct } from "@/lib/types/database"
+import type { IProduct } from "@/lib/types/intrerface"
 import { useFetchResource } from "@/hooks/useFetchResource"
 
 export default function ProductsPage() {
@@ -72,15 +72,49 @@ export default function ProductsPage() {
     setDeleteDialogOpen(true)
   }
 
-  const confirmDelete = () => {
+  // const confirmDelete = () => {
+  //   if (productToDelete) {
+  //     // setProducts(products.filter((p) => p.id !== productToDelete.id))
+  //     toast({
+  //       title: "Product deleted",
+  //       description: `${productToDelete.name} has been removed from your catalog.`,
+  //     })
+  //     setDeleteDialogOpen(false)
+  //     setProductToDelete(null)
+  //   }
+  // }
+  const confirmDelete = async () => {
     if (productToDelete) {
-      // setProducts(products.filter((p) => p.id !== productToDelete.id))
-      toast({
-        title: "Product deleted",
-        description: `${productToDelete.name} has been removed from your catalog.`,
-      })
-      setDeleteDialogOpen(false)
-      setProductToDelete(null)
+      try {
+        const response = await fetch(`/api/products/${productToDelete.id}`, {
+          method: "DELETE",
+        })
+        if (!response.ok) {
+          toast({
+            title: "Error",
+            description: "Failed to delete Product",
+            variant: "destructive",
+          })
+          return
+        }
+
+        // ✅ REFETCH
+        await fetchProducts()
+
+        toast({
+          title: "Product deleted",
+          description: `${productToDelete.name} has been removed.`,
+        })
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "An error occurred while deleting the Product",
+          variant: "destructive",
+        })
+      } finally {
+        setDeleteDialogOpen(false)
+        setProductToDelete(null)
+      }
     }
   }
 
@@ -122,7 +156,7 @@ export default function ProductsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px]">Image</TableHead>
+                  <TableHead className="w-20">Image</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>SKU</TableHead>
                   <TableHead>Price</TableHead>

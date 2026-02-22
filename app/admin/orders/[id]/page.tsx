@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, Package, CreditCard, User, MapPin, Loader2, Mail, Printer } from "lucide-react"
-import type { IOrderStatus } from "@/lib/types/database"
+import type { IOrderStatus } from "@/lib/types/intrerface"
 
 export default function OrderDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()

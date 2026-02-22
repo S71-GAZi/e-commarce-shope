@@ -8,7 +8,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Star, ShoppingCart, Heart } from "lucide-react"
-import type { IProduct } from "@/lib/types/database"
+import type { IProduct } from "@/lib/types/intrerface"
 import { useCart } from "@/lib/cart-context"
 
 interface IProductCardProps {
@@ -68,8 +68,8 @@ export function ProductCard({ product }: IProductCardProps) {
               <Star
                 key={i}
                 className={`h-4 w-4 ${i < Math.floor(product.average_rating || 0)
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "fill-muted text-muted"
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "fill-muted text-muted"
                   }`}
               />
             ))}
