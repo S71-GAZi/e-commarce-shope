@@ -49,12 +49,11 @@ export function getMySQLPool(): mysql.Pool {
 }
 
 export async function executeQuery<T = any>(query: string, params?: any[]): Promise<T[]> {
-  console.log("Executing query:", query, "params:", params)  
+  console.log("Executing query:", query, "params:", params)
   const connection = await getMySQLPool().getConnection()
   console.log("Executing connection:", connection)
   try {
     const [rows] = await connection.execute(query, params || [])
-      console.log("Rows returned:", rows)
     return rows as T[]
   } finally {
     connection.release()

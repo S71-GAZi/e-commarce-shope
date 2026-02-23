@@ -245,7 +245,7 @@ export default function BannersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[200px]">Preview</TableHead>
+                  <TableHead className="w-50">Preview</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Status</TableHead>

@@ -5,7 +5,7 @@ import jwt, { SignOptions } from "jsonwebtoken";
 const SECRET_KEY: string = process.env.NEXT_PUBLIC_JWT_SECRET || "default_secret";
 const REFRESH_SECRET = process.env.NEXT_PUBLIC_REFRESH_SECRET!;
 export interface IUserPayload {
-  id: number;
+  id: string;
   email: string;
   role: string;
 }

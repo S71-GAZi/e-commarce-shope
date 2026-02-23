@@ -167,17 +167,18 @@ export interface IOrderItem {
   product?: IProduct
 }
 
-export interface ICartItem {
+export interface ICartItem extends IProduct {
   id: string
   user_id?: string
   session_id?: string
   product_id: string
   variant_id?: string
   quantity: number
+  price_snapshot: number    // snapshot of product price at the time of adding
   created_at: string
   updated_at: string
-  product?: IProduct
-  variant?: IProductVariant
+  // product?: IProduct        // full product info if needed
+  variant?: IProductVariant // full variant info if needed
 }
 
 export interface IWishlistItem {

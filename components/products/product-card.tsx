@@ -18,6 +18,16 @@ interface IProductCardProps {
 export function ProductCard({ product }: IProductCardProps) {
   const { addItem } = useCart()
 
+  // ✅ Parse images safely
+  const images: string[] = Array.isArray(product.images)
+    ? product.images
+    : typeof product.images === "string"
+      ? JSON.parse(product.images)
+      : [];
+
+  // ✅ Fallback image
+  const imageUrl = images.length > 0 ? images[0] : "/placeholder.svg?height=64&width=64";
+
   const discount = product.compare_at_price
     ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
     : 0
@@ -32,8 +42,8 @@ export function ProductCard({ product }: IProductCardProps) {
       <Link href={`/products/${product.slug}`}>
         <div className="relative aspect-square overflow-hidden bg-muted">
           <Image
-            src={product.images?.[0]?.image_url || "/placeholder.svg?height=400&width=400"}
-            alt={product.images?.[0]?.alt_text || product.name}
+            src={imageUrl}
+            alt={product.name}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -78,9 +88,9 @@ export function ProductCard({ product }: IProductCardProps) {
         </div>
 
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold">${product.price.toFixed(2)}</span>
+          <span className="text-2xl font-bold">${Number(product.price).toFixed(2)}</span>
           {product.compare_at_price && (
-            <span className="text-sm text-muted-foreground line-through">${product.compare_at_price.toFixed(2)}</span>
+            <span className="text-sm text-muted-foreground line-through">${Number(product.compare_at_price).toFixed(2)}</span>
           )}
         </div>
       </CardContent>

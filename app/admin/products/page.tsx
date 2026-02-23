@@ -33,14 +33,10 @@ import { useFetchResource } from "@/hooks/useFetchResource"
 
 export default function ProductsPage() {
   const { toast } = useToast()
-  // const [products, setProducts] = useState(mockProducts)
   const [searchQuery, setSearchQuery] = useState("")
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState<IProduct | null>(null)
 
-  // import { useEffect } from "react"
-  // import { useFetchResource } from "@/hooks/useFetchResource"
-  // import type { IProduct } from "@/lib/types/database"
 
   const {
     data: products,
@@ -72,17 +68,6 @@ export default function ProductsPage() {
     setDeleteDialogOpen(true)
   }
 
-  // const confirmDelete = () => {
-  //   if (productToDelete) {
-  //     // setProducts(products.filter((p) => p.id !== productToDelete.id))
-  //     toast({
-  //       title: "Product deleted",
-  //       description: `${productToDelete.name} has been removed from your catalog.`,
-  //     })
-  //     setDeleteDialogOpen(false)
-  //     setProductToDelete(null)
-  //   }
-  // }
   const confirmDelete = async () => {
     if (productToDelete) {
       try {

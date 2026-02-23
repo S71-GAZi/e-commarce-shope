@@ -1,18 +1,15 @@
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { HeroBanner } from "@/components/home/hero-banner"
-import { CategoryGrid } from "@/components/home/category-grid"
 import { ProductCard } from "@/components/products/product-card"
 import { Button } from "@/components/ui/button"
-import { getBanners, getCategories, getProducts } from "@/lib/db-utils"
+import { getBanners, getProducts } from "@/lib/db-utils"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
-import { cookies } from "next/headers";
+import CategoriesSection from "@/components/home/CategorySection"
 
 export default async function HomePage() {
-  const token = cookies().get("authToken")?.value;
   const banners = await getBanners()
-  const categories = await getCategories(token)
   const featuredProducts = await getProducts({ featured: true, limit: 4 })
   const newProducts = await getProducts({ limit: 8 })
 
@@ -27,18 +24,7 @@ export default async function HomePage() {
         </section>
 
         {/* Categories Section */}
-        <section className="container mx-auto px-4 py-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-3xl font-bold">Shop by Category</h2>
-            <Button variant="ghost" asChild>
-              <Link href="/categories">
-                View All
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
-          <CategoryGrid categories={categories} />
-        </section>
+        <CategoriesSection />
 
         {/* Featured Products */}
         {featuredProducts.length > 0 && (
