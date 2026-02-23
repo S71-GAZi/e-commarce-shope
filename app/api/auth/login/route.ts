@@ -68,7 +68,6 @@ export async function POST(request: NextRequest) {
       expiresIn: process.env.NEXT_PUBLIC_JWT_EXPIRES_IN,
     })
   } catch (error) {
-    console.error("Login error:", error)
     return errorResponse("Internal server error", 500)
   }
 }

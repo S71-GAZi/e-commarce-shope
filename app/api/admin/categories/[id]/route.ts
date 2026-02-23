@@ -29,7 +29,6 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     return successResponse(updatedCategory)
   } catch (error) {
-    console.error("Update category error:", error)
     return errorResponse("Failed to update category", 500)
   }
 }
@@ -50,7 +49,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return successResponse({ id, message: "Category deleted successfully" })
   } catch (error) {
-    console.error("Delete category error:", error)
     return errorResponse("Failed to delete category", 500)
   }
 }

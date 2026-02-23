@@ -31,7 +31,6 @@ export async function GET(request: NextRequest) {
       pagination: { limit, offset, total: customers.length },
     })
   } catch (error) {
-    console.error("Get customers error:", error)
     return errorResponse("Failed to fetch customers", 500)
   }
 }

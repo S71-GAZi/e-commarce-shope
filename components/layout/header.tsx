@@ -147,14 +147,6 @@ export function Header() {
                     <span className="sr-only">User menu</span>
                   </Button>
                 </DropdownMenuTrigger>
-                {/* <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="h-9 w-9 inline-flex items-center justify-center rounded-md hover:bg-muted"
-                  >
-                    <User className="h-5 w-5" />
-                  </button>
-                </DropdownMenuTrigger> */}
 
                 <DropdownMenuContent align="end" className="w-56 bg-white text-black border shadow-lg z-9999">
                   <DropdownMenuLabel>

@@ -38,7 +38,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchCart()
   }, [fetchCart])
-  console.log("Cart items:", items)
   /* ================= ADD ITEM ================= */
   const addItem = useCallback(
     async (product: IProduct, variant?: IProductVariant, quantity = 1) => {
