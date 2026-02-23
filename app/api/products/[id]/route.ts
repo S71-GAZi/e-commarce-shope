@@ -13,7 +13,6 @@ type RouteParams = { params: { id: string } }
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = params
-    console.log(id)
     const product = await productQueries.findById(id)
 
     if (!product) {
@@ -22,7 +21,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return successResponse(product)
   } catch (error) {
-    console.error("Get product error:", error)
     return errorResponse("Failed to fetch product", 500)
   }
 }
@@ -83,7 +81,6 @@ export async function PATCH(
 
     // ✅ Merge images
     const finalImages = [...existingImages, ...newImages]
-    console.log("DB Images:", finalImages)
     if (finalImages.length > 4)
       return errorResponse("Maximum 4 images allowed", 400)
 
@@ -140,7 +137,6 @@ export async function PATCH(
 
     return successResponse(updatedProduct)
   } catch (err) {
-    console.error("Update product error:", err)
     return errorResponse(err instanceof Error ? err.message : "Failed to update product", 500)
   }
 }
@@ -166,7 +162,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return successResponse({ id, message: "Product deleted successfully" })
   } catch (error) {
-    console.error("Delete product error:", error)
     return errorResponse("Failed to delete product", 500)
   }
 }

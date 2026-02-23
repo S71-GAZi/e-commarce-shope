@@ -9,6 +9,7 @@ export interface IUser {
   phone?: string
   role: UserRole
   email_verified: boolean
+  password_hash?: string
   total_spent: number
   orders: number
   status: "active" | "inactive"

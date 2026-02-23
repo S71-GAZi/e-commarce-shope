@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
 
     return successResponse({ items })
   } catch (error) {
-    console.error("Get cart error:", error)
     return errorResponse("Failed to fetch cart", 500)
   }
 }
@@ -57,13 +56,12 @@ export async function POST(request: NextRequest) {
 
     return successResponse(cartItem, 201)
   } catch (error: any) {
-    console.error("Add to cart error:", error)
 
     if (error.message === "Product not found") {
       return errorResponse("Product not found", 404)
     }
 
-    return errorResponse("Failed to add to cart2", 500)
+    return errorResponse("Failed to add to cart", 500)
   }
 }
 
@@ -83,7 +81,6 @@ export async function DELETE(request: NextRequest) {
       deletedItems: result?.deleted ?? 0
     })
   } catch (error) {
-    console.error("Clear cart error:", error)
     return errorResponse("Failed to clear cart", 500)
   }
 }

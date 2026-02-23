@@ -20,7 +20,6 @@ export async function PATCH(
         // ✅ Auth check
         const token = getTokenFromRequest(request);
         const user = token ? getUserFromToken(token) : null;
-        console.log("Authenticated user for status update:", user, token);
         if (!user || !isAdmin(user)) {
             return errorResponse("Unauthorized", 401);
         }
@@ -41,7 +40,6 @@ export async function PATCH(
         return successResponse({ message: "Status updated successfully" });
 
     } catch (error) {
-        console.error("Update customer status error:", error);
         return errorResponse("Failed to update status", 500);
     }
 }
