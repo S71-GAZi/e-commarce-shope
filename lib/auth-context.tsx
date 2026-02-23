@@ -54,7 +54,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const data = await res.json()
-        console.log("Refresh Token data", data)
         setAccessToken(data.accessToken)
         setUser(data.user)
       } catch (err) {

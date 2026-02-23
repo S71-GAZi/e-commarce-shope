@@ -29,11 +29,6 @@ export function Header() {
   // Ensure component is mounted before rendering auth-dependent content
   useEffect(() => {
     setMounted(true)
-    console.log("Header mounted:", mounted);
-    console.log("Header isAuthenticated :", isAuthenticated);
-    console.log("Header user:", user);
-
-
   }, [])
 
   const handleSearch = (e: React.FormEvent) => {
@@ -50,7 +45,7 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
           {/* Mobile Menu */}
@@ -134,7 +129,7 @@ export function Header() {
             <Button variant="ghost" size="icon" asChild className="relative">
               <Link href="/cart">
                 <ShoppingCart className="h-5 w-5" />
-                {itemCount > 0 && (
+                {mounted && itemCount > 0 && (
                   <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
                     {itemCount}
                   </Badge>
@@ -161,7 +156,7 @@ export function Header() {
                   </button>
                 </DropdownMenuTrigger> */}
 
-                <DropdownMenuContent align="end" className="w-56 bg-white text-black border shadow-lg z-[9999]">
+                <DropdownMenuContent align="end" className="w-56 bg-white text-black border shadow-lg z-9999">
                   <DropdownMenuLabel>
                     <div className="flex flex-col">
                       <span className="font-medium">{user?.full_name || "User"}</span>

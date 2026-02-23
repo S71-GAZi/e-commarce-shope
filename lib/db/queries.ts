@@ -211,39 +211,99 @@ export const orderQueries = {
 
 export const cartQueries = {
   async findByUserId(userId: string) {
-    return executeQuery<ICartItem & { product_name: string; price: number; slug: string }>(
-      `SELECT ci.*, p.name as product_name, p.price, p.slug
-       FROM cart_items ci
-       LEFT JOIN products p ON ci.product_id = p.id
-       WHERE ci.user_id = ?`,
+    return executeQuery<ICartItem & { name: string; slug: string; images: [string] }>(
+      `SELECT ci.*, p.name , p.slug , p.images 
+     FROM cart_items ci
+     LEFT JOIN products p ON ci.product_id = p.id
+     WHERE ci.user_id = ?`,
       [userId],
     )
   },
 
   async addItem(userId: string, productId: string, quantity: number, variantId?: string) {
-    const result = await executeQuery<ICartItem>(
-      `INSERT INTO cart_items (user_id, product_id, variant_id, quantity)
-       VALUES (?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE quantity = quantity + ?`,
-      [userId, productId, variantId || null, quantity, quantity],
+
+    const product = await executeQuerySingle<{ price: number }>(
+      "SELECT price FROM products WHERE id = ?",
+      [productId]
     )
-    return result[0]
+
+    if (!product) {
+      throw new Error("Product not found")
+    }
+
+    const existing = await executeQuerySingle(
+      "SELECT * FROM cart_items WHERE user_id = ? AND product_id = ? AND variant_id IS NULL",
+      [userId, productId]
+    )
+    if (existing) {
+      await executeQuery(
+        "UPDATE cart_items SET quantity = quantity + ? WHERE id = ?",
+        [quantity, existing.id]
+      )
+    } else {
+      await executeQuery(
+        "INSERT INTO cart_items (user_id, product_id, variant_id, quantity, price_snapshot) VALUES (?, ?, ?, ?, ?)",
+        [userId, productId, null, quantity, product.price]
+      )
+    }
+
+    return executeQuerySingle<ICartItem>(
+      `SELECT * FROM cart_items 
+     WHERE user_id = ? 
+     AND product_id = ? 
+     AND variant_id <=> ?`,
+      [userId, productId, variantId ?? null]
+    )
   },
 
-  async updateQuantity(id: string, quantity: number) {
-    await executeQuery("UPDATE cart_items SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", [
-      quantity,
-      id,
-    ])
-    return executeQuerySingle<ICartItem>("SELECT * FROM cart_items WHERE id = ?", [id])
+  async updateQuantity(id: string, userId: string, quantity: number) {
+
+    if (quantity <= 0) {
+      const result: any = await executeQuery(
+        "DELETE FROM cart_items WHERE id = ? AND user_id = ?",
+        [id, userId]
+      )
+
+      if (result.affectedRows === 0) {
+        throw new Error("Cart item not found")
+      }
+
+      return null
+    }
+
+    const result: any = await executeQuery(
+      "UPDATE cart_items SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?",
+      [quantity, id, userId]
+    )
+
+    if (result.affectedRows === 0) {
+      throw new Error("Cart item not found")
+    }
+
+    return executeQuerySingle<ICartItem>(
+      "SELECT * FROM cart_items WHERE id = ? AND user_id = ?",
+      [id, userId]
+    )
   },
 
-  async removeItem(id: string) {
-    await executeQuery("DELETE FROM cart_items WHERE id = ?", [id])
+  async removeItem(id: string, userId: string) {
+    const result: any = await executeQuery(
+      "DELETE FROM cart_items WHERE id = ? AND user_id = ?",
+      [id, userId]
+    )
+
+    if (result.affectedRows === 0) {
+      throw new Error("Cart item not found")
+    }
   },
 
   async clearCart(userId: string) {
-    await executeQuery("DELETE FROM cart_items WHERE user_id = ?", [userId])
+    const result: any = await executeQuery(
+      "DELETE FROM cart_items WHERE user_id = ?",
+      [userId]
+    )
+
+    return { deleted: result.affectedRows || 0 } // return affected rows
   },
 }
 

@@ -279,6 +279,32 @@ CREATE TABLE IF NOT EXISTS banners (
   INDEX idx_active (is_active)
 );
 
+--cart Table
+CREATE TABLE IF NOT EXISTS carts (
+  id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  user_id CHAR(36) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_user_cart (user_id),
+  INDEX idx_user (user_id)
+);
+
+--cart Item
+CREATE TABLE IF NOT EXISTS cart_items (
+  id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  cart_id CHAR(36) NOT NULL,
+  product_id CHAR(36) NOT NULL,
+  quantity INT NOT NULL DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (cart_id) REFERENCES carts(id) ON DELETE CASCADE,
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+
+  UNIQUE KEY unique_cart_product (cart_id, product_id),
+  INDEX idx_cart (cart_id),
+  INDEX idx_product (product_id)
+);
+
 -- Insert Demo Users
 -- demo@example.com / demo123 -> SHA256: 6cb75f652a9b52798eb6cf2201057c73
 -- admin@example.com / admin123 -> SHA256: 0192023a7bbd73250516f069df18b500

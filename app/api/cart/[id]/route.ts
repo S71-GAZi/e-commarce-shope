@@ -24,7 +24,11 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return errorResponse(validation.error, 400)
     }
 
-    const updatedItem = await cartQueries.updateQuantity(id, validation.data.quantity)
+    const updatedItem = await cartQueries.updateQuantity(
+      id,
+      user.id,
+      validation.data.quantity
+    )
 
     return successResponse(updatedItem)
   } catch (error) {
@@ -45,11 +49,16 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const { id } = params
 
-    await cartQueries.removeItem(id)
+    await cartQueries.removeItem(id, user.id)
 
     return successResponse({ id, message: "Item removed from cart" })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Remove cart item error:", error)
+
+    if (error.message === "Cart item not found") {
+      return errorResponse("Cart item not found", 404)
+    }
+
     return errorResponse("Failed to remove cart item", 500)
   }
 }
