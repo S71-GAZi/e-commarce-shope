@@ -9,12 +9,6 @@ import { getUserFromToken, IUserPayload } from "@/lib/jwt"
 // GET /api/admin/categories
 export async function GET(request: NextRequest) {
   try {
-    // const token = getTokenFromRequest(request)
-    // const user = token ? getUserFromToken(token) : null
-
-    // if (!user || !isAdmin(user)) {
-    //   return errorResponse("Unauthorized", 401)
-    // }
 
     const categories = await categoryQueries.listAll()
 

@@ -3,63 +3,64 @@
 import { useCallback, useState } from "react"
 import { apiClient } from "./client"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "../auth-context"
 
 // Auth hooks
-export function useAuth() {
-  const { toast } = useToast()
+// export function useAuth() {
+//   const { toast } = useToast()
 
-  const login = useCallback(
-    async (email: string, password: string) => {
-      try {
-        const response: any = await apiClient.post("/api/auth/login", { email, password })
-        if (response.success) {
-          apiClient.setToken(response.data.token)
-          return { success: true, user: response.data.user }
-        }
-        toast({ title: "Error", description: response.error, variant: "destructive" })
-        return { success: false, error: response.error }
-      } catch (error: any) {
-        const message = error.message || "Login failed"
-        toast({ title: "Error", description: message, variant: "destructive" })
-        return { success: false, error: message }
-      }
-    },
-    [toast],
-  )
+//   const login = useCallback(
+//     async (email: string, password: string) => {
+//       try {
+//         const response: any = await apiClient.post("/api/auth/login", { email, password })
+//         if (response.success) {
+//           apiClient.setToken(response.data.token)
+//           return { success: true, user: response.data.user }
+//         }
+//         toast({ title: "Error", description: response.error, variant: "destructive" })
+//         return { success: false, error: response.error }
+//       } catch (error: any) {
+//         const message = error.message || "Login failed"
+//         toast({ title: "Error", description: message, variant: "destructive" })
+//         return { success: false, error: message }
+//       }
+//     },
+//     [toast],
+//   )
 
-  const register = useCallback(
-    async (email: string, password: string, fullName: string) => {
-      try {
-        const response: any = await apiClient.post("/api/auth/register", { email, password, full_name: fullName })
-        if (response.success) {
-          apiClient.setToken(response.data.token)
-          return { success: true, user: response.data.user }
-        }
-        toast({ title: "Error", description: response.error, variant: "destructive" })
-        return { success: false, error: response.error }
-      } catch (error: any) {
-        const message = error.message || "Registration failed"
-        toast({ title: "Error", description: message, variant: "destructive" })
-        return { success: false, error: message }
-      }
-    },
-    [toast],
-  )
+//   const register = useCallback(
+//     async (email: string, password: string, fullName: string) => {
+//       try {
+//         const response: any = await apiClient.post("/api/auth/register", { email, password, full_name: fullName })
+//         if (response.success) {
+//           apiClient.setToken(response.data.token)
+//           return { success: true, user: response.data.user }
+//         }
+//         toast({ title: "Error", description: response.error, variant: "destructive" })
+//         return { success: false, error: response.error }
+//       } catch (error: any) {
+//         const message = error.message || "Registration failed"
+//         toast({ title: "Error", description: message, variant: "destructive" })
+//         return { success: false, error: message }
+//       }
+//     },
+//     [toast],
+//   )
 
-  const logout = useCallback(async () => {
-    try {
-      await apiClient.post("/api/auth/logout", {})
-      apiClient.setToken(null)
-      return { success: true }
-    } catch (error: any) {
-      const message = error.message || "Logout failed"
-      toast({ title: "Error", description: message, variant: "destructive" })
-      return { success: false, error: message }
-    }
-  }, [toast])
+//   const logout = useCallback(async () => {
+//     try {
+//       await apiClient.post("/api/auth/logout", {})
+//       apiClient.setToken(null)
+//       return { success: true }
+//     } catch (error: any) {
+//       const message = error.message || "Logout failed"
+//       toast({ title: "Error", description: message, variant: "destructive" })
+//       return { success: false, error: message }
+//     }
+//   }, [toast])
 
-  return { login, register, logout }
-}
+//   return { login, register, logout }
+// }
 
 // Product hooks
 export function useProducts() {
@@ -242,72 +243,78 @@ export function useOrders() {
 }
 
 // Cart hooks
-export function useShoppingCart() {
-  const { toast } = useToast()
+// export function useShoppingCart() {
+//   const { toast } = useToast()
+//   const { isAuthenticated } = useAuth()   // ✅ Hook inside function
 
-  const getCart = useCallback(async () => {
-    try {
-      const response: any = await apiClient.get("/api/cart")
-      if (response.success) return { success: true, data: response.data }
-      return { success: false, error: response.error }
-    } catch (error) {
-      return { success: false, error: "Failed to fetch cart" }
-    }
-  }, [])
+//   const getCart = useCallback(async () => {
+//     if (!isAuthenticated) {
+//       toast({ title: "Error", description: "You must be logged in to view the cart", variant: "destructive" })
+//       return { success: false, error: "Not authenticated" }
+//     }
 
-  const addToCart = useCallback(
-    async (productId: string, quantity: number, variantId?: string) => {
-      try {
-        const response: any = await apiClient.post("/api/cart", { product_id: productId, quantity, variant_id: variantId })
-        if (response.success) {
-          toast({ title: "Success", description: "Item added to cart" })
-          return { success: true, data: response.data }
-        }
-        toast({ title: "Error", description: response.error, variant: "destructive" })
-        return { success: false, error: response.error }
-      } catch (error: any) {
-        const message = error.message || "Failed to add to cart"
-        toast({ title: "Error", description: message, variant: "destructive" })
-        return { success: false, error: message }
-      }
-    },
-    [toast],
-  )
+//     try {
+//       const response: any = await apiClient.get("/api/cart")
+//       if (response.success) return { success: true, data: response.data }
+//       return { success: false, error: response.error }
+//     } catch (error) {
+//       return { success: false, error: "Failed to fetch cart" }
+//     }
+//   }, [isAuthenticated, toast])
 
-  const removeFromCart = useCallback(
-    async (itemId: string) => {
-      try {
-        const response: any = await apiClient.delete(`/api/cart/${itemId}`)
-        if (response.success) {
-          toast({ title: "Success", description: "Item removed from cart" })
-          return { success: true }
-        }
-        toast({ title: "Error", description: response.error, variant: "destructive" })
-        return { success: false, error: response.error }
-      } catch (error: any) {
-        const message = error.message || "Failed to remove item"
-        toast({ title: "Error", description: message, variant: "destructive" })
-        return { success: false, error: message }
-      }
-    },
-    [toast],
-  )
+//   const addToCart = useCallback(
+//     async (productId: string, quantity: number, variantId?: string) => {
+//       try {
+//         const response: any = await apiClient.post("/api/cart", { product_id: productId, quantity, variant_id: variantId })
+//         if (response.success) {
+//           toast({ title: "Success", description: "Item added to cart" })
+//           return { success: true, data: response.data }
+//         }
+//         toast({ title: "Error", description: response.error, variant: "destructive" })
+//         return { success: false, error: response.error }
+//       } catch (error: any) {
+//         const message = error.message || "Failed to add to cart"
+//         toast({ title: "Error", description: message, variant: "destructive" })
+//         return { success: false, error: message }
+//       }
+//     },
+//     [toast],
+//   )
 
-  const clearCart = useCallback(async () => {
-    try {
-      const response: any = await apiClient.delete("/api/cart")
-      if (response.success) {
-        toast({ title: "Success", description: "Cart cleared" })
-        return { success: true }
-      }
-      toast({ title: "Error", description: response.error, variant: "destructive" })
-      return { success: false, error: response.error }
-    } catch (error: any) {
-      const message = error.message || "Failed to clear cart"
-      toast({ title: "Error", description: message, variant: "destructive" })
-      return { success: false, error: message }
-    }
-  }, [toast])
+//   const removeFromCart = useCallback(
+//     async (itemId: string) => {
+//       try {
+//         const response: any = await apiClient.delete(`/api/cart/${itemId}`)
+//         if (response.success) {
+//           toast({ title: "Success", description: "Item removed from cart" })
+//           return { success: true }
+//         }
+//         toast({ title: "Error", description: response.error, variant: "destructive" })
+//         return { success: false, error: response.error }
+//       } catch (error: any) {
+//         const message = error.message || "Failed to remove item"
+//         toast({ title: "Error", description: message, variant: "destructive" })
+//         return { success: false, error: message }
+//       }
+//     },
+//     [toast],
+//   )
 
-  return { getCart, addToCart, removeFromCart, clearCart }
-}
+//   const clearCart = useCallback(async () => {
+//     try {
+//       const response: any = await apiClient.delete("/api/cart")
+//       if (response.success) {
+//         toast({ title: "Success", description: "Cart cleared" })
+//         return { success: true }
+//       }
+//       toast({ title: "Error", description: response.error, variant: "destructive" })
+//       return { success: false, error: response.error }
+//     } catch (error: any) {
+//       const message = error.message || "Failed to clear cart"
+//       toast({ title: "Error", description: message, variant: "destructive" })
+//       return { success: false, error: message }
+//     }
+//   }, [toast])
+
+//   return { getCart, addToCart, removeFromCart, clearCart }
+// }

@@ -10,17 +10,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getProducts } from "@/lib/db-utils"
 import { Star, ShoppingCart, Heart, Truck, Shield, RotateCcw } from "lucide-react"
 import { productQueries } from "@/lib/db"
+import { AddToCartButton } from "@/components/home/AddToCartButton"
 
-export default async function ProductDetailPage({
-  params,
-}: {
-  params: { slug: string }
-}) {
+export default async function ProductDetailPage({ params, }: { params: { slug: string } }) {
   const product = await productQueries.findBySlug(params.slug)
-
   if (!product) {
     notFound()
   }
+
+  // ✅ Parse images safely
+  const images: string[] = Array.isArray(product.images)
+    ? product.images
+    : typeof product.images === "string"
+      ? JSON.parse(product.images)
+      : [];
+
+  // ✅ Fallback image
+  const imageUrl = images.length > 0 ? images[0] : "/placeholder.svg?height=64&width=64";
 
   const relatedProducts = await getProducts({ category: product.category_id, limit: 4 })
   const filteredRelated = relatedProducts.filter((p) => p.id !== product.id).slice(0, 4)
@@ -39,8 +45,8 @@ export default async function ProductDetailPage({
           <div className="space-y-4">
             <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
               <Image
-                src={product.images?.[0]?.image_url || "/placeholder.svg?height=600&width=600"}
-                alt={product.images?.[0]?.alt_text || product.name}
+                src={imageUrl}
+                alt={product.name}
                 fill
                 className="object-cover"
                 priority
@@ -116,11 +122,11 @@ export default async function ProductDetailPage({
             </div>
 
             <div className="flex gap-4">
-              <Button size="lg" className="flex-1" disabled={product.stock_quantity <= 0}>
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Add to Cart
-              </Button>
-              <Button size="lg" variant="outline">
+              {/* <Button size="lg" className="flex-1 cursor-pointer" disabled={product.stock_quantity <= 0} onClick={handleAddToCart}> */}
+              {/* <ShoppingCart className="mr-2 h-5 w-5" /> */}
+              <AddToCartButton product={product} />
+              {/* </Button> */}
+              <Button size="lg" variant="outline" className="cursor-pointer">
                 <Heart className="h-5 w-5" />
                 <span className="sr-only">Add to wishlist</span>
               </Button>

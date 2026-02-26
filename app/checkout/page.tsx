@@ -40,7 +40,7 @@ const MOBILE_BANKING_PROVIDERS = [
   {
     id: "bkash",
     name: "bKash",
-    logo: "/images/mobile-banking/bkash.png", // Add your actual logo path
+    logo: "https://freelogopng.com/images/all_img/1656227518bkash-logo-png.png",
     activeBg: "bg-pink-50",
     accountNo: "01700-000000",
     type: "Personal",
@@ -75,7 +75,7 @@ type PaymentMethod = "cod" | "mobile_banking"
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, subtotal, clearCart } = useCart()
+  const { items, subtotal, clearCart, isLoading: isCartLoading } = useCart()
   const { user, isAuthenticated, isLoading } = useAuth()
   const { toast } = useToast()
 
@@ -131,15 +131,21 @@ export default function CheckoutPage() {
 
   useEffect(() => { setMounted(true) }, [])
 
-  useEffect(() => {
-    if (mounted && items.length === 0) router.push("/cart")
-  }, [mounted, items.length, router])
 
   useEffect(() => {
-    if (mounted && !isLoading && !isAuthenticated) {
-      router.push("/auth/login?redirect=/checkout")
+    if (!mounted) return
+    if (!isLoading && !isCartLoading) {
+      if (!isAuthenticated) {
+        router.push("/auth/login?redirect=/checkout")
+        return
+      }
+      // if (!isCartLoading && (!items || items.length === 0)) {
+      //   router.push("/cart")
+      //   console.log(items)
+      //   return
+      // }
     }
-  }, [mounted, isLoading, isAuthenticated, router])
+  }, [mounted, isLoading, isAuthenticated, items, router, isCartLoading])
 
   useEffect(() => {
     if (paymentMethod !== "mobile_banking") {
@@ -158,39 +164,23 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
-    if (paymentMethod === "mobile_banking") {
-      if (!selectedProvider) {
-        toast({ title: "Please select a mobile banking provider", variant: "destructive" })
-        return
-      }
-      if (!accountNo.trim()) {
-        toast({ title: "Please enter your mobile banking account number", variant: "destructive" })
-        return
-      }
-      if (!transactionNo.trim()) {
-        toast({ title: "Please enter the transaction ID", variant: "destructive" })
-        return
-      }
-    }
 
-    setIsProcessing(true)
     const form = e.currentTarget
     const formData = new FormData(form)
 
     const orderData = {
-      shippingInfo: {
-        firstName: formData.get("firstName"),
-        lastName: formData.get("lastName"),
+      shipping_info: {
+        name: formData.get("name"),
         email: formData.get("email"),
         phone: formData.get("phone"),
+        division: selectedDivision,
+        district: selectedDistrict,
+        upazila: selectedUpazila,
         address: formData.get("address"),
-        city: formData.get("city"),
-        state: formData.get("state"),
-        zip: formData.get("zip"),
-        country: formData.get("country"),
+
       },
       payment: {
-        method: paymentMethod,
+        payment_method: paymentMethod,
         ...(paymentMethod === "mobile_banking" && {
           provider: selectedProvider,
           senderAccount: accountNo,
@@ -203,25 +193,45 @@ export default function CheckoutPage() {
       tax,
       total,
     }
+    console.log(orderData)
 
+    // validate mobile banking fields
+    if (paymentMethod === "mobile_banking") {
+      if (!selectedProvider || !accountNo.trim() || !transactionNo.trim()) {
+        toast({ title: "Please fill all required payment fields", variant: "destructive" });
+        return;
+      }
+    }
+
+    // validate shipping fields
+    if (!orderData.shipping_info.name || !orderData.shipping_info.email || !orderData.shipping_info.phone || !selectedDivision || !selectedDistrict || !selectedUpazila || !orderData.shipping_info.address) {
+      toast({ title: "Please fill all required shipping fields", variant: "destructive" });
+      return;
+    }
+
+    setIsProcessing(true);
     try {
+      console.log("Submitting order data:", orderData)
       // Replace with your actual API call:
-      // const res = await fetch("/api/orders", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(orderData),
-      // })
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      clearCart()
-      toast({
-        title: "Order placed successfully! 🎉",
-        description:
-          paymentMethod === "cod"
-            ? "Pay when your order arrives."
-            : "We'll verify your payment and confirm your order shortly.",
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData),
       })
-      router.push("/orders/confirmation")
+      console.log(res)
+      // await new Promise((resolve) => setTimeout(resolve, 2000))
+      if (res.ok) {
+
+        clearCart()
+        toast({
+          title: "Order placed successfully! 🎉",
+          description:
+            paymentMethod === "cod"
+              ? "Pay when your order arrives."
+              : "We'll verify your payment and confirm your order shortly.",
+        })
+        // router.push("/orders/confirmation")
+      }
     } catch (error) {
       console.error("Order failed:", error)
       toast({ title: "Order failed", description: "Something went wrong. Please try again.", variant: "destructive" })
@@ -289,16 +299,10 @@ export default function CheckoutPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-sm font-medium">
-                        First Name <span className="text-red-500">*</span>
+                      <Label htmlFor="name" className="text-sm font-medium">
+                        Name <span className="text-red-500">*</span>
                       </Label>
-                      <Input id="firstName" name="firstName" required defaultValue={user?.full_name?.split(" ")[0]} className="h-10" placeholder="John" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-sm font-medium">
-                        Last Name <span className="text-red-500">*</span>
-                      </Label>
-                      <Input id="lastName" name="lastName" required defaultValue={user?.full_name?.split(" ")[1]} className="h-10" placeholder="Doe" />
+                      <Input id="name" name="name" required defaultValue={user?.full_name} className="h-10" placeholder="John" />
                     </div>
                   </div>
 
@@ -316,7 +320,7 @@ export default function CheckoutPage() {
                       <Input id="phone" name="phone" type="tel" required defaultValue={user?.phone} className="h-10" placeholder="+880 1XXX-XXXXXX" />
                     </div>
                   </div>
-                  ca
+
                   <div className="space-y-4">
 
                     {/* Division Dropdown */}
@@ -378,10 +382,6 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="country" className="text-sm font-medium">Country <span className="text-red-500">*</span></Label>
-                    <Input id="country" name="country" required defaultValue="Bangladesh" className="h-10" />
-                  </div>
 
                   {shipping === 0 ? (
                     <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 rounded-lg px-3 py-2">
@@ -495,8 +495,20 @@ export default function CheckoutPage() {
                                 : "border-border hover:border-primary/40 bg-white"
                                 }`}
                             >
-                              <span className="text-2xl leading-none">{provider.logo}</span>
+                              {/* Logo */}
+                              <div className="w-12 h-12 relative">
+                                <Image
+                                  src={provider.logo}
+                                  alt={provider.name}
+                                  fill
+                                  className="object-contain"
+                                />
+                              </div>
+
+                              {/* Name */}
                               <span className="text-xs font-semibold">{provider.name}</span>
+
+                              {/* Selected check */}
                               {selectedProvider === provider.id && (
                                 <CheckCircle2 className="h-3.5 w-3.5 text-primary absolute top-1.5 right-1.5" />
                               )}
@@ -633,28 +645,28 @@ export default function CheckoutPage() {
                   {/* Items list */}
                   <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
                     {items.map((item) => {
-                      const price = item.variant?.price || item.product.price
-                      const images: string[] = Array.isArray(item.product.images)
-                        ? item.product.images
-                        : typeof item.product.images === "string"
-                          ? JSON.parse(item.product.images)
+                      const price = item.price
+                      const images: string[] = Array.isArray(item.images)
+                        ? item.images
+                        : typeof item.images === "string"
+                          ? JSON.parse(item.images)
                           : []
                       const imageUrl = images.length > 0 ? images[0] : "/placeholder.svg?height=64&width=64"
 
                       return (
-                        <div key={`${item.product.id}-${item.variant?.id || "default"}`} className="flex gap-3 items-start">
+                        <div key={`${item.product_id}-${item.variant?.id || "default"}`} className="flex gap-3 items-start">
                           <div className="relative w-14 h-14 shrink-0 rounded-lg bg-muted overflow-hidden">
-                            <Image src={imageUrl} alt={item.product.name} fill className="object-cover" />
+                            <Image src={imageUrl} alt={item.name} fill className="object-cover" />
                             <Badge className="absolute -top-1.5 -right-1.5 h-4 w-4 p-0 flex items-center justify-center text-[10px] rounded-full">
                               {item.quantity}
                             </Badge>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium line-clamp-2 leading-tight">{item.product.name}</p>
+                            <p className="text-sm font-medium line-clamp-2 leading-tight">{item.name}</p>
                             {item.variant && (
                               <p className="text-xs text-muted-foreground mt-0.5">{item.variant.name}</p>
                             )}
-                            <p className="text-sm font-semibold mt-1">${(price * item.quantity).toFixed(2)}</p>
+                            <p className="text-sm font-semibold mt-1">${(item.price_snapshot * item.quantity).toFixed(2)}</p>
                           </div>
                         </div>
                       )
@@ -713,7 +725,7 @@ export default function CheckoutPage() {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full h-12 text-base font-semibold"
+                    className={`w-full h-12 text-base font-semibold ${isProcessing ? "cursor-not-allowed" : "cursor-pointer"}`}
                     disabled={isProcessing}
                   >
                     {isProcessing ? (

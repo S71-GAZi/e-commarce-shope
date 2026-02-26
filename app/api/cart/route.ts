@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const token = getTokenFromRequest(request)
     const user = token ? getUserFromToken(token) : null
 
-    if (!user) return errorResponse("Unauthorized", 401)
+    if (!user) return errorResponse("Unauthorized111", 401)
 
     const items = await cartQueries.findByUserId(user.id)
 
