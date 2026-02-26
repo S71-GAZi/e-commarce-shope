@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import type { IBanner } from "@/lib/types/database"
+import type { IBanner } from "@/lib/types/intrerface"
 
 interface HeroBannerProps {
   banners: IBanner[]
@@ -18,7 +18,7 @@ export function HeroBanner({ banners }: HeroBannerProps) {
     if (banners.length <= 1) return
 
     const interval = setInterval(() => {
-      console.log("Auto-advancing banner running..." );
+      console.log("Auto-advancing banner running...");
       setCurrentIndex((prev) => (prev + 1) % banners.length)
     }, 5000)
 
@@ -38,7 +38,7 @@ export function HeroBanner({ banners }: HeroBannerProps) {
   const currentBanner = banners[currentIndex]
 
   return (
-    <div className="relative w-full aspect-[21/9] md:aspect-[21/6] overflow-hidden rounded-lg bg-muted">
+    <div className="relative w-full aspect-21/9 md:aspect-21/6 overflow-hidden rounded-lg bg-muted">
       <Image
         src={currentBanner.image_url || "/placeholder.svg"}
         alt={currentBanner.title}
@@ -47,7 +47,7 @@ export function HeroBanner({ banners }: HeroBannerProps) {
         priority
       />
 
-      <div className="absolute inset-0 bg-gradient-to-r from-background/80 to-transparent">
+      <div className="absolute inset-0 bg-linear-to-r from-background/80 to-transparent">
         <div className="container mx-auto px-4 h-full flex items-center">
           <div className="max-w-xl space-y-4">
             <h1 className="text-4xl md:text-6xl font-bold text-balance">{currentBanner.title}</h1>

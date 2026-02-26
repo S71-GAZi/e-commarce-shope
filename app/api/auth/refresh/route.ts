@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   const newAccessToken = generateToken(user as any);
   const newRefreshToken = generateRefreshToken(user as any);
 
-  const response = NextResponse.json({user : user,accessToken: newAccessToken });
+  const response = NextResponse.json({ user: user, accessToken: newAccessToken });
 
   response.cookies.set("refreshToken", newRefreshToken, {
     httpOnly: true,

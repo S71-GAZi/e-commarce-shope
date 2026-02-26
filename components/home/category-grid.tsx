@@ -1,7 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
-import type { ICategory } from "@/lib/types/database"
+import type { ICategory } from "@/lib/types/intrerface"
 
 interface ICategoryGridProps {
   categories: ICategory[]
@@ -10,7 +10,7 @@ interface ICategoryGridProps {
 export function CategoryGrid({ categories }: ICategoryGridProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {categories.map((category) => (
+      {categories?.map((category) => (
         <Link key={category.id} href={`/products?category=${category.slug}`}>
           <Card className="group overflow-hidden hover:shadow-lg transition-shadow">
             <CardContent className="p-0">

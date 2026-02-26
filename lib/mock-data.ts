@@ -1,6 +1,6 @@
 // Mock data for development (until database is connected)
 
-import type { IProduct, ICategory, IUser, IBanner } from "./types/database"
+import type { IProduct, ICategory, IUser, IBanner } from "./types/intrerface"
 
 export const mockCategories: ICategory[] = [
   {

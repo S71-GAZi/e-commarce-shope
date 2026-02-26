@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, Package, CreditCard, User, MapPin, Loader2, Mail, Printer } from "lucide-react"
-import type { IOrderStatus } from "@/lib/types/database"
+import type { IOrderStatus } from "@/lib/types/intrerface"
 
 export default function OrderDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -139,8 +139,8 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                       <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">${item.total_price.toFixed(2)}</p>
-                      <p className="text-sm text-muted-foreground">${item.unit_price.toFixed(2)} each</p>
+                      <p className="font-semibold">${Number(item.total_price).toFixed(2)}</p>
+                      <p className="text-sm text-muted-foreground">${Number(item.unit_price).toFixed(2)} each</p>
                     </div>
                   </div>
                 ))}

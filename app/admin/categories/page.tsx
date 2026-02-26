@@ -33,7 +33,7 @@ import {
 import { useToast } from "@/hooks/use-toast"
 import { Plus, Edit, Trash2, Loader2 } from "lucide-react"
 import Image from "next/image"
-import type { ICategory } from "@/lib/types/database"
+import type { ICategory } from "@/lib/types/intrerface"
 import { useFetchResource } from "@/hooks/useFetchResource"
 
 export default function CategoriesPage() {
@@ -109,7 +109,6 @@ export default function CategoriesPage() {
         description: "An error occurred while saving the category",
         variant: "destructive",
       })
-      console.error(error)
     }
   }
 
@@ -152,7 +151,6 @@ export default function CategoriesPage() {
           description: "An error occurred while deleting the category",
           variant: "destructive",
         })
-        console.error(error)
       } finally {
         setDeleteDialogOpen(false)
         setCategoryToDelete(null)

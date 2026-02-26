@@ -3,13 +3,14 @@ export const dynamic = "force-dynamic";
 import type { NextRequest } from "next/server"
 import {
   getTokenFromRequest,
-  getUserFromToken,
+  // getUserFromToken,
   isAdmin,
   errorResponse,
   successResponse,
   getPaginationParams,
 } from "@/lib/api/middleware"
 import { userQueries } from "@/lib/db/queries"
+import { getUserFromToken } from "@/lib/jwt";
 
 // GET /api/admin/customers
 export async function GET(request: NextRequest) {
@@ -23,14 +24,13 @@ export async function GET(request: NextRequest) {
 
     const { limit, offset } = getPaginationParams(request)
 
-    const customers = await userQueries.listAll(limit, offset)
+    const customers = await userQueries.listAllCustomers(limit, offset)
 
     return successResponse({
       customers,
       pagination: { limit, offset, total: customers.length },
     })
   } catch (error) {
-    console.error("Get customers error:", error)
     return errorResponse("Failed to fetch customers", 500)
   }
 }

@@ -10,10 +10,19 @@ import { useCart } from "@/lib/cart-context"
 import Image from "next/image"
 import Link from "next/link"
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react"
+import { useEffect, useState } from "react"
 
 export default function CartPage() {
   const { items, subtotal, updateQuantity, removeItem, clearCart } = useCart()
+  const [mounted, setMounted] = useState(false)
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null // or loading spinner
+  }
   const shipping = subtotal > 50 ? 0 : 9.99
   const tax = subtotal * 0.1
   const total = subtotal + shipping + tax
@@ -48,35 +57,43 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {items.map((item) => {
-              const price = item.variant?.price || item.product.price
+              const price = item.price_snapshot
               const itemTotal = price * item.quantity
+              // ✅ Parse images safely
+              const images: string[] = Array.isArray(item.images)
+                ? item.images
+                : typeof item.images === "string"
+                  ? JSON.parse(item.images)
+                  : [];
 
+              // ✅ Fallback image
+              const imageUrl = images.length > 0 ? images[0] : "/placeholder.svg?height=64&width=64";
               return (
-                <Card key={`${item.product.id}-${item.variant?.id || "default"}`}>
+                <Card key={`${item.product_id}-${item.variant?.id || "default"}`}>
                   <CardContent className="p-4">
                     <div className="flex gap-4">
-                      <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-muted">
+                      <div className="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-muted">
                         <Image
-                          src={item.product.images?.[0]?.image_url || "/placeholder.svg?height=96&width=96"}
-                          alt={item.product.name}
+                          src={imageUrl}
+                          alt={item.name || "Product Image"}
                           fill
                           className="object-cover"
                         />
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <Link href={`/products/${item.product.slug}`} className="hover:text-primary">
-                          <h3 className="font-semibold mb-1 line-clamp-2">{item.product.name}</h3>
+                        <Link href={`/products/${item.slug}`} className="hover:text-primary">
+                          <h3 className="font-semibold mb-1 line-clamp-2">{item.name}</h3>
                         </Link>
                         {item.variant && <p className="text-sm text-muted-foreground mb-2">{item.variant.name}</p>}
-                        <p className="font-bold text-lg">${price.toFixed(2)}</p>
+                        <p className="font-bold text-lg">${Number(price).toFixed(2)}</p>
                       </div>
 
                       <div className="flex flex-col items-end justify-between">
-                        <Button
+                        <Button className="cursor-pointer"
                           variant="ghost"
                           size="icon"
-                          onClick={() => removeItem(item.product.id, item.variant?.id)}
+                          onClick={() => removeItem(item.product_id, item.variant?.id)}
                         >
                           <Trash2 className="h-4 w-4" />
                           <span className="sr-only">Remove item</span>
@@ -86,8 +103,8 @@ export default function CartPage() {
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8 bg-transparent"
-                            onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.variant?.id)}
+                            className="h-8 w-8 bg-transparent cursor-pointer"
+                            onClick={() => updateQuantity(item.product_id, item.quantity - 1, item.variant?.id)}
                           >
                             <Minus className="h-3 w-3" />
                             <span className="sr-only">Decrease quantity</span>
@@ -97,15 +114,15 @@ export default function CartPage() {
                             min="1"
                             value={item.quantity}
                             onChange={(e) =>
-                              updateQuantity(item.product.id, Number.parseInt(e.target.value) || 1, item.variant?.id)
+                              updateQuantity(item.product_id, Number.parseInt(e.target.value) || 1, item.variant?.id)
                             }
                             className="w-16 h-8 text-center"
                           />
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8 bg-transparent"
-                            onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.variant?.id)}
+                            className="h-8 w-8 bg-transparent cursor-pointer"
+                            onClick={() => updateQuantity(item.product_id, item.quantity + 1, item.variant?.id)}
                           >
                             <Plus className="h-3 w-3" />
                             <span className="sr-only">Increase quantity</span>
@@ -121,7 +138,7 @@ export default function CartPage() {
             })}
 
             <div className="flex justify-between items-center pt-4">
-              <Button variant="outline" onClick={clearCart}>
+              <Button className="cursor-pointer" variant="outline" onClick={clearCart}>
                 Clear Cart
               </Button>
               <Button variant="ghost" asChild>
@@ -166,7 +183,7 @@ export default function CartPage() {
                   </p>
                 )}
 
-                <Button asChild size="lg" className="w-full">
+                <Button asChild size="lg" className="w-full" cursor-pointer>
                   <Link href="/checkout">Proceed to Checkout</Link>
                 </Button>
 

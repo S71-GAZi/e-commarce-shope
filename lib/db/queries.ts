@@ -1,5 +1,7 @@
-import { executeQuery, executeQuerySingle } from "./mysql"
-import type { IUser, IProduct, IOrder, ICategory, ICoupon, ICartItem } from "@/lib/types/database"
+import { TOrderItemInput, TShippingInfoInput } from "../api/order.validation"
+import { IOrderFull, IOrderItem, IOrderShipping, TOrderStatus, TPaymentMethod, TPaymentStatus } from "../types/order.interface"
+import { executeQuery, executeQuerySingle, getMySQLPool } from "./mysql"
+import type { IUser, IProduct, ICategory, ICoupon, ICartItem, } from "@/lib/types/intrerface"
 
 export const userQueries = {
   async findByEmail(email: string) {
@@ -41,6 +43,16 @@ export const userQueries = {
   async listAll(limit = 50, offset = 0) {
     return executeQuery<IUser>("SELECT * FROM users ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
   },
+  async listAllCustomers(limit = 50, offset = 0) {
+    return executeQuery<IUser>(
+      `SELECT *
+     FROM users
+     WHERE role = ?
+     ORDER BY created_at DESC
+     LIMIT ? OFFSET ?`,
+      ['customer', limit, offset]
+    );
+  }
 }
 
 export const productQueries = {
@@ -55,7 +67,6 @@ export const productQueries = {
   },
 
   async findBySlug(slug: string) {
-    console.log(slug)
     return executeQuerySingle<IProduct>(
       `SELECT p.*, c.name as category_name
        FROM products p
@@ -158,34 +169,196 @@ export const productQueries = {
   },
 }
 
-export const orderQueries = {
-  async findById(id: string) {
-    return executeQuerySingle<IOrder>("SELECT * FROM orders WHERE id = ? LIMIT 1", [id])
-  },
+// import { IOrderFull, IOrderItem, IOrderShipping, TPaymentMethod } from "./types";
+// import { TOrderItemInput, TShippingInfoInput, TPaymentInput } from "./validation";
 
+// ✅ Use inferred types from Zod schema instead of redefining
+export interface ICreateFullOrderParams {
+  user_id: string; // ✅ number (not string)
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  discount: number; // ✅ required (default(0) in schema)
+  coupon_code?: string | null;
+  status: TOrderStatus;
+  total: number;
+  note?: string | null;
+  note_image?: string | null;
+  payment_method: TPaymentMethod;
+  payment_status: TPaymentStatus;
+  payment_provider?: string | null;
+  payment_sender_account?: string | null;
+  payment_transaction_id?: string | null;
+  items: TOrderItemInput[];
+  shipping_info: TShippingInfoInput;
+  ip_address: string | null, // You can capture real IP from request in route handler and pass it here
+  create_at: Date,
+  updated_at: Date,
+}
+
+function generateOrderNumber(): string {
+  const date = new Date();
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  const random = Math.floor(Math.random() * 9000 + 1000);
+  return `ORD-${y}${m}${d}-${random}`;
+}
+
+export const orderQueries = {
+  async findById(id: number): Promise<IOrderFull | null> {
+    const order = await executeQuerySingle<IOrderFull>(
+      `SELECT * FROM orders WHERE id = ? LIMIT 1`,
+      [id]
+    );
+
+    if (!order) return null;
+
+    const items = await executeQuery<IOrderItem>(
+      `SELECT * FROM order_items WHERE order_id = ?`,
+      [id]
+    );
+
+    const shipping_info = await executeQuerySingle<IOrderShipping>(
+      `SELECT * FROM order_shipping WHERE order_id = ? LIMIT 1`,
+      [id]
+    );
+
+    if (!shipping_info) throw new Error(`Shipping info not found for order ${id}`);
+
+    return { ...order, items, shipping_info };
+  },
   async findByUserId(userId: string, limit = 20, offset = 0) {
-    return executeQuery<IOrder>("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", [
+    return executeQuery<IOrderFull>("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", [
       userId,
       limit,
       offset,
     ])
   },
-
   async listAll(limit = 20, offset = 0) {
-    return executeQuery<IOrder>("SELECT * FROM orders ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
+    return executeQuery<IOrderFull>("SELECT * FROM orders ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
   },
 
-  async create(data: Partial<IOrder>) {
-    const orderNumber = `ORD-${Date.now()}`
-    const result = await executeQuery<IOrder>(
+  async createFullOrder(data: ICreateFullOrderParams): Promise<IOrderFull> {
+    const order_number = generateOrderNumber();
+
+    // 1️⃣ Insert order
+    const orderResult = await executeQuery<{ insertId: number }>(
       `INSERT INTO orders (
-        order_number, user_id, status, payment_status, subtotal,
-        total_amount, currency, coupon_code
-       ) VALUES (?, ?, 'pending', 'pending', ?, ?, ?, ?)`,
-      [orderNumber, data.user_id, data.subtotal || 0, data.total_amount, data.currency || "USD", data.coupon_code],
-    )
-    return result[0]
+            order_number,
+            user_id,
+            subtotal,
+            shipping,
+            tax,
+            discount,
+            coupon_code,
+            status,
+            total,
+            payment_method,
+            payment_status,
+            payment_provider,
+            payment_sender_account,
+            payment_transaction_id,
+            note,
+            note_image,
+            ip_address,
+            created_at,
+            updated_at
+        ) VALUES (?, ?,?,?,?,?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        order_number,
+        data.user_id,
+        data.subtotal,
+        data.shipping,
+        data.tax,
+        data.discount,
+        data.coupon_code ?? null,
+        data.status,
+        data.total,
+        data.payment_method,
+        data.payment_status,
+        data.payment_provider ?? null,
+        data.payment_sender_account ?? null,
+        data.payment_transaction_id ?? null,
+        data.note ?? null,
+        data.note_image ?? null,
+        data.ip_address ?? null,
+        data.create_at ?? new Date(),
+        data.updated_at ?? new Date(),
+      ]
+    );
+    console.log("Order insert result:", orderResult);
+    const orderId = orderResult.insertId;
+    console.log("Created order ID:", orderId);
+
+
+    await Promise.all(
+      data.items.map((item) =>
+        executeQuery(
+          `INSERT INTO order_items (
+                    order_id,
+                    product_id,
+                    variant_id,
+                    name,
+                    slug,
+                    price_snapshot,
+                    quantity,
+                    images
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            orderId,
+            item.product_id,
+            item.variant_id ?? null,
+            item.name,
+            item.slug ?? null,
+            item.price_snapshot,
+            item.quantity,
+            item.images ? JSON.stringify(item.images) : null,
+          ]
+        )
+      )
+    );
+
+    // 3️⃣ Insert shipping info
+    const s = data.shipping_info;
+    await executeQuery(
+      `INSERT INTO order_shipping (
+            order_id,
+            name,
+            email,
+            phone,
+            division,
+            district,
+            upazila,
+            address,
+            shipping_method,
+            courier_name,
+            tracking_code,
+            shipping_status,
+            created_at,
+            updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())`,
+      [
+        orderId,
+        s.name,
+        s.email ?? null,
+        s.phone,
+        s.division,
+        s.district,
+        s.upazila,
+        s.address,
+        s.shipping_method ?? "standard",
+        s.courier_name ?? null,
+        s.tracking_code ?? null,
+      ]
+    );
+
+    // 4️⃣ Return full order
+    const fullOrder = await this.findById(orderId);
+    if (!fullOrder) throw new Error("Order not found after creation");
+    return fullOrder;
   },
+
 
   async updateStatus(id: string, status: string, paymentStatus?: string) {
     if (paymentStatus) {
@@ -196,45 +369,108 @@ export const orderQueries = {
     } else {
       await executeQuery("UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", [status, id])
     }
-    return executeQuerySingle<IOrder>("SELECT * FROM orders WHERE id = ?", [id])
+    return executeQuerySingle<IOrderFull>("SELECT * FROM orders WHERE id = ?", [id])
   },
-}
+
+
+};
+
 
 export const cartQueries = {
   async findByUserId(userId: string) {
-    return executeQuery<ICartItem & { product_name: string; price: number; slug: string }>(
-      `SELECT ci.*, p.name as product_name, p.price, p.slug
-       FROM cart_items ci
-       LEFT JOIN products p ON ci.product_id = p.id
-       WHERE ci.user_id = ?`,
+    return executeQuery<ICartItem & { name: string; slug: string; images: [string] }>(
+      `SELECT ci.*, p.name , p.slug , p.images 
+     FROM cart_items ci
+     LEFT JOIN products p ON ci.product_id = p.id
+     WHERE ci.user_id = ?`,
       [userId],
     )
   },
 
   async addItem(userId: string, productId: string, quantity: number, variantId?: string) {
-    const result = await executeQuery<ICartItem>(
-      `INSERT INTO cart_items (user_id, product_id, variant_id, quantity)
-       VALUES (?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE quantity = quantity + ?`,
-      [userId, productId, variantId || null, quantity, quantity],
+
+    const product = await executeQuerySingle<{ price: number }>(
+      "SELECT price FROM products WHERE id = ?",
+      [productId]
     )
-    return result[0]
+
+    if (!product) {
+      throw new Error("Product not found")
+    }
+
+    const existing = await executeQuerySingle(
+      "SELECT * FROM cart_items WHERE user_id = ? AND product_id = ? AND variant_id IS NULL",
+      [userId, productId]
+    )
+    if (existing) {
+      await executeQuery(
+        "UPDATE cart_items SET quantity = quantity + ? WHERE id = ?",
+        [quantity, existing.id]
+      )
+    } else {
+      await executeQuery(
+        "INSERT INTO cart_items (user_id, product_id, variant_id, quantity, price_snapshot) VALUES (?, ?, ?, ?, ?)",
+        [userId, productId, null, quantity, product.price]
+      )
+    }
+
+    return executeQuerySingle<ICartItem>(
+      `SELECT * FROM cart_items 
+     WHERE user_id = ? 
+     AND product_id = ? 
+     AND variant_id <=> ?`,
+      [userId, productId, variantId ?? null]
+    )
   },
 
-  async updateQuantity(id: string, quantity: number) {
-    await executeQuery("UPDATE cart_items SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", [
-      quantity,
-      id,
-    ])
-    return executeQuerySingle<ICartItem>("SELECT * FROM cart_items WHERE id = ?", [id])
+  async updateQuantity(id: string, userId: string, quantity: number) {
+
+    if (quantity <= 0) {
+      const result: any = await executeQuery(
+        "DELETE FROM cart_items WHERE id = ? AND user_id = ?",
+        [id, userId]
+      )
+
+      if (result.affectedRows === 0) {
+        throw new Error("Cart item not found")
+      }
+
+      return null
+    }
+
+    const result: any = await executeQuery(
+      "UPDATE cart_items SET quantity = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?",
+      [quantity, id, userId]
+    )
+
+    if (result.affectedRows === 0) {
+      throw new Error("Cart item not found")
+    }
+
+    return executeQuerySingle<ICartItem>(
+      "SELECT * FROM cart_items WHERE id = ? AND user_id = ?",
+      [id, userId]
+    )
   },
 
-  async removeItem(id: string) {
-    await executeQuery("DELETE FROM cart_items WHERE id = ?", [id])
+  async removeItem(id: string, userId: string) {
+    const result: any = await executeQuery(
+      "DELETE FROM cart_items WHERE id = ? AND user_id = ?",
+      [id, userId]
+    )
+
+    if (result.affectedRows === 0) {
+      throw new Error("Cart item not found")
+    }
   },
 
   async clearCart(userId: string) {
-    await executeQuery("DELETE FROM cart_items WHERE user_id = ?", [userId])
+    const result: any = await executeQuery(
+      "DELETE FROM cart_items WHERE user_id = ?",
+      [userId]
+    )
+
+    return { deleted: result.affectedRows || 0 } // return affected rows
   },
 }
 
@@ -243,10 +479,6 @@ export const categoryQueries = {
     const safeLimit = Number(limit ?? 100);
     const safeOffset = Number(offset ?? 0);
 
-    // return executeQuery<ICategory>(
-    //   "SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ? OFFSET ?",
-    //   [safeLimit, safeOffset],
-    // )
 
     return executeQuery<ICategory>(
       `SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ${safeLimit} OFFSET ${safeOffset}`

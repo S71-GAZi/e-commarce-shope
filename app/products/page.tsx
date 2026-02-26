@@ -2,10 +2,11 @@ import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { ProductCard } from "@/components/products/product-card"
 import { Button } from "@/components/ui/button"
-import { getProducts, getCategories } from "@/lib/db-utils"
+import { getProducts } from "@/lib/db-utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import ProductCatrgory from "@/components/home/ProductCategory"
 
 export default async function ProductsPage({
   searchParams,
@@ -18,7 +19,6 @@ export default async function ProductsPage({
     category: params.category,
     featured: params.featured === "true",
   })
-  const categories = await getCategories()
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -37,16 +37,7 @@ export default async function ProductsPage({
           <aside className="lg:w-64 space-y-6">
             <div>
               <h3 className="font-semibold mb-4">Categories</h3>
-              <div className="space-y-2">
-                {categories.map((category) => (
-                  <div key={category.id} className="flex items-center space-x-2">
-                    <Checkbox id={category.id} />
-                    <Label htmlFor={category.id} className="text-sm cursor-pointer">
-                      {category.name}
-                    </Label>
-                  </div>
-                ))}
-              </div>
+              <ProductCatrgory />
             </div>
 
             <div>
@@ -102,7 +93,7 @@ export default async function ProductsPage({
               </p>
 
               <Select defaultValue="newest">
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-45">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>

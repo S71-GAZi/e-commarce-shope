@@ -53,7 +53,7 @@ export default function ContactPage() {
         title: "Message sent!",
         description: "We'll get back to you as soon as possible.",
       })
-      ;(e.target as HTMLFormElement).reset()
+        ; (e.target as HTMLFormElement).reset()
     } catch (error) {
       toast({
         title: "Error",
@@ -150,7 +150,7 @@ export default function ContactPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex gap-3">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
                         <Mail className="h-5 w-5" />
                       </div>
@@ -167,7 +167,7 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex gap-3">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
                         <Phone className="h-5 w-5" />
                       </div>
@@ -184,7 +184,7 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex gap-3">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
                         <MapPin className="h-5 w-5" />
                       </div>
@@ -202,7 +202,7 @@ export default function ContactPage() {
                   </div>
 
                   <div className="flex gap-3">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary">
                         <Clock className="h-5 w-5" />
                       </div>

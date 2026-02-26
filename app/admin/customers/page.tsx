@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,6 +9,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Search, Eye, Mail, Download } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { IUser } from "@/lib/types/intrerface"
+import { useFetchResource } from "@/hooks/useFetchResource"
 
 export default function CustomersPage() {
   const { toast } = useToast()
@@ -16,46 +18,29 @@ export default function CustomersPage() {
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
 
-  // Mock data - replace with real data from database
-  const customers = [
-    {
-      id: "1",
-      name: "John Doe",
-      email: "john@example.com",
-      orders: 12,
-      totalSpent: 1299.99,
-      status: "active",
-      joinedDate: "2023-06-15",
-      phone: "+1 (555) 123-4567",
-      address: "123 Main St, New York, NY 10001",
-    },
-    {
-      id: "2",
-      name: "Jane Smith",
-      email: "jane@example.com",
-      orders: 8,
-      totalSpent: 899.99,
-      status: "active",
-      joinedDate: "2023-08-22",
-      phone: "+1 (555) 234-5678",
-      address: "456 Oak Ave, Los Angeles, CA 90001",
-    },
-    {
-      id: "3",
-      name: "Bob Johnson",
-      email: "bob@example.com",
-      orders: 5,
-      totalSpent: 549.99,
-      status: "active",
-      joinedDate: "2023-11-10",
-      phone: "+1 (555) 345-6789",
-      address: "789 Pine Rd, Chicago, IL 60601",
-    },
-  ]
+
+  /* ================= FETCH Customer ================= */
+  const {
+    data: customers,
+    isLoading,
+    fetchData: fetchCustomers,
+  } = useFetchResource<IUser>({
+    url: "/api/admin/customers",
+    extractData: (result) =>
+      Array.isArray(result)
+        ? result
+        : Array.isArray(result?.data?.customers)
+          ? result.data.customers
+          : [],
+  })
+
+  useEffect(() => {
+    fetchCustomers()
+  }, [fetchCustomers])
 
   const filteredCustomers = customers.filter(
     (customer) =>
-      customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      customer?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       customer.email.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
@@ -64,23 +49,47 @@ export default function CustomersPage() {
     setDetailsOpen(true)
   }
 
-  const handleSendEmail = (customer: any) => {
-    toast({
-      title: "Email client opened",
-      description: `Opening email to ${customer.email}`,
-    })
-    window.location.href = `mailto:${customer.email}`
-  }
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/customers/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) throw new Error("Failed to update");
+
+      // Optimistic UI update
+      fetchCustomers()
+      toast({
+        title: "Status updated",
+        description: `Customer status changed to ${newStatus}`,
+      });
+
+    } catch (err) {
+      alert("Failed to update status");
+    }
+  };
+
+  // const handleSendEmail = (customer: any) => {
+  //   toast({
+  //     title: "Email client opened",
+  //     description: `Opening email to ${customer.email}`,
+  //   })
+  //   window.location.href = `mailto:${customer.email}`
+  // }
 
   const handleExport = () => {
     const csvContent = [
       ["Name", "Email", "Orders", "Total Spent", "Status", "Joined"].join(","),
       ...filteredCustomers.map((customer) =>
         [
-          customer.name,
+          customer.full_name,
           customer.email,
           customer.orders,
-          customer.totalSpent.toFixed(2),
+          customer.total_spent.toFixed(2),
           customer.status,
           new Date(customer.joinedDate).toLocaleDateString(),
         ].join(","),
@@ -148,12 +157,18 @@ export default function CustomersPage() {
               <TableBody>
                 {filteredCustomers.map((customer) => (
                   <TableRow key={customer.id}>
-                    <TableCell className="font-medium">{customer.name}</TableCell>
+                    <TableCell className="font-medium">{customer.full_name}</TableCell>
                     <TableCell>{customer.email}</TableCell>
                     <TableCell>{customer.orders}</TableCell>
-                    <TableCell>${customer.totalSpent.toFixed(2)}</TableCell>
+                    <TableCell>  ${Number(customer.total_spent).toFixed(2)}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{customer.status}</Badge>
+                      <Button
+                        variant={customer.status === "active" ? "default" : "destructive"}
+                        size="sm"
+                        onClick={() => handleToggleStatus(customer.id, customer.status)}
+                      >
+                        {customer.status}
+                      </Button>
                     </TableCell>
                     <TableCell>{new Date(customer.joinedDate).toLocaleDateString()}</TableCell>
                     <TableCell className="text-right">
@@ -162,10 +177,10 @@ export default function CustomersPage() {
                           <Eye className="h-4 w-4" />
                           <span className="sr-only">View details</span>
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleSendEmail(customer)}>
+                        {/* <Button variant="ghost" size="icon" onClick={() => handleSendEmail(customer)}>
                           <Mail className="h-4 w-4" />
                           <span className="sr-only">Send email</span>
-                        </Button>
+                        </Button> */}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -213,7 +228,10 @@ export default function CustomersPage() {
                 </div>
                 <div>
                   <p className="text-sm font-medium">Total Spent</p>
-                  <p className="text-sm text-muted-foreground">${selectedCustomer.totalSpent.toFixed(2)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    ${Number(selectedCustomer.total_spent).toFixed(2)}
+                    {/* ${Number(selectedCustomer.total_spent.toFixed(2))} */}
+                  </p>
                 </div>
               </div>
               <div>

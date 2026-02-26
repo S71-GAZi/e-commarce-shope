@@ -1,9 +1,10 @@
 export const dynamic = "force-dynamic";
 
 import type { NextRequest } from "next/server"
-import { getTokenFromRequest, getUserFromToken, errorResponse, successResponse } from "@/lib/api/middleware"
+import { getTokenFromRequest, errorResponse, successResponse } from "@/lib/api/middleware"
 import { validateRequestBody, UpdateCartItemSchema } from "@/lib/api/validation"
 import { cartQueries } from "@/lib/db/queries"
+import { getUserFromToken } from "@/lib/jwt";
 
 type RouteParams = { params: { id: string } }
 
@@ -24,11 +25,14 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return errorResponse(validation.error, 400)
     }
 
-    const updatedItem = await cartQueries.updateQuantity(id, validation.data.quantity)
+    const updatedItem = await cartQueries.updateQuantity(
+      id,
+      user.id,
+      validation.data.quantity
+    )
 
     return successResponse(updatedItem)
   } catch (error) {
-    console.error("Update cart item error:", error)
     return errorResponse("Failed to update cart item", 500)
   }
 }
@@ -45,11 +49,15 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const { id } = params
 
-    await cartQueries.removeItem(id)
+    await cartQueries.removeItem(id, user.id)
 
     return successResponse({ id, message: "Item removed from cart" })
-  } catch (error) {
-    console.error("Remove cart item error:", error)
+  } catch (error: any) {
+
+    if (error.message === "Cart item not found") {
+      return errorResponse("Cart item not found", 404)
+    }
+
     return errorResponse("Failed to remove cart item", 500)
   }
 }

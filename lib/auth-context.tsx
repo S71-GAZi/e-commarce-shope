@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import type { IUser } from "./types/database"
+import type { IUser } from "./types/intrerface"
 import { mockUser, mockAdminUser } from "./mock-data"
 import { cookies } from "next/headers";
 
@@ -54,7 +54,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const data = await res.json()
-        console.log("Refresh Token data", data)
         setAccessToken(data.accessToken)
         setUser(data.user)
       } catch (err) {

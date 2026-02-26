@@ -9,6 +9,11 @@ export interface IUser {
   phone?: string
   role: UserRole
   email_verified: boolean
+  password_hash?: string
+  total_spent: number
+  orders: number
+  status: "active" | "inactive"
+  joinedDate: string
   created_at: string
   updated_at: string
 }
@@ -53,7 +58,7 @@ export interface IProduct {
   created_at: string
   updated_at: string
   category?: ICategory
-  images?: IProductImage[] | string[]
+  images?: IProductImage[] | string[] | string
   variants?: IProductVariant[]
   reviews?: IReview[]
   average_rating?: number
@@ -99,81 +104,18 @@ export interface IReview {
   user?: IUser
 }
 
-export interface IAddress {
-  id: string
-  user_id: string
-  full_name: string
-  phone?: string
-  address_line1: string
-  address_line2?: string
-  city: string
-  state?: string
-  postal_code: string
-  country: string
-  is_default: boolean
-  address_type: "shipping" | "billing" | "both"
-  created_at: string
-  updated_at: string
-}
-
-export type IOrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled" | "refunded"
-export type IPaymentStatus = "pending" | "paid" | "failed" | "refunded"
-
-export interface IOrder {
-  id: string
-  order_number: string
-  user_id?: string
-  status: IOrderStatus
-  payment_status: IPaymentStatus
-  payment_method?: string
-  payment_intent_id?: string
-  subtotal: number
-  discount_amount: number
-  tax_amount: number
-  shipping_amount: number
-  total_amount: number
-  currency: string
-  shipping_address_id?: string
-  billing_address_id?: string
-  coupon_code?: string
-  notes?: string
-  tracking_number?: string
-  shipped_at?: string
-  delivered_at?: string
-  created_at: string
-  updated_at: string
-  user?: IUser
-  items?: IOrderItem[]
-  shipping_address?: IAddress
-  billing_address?: IAddress
-}
-
-export interface IOrderItem {
-  id: string
-  order_id: string
-  product_id?: string
-  variant_id?: string
-  product_name: string
-  variant_name?: string
-  sku?: string
-  quantity: number
-  unit_price: number
-  total_price: number
-  created_at: string
-  product?: IProduct
-}
-
-export interface ICartItem {
+export interface ICartItem extends IProduct {
   id: string
   user_id?: string
   session_id?: string
   product_id: string
   variant_id?: string
   quantity: number
+  price_snapshot: number    // snapshot of product price at the time of adding
   created_at: string
   updated_at: string
-  product?: IProduct
-  variant?: IProductVariant
+  // product?: IProduct        // full product info if needed
+  variant?: IProductVariant // full variant info if needed
 }
 
 export interface IWishlistItem {

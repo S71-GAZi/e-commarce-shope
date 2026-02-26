@@ -9,18 +9,11 @@ import { getUserFromToken, IUserPayload } from "@/lib/jwt"
 // GET /api/admin/categories
 export async function GET(request: NextRequest) {
   try {
-    // const token = getTokenFromRequest(request)
-    // const user = token ? getUserFromToken(token) : null
-
-    // if (!user || !isAdmin(user)) {
-    //   return errorResponse("Unauthorized", 401)
-    // }
 
     const categories = await categoryQueries.listAll()
 
     return successResponse({ categories })
   } catch (error) {
-    console.error("Get categories error:", error)
     return errorResponse("Failed to fetch categories", 500)
   }
 }
@@ -29,9 +22,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const token = getTokenFromRequest(request)
-    console.log(token)
     const user: IUserPayload | null = token ? getUserFromToken(token) : null
-    console.log("User from token:", user)
     if (!user || !isAdmin(user)) {
       return errorResponse("Unauthorized", 401)
     }
@@ -46,7 +37,6 @@ export async function POST(request: NextRequest) {
 
     return successResponse(newCategory, 201)
   } catch (error) {
-    console.error("Create category error:", error)
     return errorResponse("Failed to create category", 500)
   }
 }
