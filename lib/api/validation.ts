@@ -67,19 +67,6 @@ export const CreateProductSchema = z.object({
 
 export const UpdateProductSchema = CreateProductSchema.partial()
 
-// Order schemas
-export const CreateOrderSchema = z.object({
-  shipping_address_id: z.string(),
-  billing_address_id: z.string().optional(),
-  coupon_code: z.string().optional(),
-  notes: z.string().optional(),
-})
-
-export const UpdateOrderStatusSchema = z.object({
-  status: z.enum(["pending", "processing", "shipped", "delivered", "cancelled", "refunded"]),
-  tracking_number: z.string().optional(),
-})
-
 // Cart schemas
 export const AddToCartSchema = z.object({
   product_id: z.string(),
@@ -119,9 +106,9 @@ export async function validateRequestBody<T>(
   request: Request,
   schema: z.ZodSchema<T>,
 ): Promise<{ valid: true; data: T } | { valid: false; error: string }> {
+  const orderData = await request.json();
   try {
-    const body = await request.json()
-    const result = schema.safeParse(body)
+    const result = schema.safeParse(orderData)
 
     if (!result.success) {
       const errors = result.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join(", ")

@@ -1,5 +1,7 @@
-import { executeQuery, executeQuerySingle } from "./mysql"
-import type { IUser, IProduct, IOrder, ICategory, ICoupon, ICartItem } from "@/lib/types/intrerface"
+import { TOrderItemInput, TShippingInfoInput } from "../api/order.validation"
+import { IOrderFull, IOrderItem, IOrderShipping, TOrderStatus, TPaymentMethod, TPaymentStatus } from "../types/order.interface"
+import { executeQuery, executeQuerySingle, getMySQLPool } from "./mysql"
+import type { IUser, IProduct, ICategory, ICoupon, ICartItem, } from "@/lib/types/intrerface"
 
 export const userQueries = {
   async findByEmail(email: string) {
@@ -167,34 +169,196 @@ export const productQueries = {
   },
 }
 
-export const orderQueries = {
-  async findById(id: string) {
-    return executeQuerySingle<IOrder>("SELECT * FROM orders WHERE id = ? LIMIT 1", [id])
-  },
+// import { IOrderFull, IOrderItem, IOrderShipping, TPaymentMethod } from "./types";
+// import { TOrderItemInput, TShippingInfoInput, TPaymentInput } from "./validation";
 
+// ✅ Use inferred types from Zod schema instead of redefining
+export interface ICreateFullOrderParams {
+  user_id: string; // ✅ number (not string)
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  discount: number; // ✅ required (default(0) in schema)
+  coupon_code?: string | null;
+  status: TOrderStatus;
+  total: number;
+  note?: string | null;
+  note_image?: string | null;
+  payment_method: TPaymentMethod;
+  payment_status: TPaymentStatus;
+  payment_provider?: string | null;
+  payment_sender_account?: string | null;
+  payment_transaction_id?: string | null;
+  items: TOrderItemInput[];
+  shipping_info: TShippingInfoInput;
+  ip_address: string | null, // You can capture real IP from request in route handler and pass it here
+  create_at: Date,
+  updated_at: Date,
+}
+
+function generateOrderNumber(): string {
+  const date = new Date();
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  const random = Math.floor(Math.random() * 9000 + 1000);
+  return `ORD-${y}${m}${d}-${random}`;
+}
+
+export const orderQueries = {
+  async findById(id: number): Promise<IOrderFull | null> {
+    const order = await executeQuerySingle<IOrderFull>(
+      `SELECT * FROM orders WHERE id = ? LIMIT 1`,
+      [id]
+    );
+
+    if (!order) return null;
+
+    const items = await executeQuery<IOrderItem>(
+      `SELECT * FROM order_items WHERE order_id = ?`,
+      [id]
+    );
+
+    const shipping_info = await executeQuerySingle<IOrderShipping>(
+      `SELECT * FROM order_shipping WHERE order_id = ? LIMIT 1`,
+      [id]
+    );
+
+    if (!shipping_info) throw new Error(`Shipping info not found for order ${id}`);
+
+    return { ...order, items, shipping_info };
+  },
   async findByUserId(userId: string, limit = 20, offset = 0) {
-    return executeQuery<IOrder>("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", [
+    return executeQuery<IOrderFull>("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", [
       userId,
       limit,
       offset,
     ])
   },
-
   async listAll(limit = 20, offset = 0) {
-    return executeQuery<IOrder>("SELECT * FROM orders ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
+    return executeQuery<IOrderFull>("SELECT * FROM orders ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
   },
 
-  async create(data: Partial<IOrder>) {
-    const orderNumber = `ORD-${Date.now()}`
-    const result = await executeQuery<IOrder>(
+  async createFullOrder(data: ICreateFullOrderParams): Promise<IOrderFull> {
+    const order_number = generateOrderNumber();
+
+    // 1️⃣ Insert order
+    const orderResult = await executeQuery<{ insertId: number }>(
       `INSERT INTO orders (
-        order_number, user_id, status, payment_status, subtotal,
-        total_amount, currency, coupon_code
-       ) VALUES (?, ?, 'pending', 'pending', ?, ?, ?, ?)`,
-      [orderNumber, data.user_id, data.subtotal || 0, data.total_amount, data.currency || "USD", data.coupon_code],
-    )
-    return result[0]
+            order_number,
+            user_id,
+            subtotal,
+            shipping,
+            tax,
+            discount,
+            coupon_code,
+            status,
+            total,
+            payment_method,
+            payment_status,
+            payment_provider,
+            payment_sender_account,
+            payment_transaction_id,
+            note,
+            note_image,
+            ip_address,
+            created_at,
+            updated_at
+        ) VALUES (?, ?,?,?,?,?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        order_number,
+        data.user_id,
+        data.subtotal,
+        data.shipping,
+        data.tax,
+        data.discount,
+        data.coupon_code ?? null,
+        data.status,
+        data.total,
+        data.payment_method,
+        data.payment_status,
+        data.payment_provider ?? null,
+        data.payment_sender_account ?? null,
+        data.payment_transaction_id ?? null,
+        data.note ?? null,
+        data.note_image ?? null,
+        data.ip_address ?? null,
+        data.create_at ?? new Date(),
+        data.updated_at ?? new Date(),
+      ]
+    );
+    console.log("Order insert result:", orderResult);
+    const orderId = orderResult.insertId;
+    console.log("Created order ID:", orderId);
+
+
+    await Promise.all(
+      data.items.map((item) =>
+        executeQuery(
+          `INSERT INTO order_items (
+                    order_id,
+                    product_id,
+                    variant_id,
+                    name,
+                    slug,
+                    price_snapshot,
+                    quantity,
+                    images
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            orderId,
+            item.product_id,
+            item.variant_id ?? null,
+            item.name,
+            item.slug ?? null,
+            item.price_snapshot,
+            item.quantity,
+            item.images ? JSON.stringify(item.images) : null,
+          ]
+        )
+      )
+    );
+
+    // 3️⃣ Insert shipping info
+    const s = data.shipping_info;
+    await executeQuery(
+      `INSERT INTO order_shipping (
+            order_id,
+            name,
+            email,
+            phone,
+            division,
+            district,
+            upazila,
+            address,
+            shipping_method,
+            courier_name,
+            tracking_code,
+            shipping_status,
+            created_at,
+            updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())`,
+      [
+        orderId,
+        s.name,
+        s.email ?? null,
+        s.phone,
+        s.division,
+        s.district,
+        s.upazila,
+        s.address,
+        s.shipping_method ?? "standard",
+        s.courier_name ?? null,
+        s.tracking_code ?? null,
+      ]
+    );
+
+    // 4️⃣ Return full order
+    const fullOrder = await this.findById(orderId);
+    if (!fullOrder) throw new Error("Order not found after creation");
+    return fullOrder;
   },
+
 
   async updateStatus(id: string, status: string, paymentStatus?: string) {
     if (paymentStatus) {
@@ -205,9 +369,12 @@ export const orderQueries = {
     } else {
       await executeQuery("UPDATE orders SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", [status, id])
     }
-    return executeQuerySingle<IOrder>("SELECT * FROM orders WHERE id = ?", [id])
+    return executeQuerySingle<IOrderFull>("SELECT * FROM orders WHERE id = ?", [id])
   },
-}
+
+
+};
+
 
 export const cartQueries = {
   async findByUserId(userId: string) {
@@ -312,10 +479,6 @@ export const categoryQueries = {
     const safeLimit = Number(limit ?? 100);
     const safeOffset = Number(offset ?? 0);
 
-    // return executeQuery<ICategory>(
-    //   "SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ? OFFSET ?",
-    //   [safeLimit, safeOffset],
-    // )
 
     return executeQuery<ICategory>(
       `SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ${safeLimit} OFFSET ${safeOffset}`

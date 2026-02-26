@@ -90,7 +90,7 @@ export default function CartPage() {
                       </div>
 
                       <div className="flex flex-col items-end justify-between">
-                        <Button
+                        <Button className="cursor-pointer"
                           variant="ghost"
                           size="icon"
                           onClick={() => removeItem(item.product_id, item.variant?.id)}
@@ -103,7 +103,7 @@ export default function CartPage() {
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8 bg-transparent"
+                            className="h-8 w-8 bg-transparent cursor-pointer"
                             onClick={() => updateQuantity(item.product_id, item.quantity - 1, item.variant?.id)}
                           >
                             <Minus className="h-3 w-3" />
@@ -121,7 +121,7 @@ export default function CartPage() {
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8 bg-transparent"
+                            className="h-8 w-8 bg-transparent cursor-pointer"
                             onClick={() => updateQuantity(item.product_id, item.quantity + 1, item.variant?.id)}
                           >
                             <Plus className="h-3 w-3" />
@@ -138,7 +138,7 @@ export default function CartPage() {
             })}
 
             <div className="flex justify-between items-center pt-4">
-              <Button variant="outline" onClick={clearCart}>
+              <Button className="cursor-pointer" variant="outline" onClick={clearCart}>
                 Clear Cart
               </Button>
               <Button variant="ghost" asChild>
@@ -183,7 +183,7 @@ export default function CartPage() {
                   </p>
                 )}
 
-                <Button asChild size="lg" className="w-full">
+                <Button asChild size="lg" className="w-full" cursor-pointer>
                   <Link href="/checkout">Proceed to Checkout</Link>
                 </Button>
 

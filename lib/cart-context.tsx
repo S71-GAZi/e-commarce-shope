@@ -4,11 +4,13 @@ import { createContext, useContext, useEffect, useState, type ReactNode, useCall
 import type { ICartItem, IProduct, IProductVariant } from "./types/intrerface"
 import { useToast } from "@/hooks/use-toast"
 import { useFetchResource } from "@/hooks/useFetchResource"
+import { useAuth } from "./auth-context"
 
 interface CartContextType {
   items: ICartItem[]
   itemCount: number
   subtotal: number
+  isLoading: boolean
   addItem: (product: IProduct, variant?: IProductVariant, quantity?: number) => void
   removeItem: (productId: string, variantId?: string) => void
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void
@@ -18,6 +20,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useAuth()
   const { toast } = useToast()
 
   /* ================= FETCH CART ================= */
@@ -31,16 +34,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
       Array.isArray(result)
         ? result
         : Array.isArray(result?.data?.items)
-          ? result?.data.items :
-          [],
+          ? result?.data.items
+          : [],
+    autoFetch: isAuthenticated,
   })
 
+  // Only fetch cart if user is authenticated
   useEffect(() => {
+    if (!isAuthenticated) return
     fetchCart()
-  }, [fetchCart])
+  }, [isAuthenticated, fetchCart])
+
   /* ================= ADD ITEM ================= */
   const addItem = useCallback(
     async (product: IProduct, variant?: IProductVariant, quantity = 1) => {
+      if (!isAuthenticated) return // skip if unauthenticated
       try {
         const res = await fetch("/api/cart", {
           method: "POST",
@@ -51,18 +59,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
         if (!res.ok) throw new Error(data?.error || "Failed to add item")
 
         fetchCart()
-
         toast({ title: "Added to cart", description: `${product.name} added.` })
       } catch (err: any) {
         toast({ title: "Error", description: err.message || "Failed to add item", variant: "destructive" })
       }
     },
-    [items, toast]
+    [isAuthenticated, fetchCart, toast]
   )
 
   /* ================= REMOVE ITEM ================= */
   const removeItem = useCallback(
     async (productId: string, variantId?: string) => {
+      if (!isAuthenticated) return // skip if unauthenticated
       try {
         const item = items.find((i) => i.product_id === productId && i.variant?.id === variantId)
         if (!item) return
@@ -76,12 +84,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
         toast({ title: "Error", description: err.message || "Failed to remove item", variant: "destructive" })
       }
     },
-    [items, toast]
+    [isAuthenticated, items, fetchCart, toast]
   )
 
   /* ================= UPDATE QUANTITY ================= */
   const updateQuantity = useCallback(
     async (productId: string, quantity: number, variantId?: string) => {
+      if (!isAuthenticated) return // skip if unauthenticated
       try {
         const item = items.find((i) => i.product_id === productId && i.variant?.id === variantId)
         if (!item) return
@@ -99,11 +108,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         toast({ title: "Error", description: err.message || "Failed to update quantity", variant: "destructive" })
       }
     },
-    [items, toast]
+    [isAuthenticated, items, fetchCart, toast]
   )
 
   /* ================= CLEAR CART ================= */
   const clearCart = useCallback(async () => {
+    if (!isAuthenticated) return // skip if unauthenticated
     try {
       const res = await fetch("/api/cart", { method: "DELETE" })
       const data = await res.json()
@@ -114,14 +124,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "Failed to clear cart", variant: "destructive" })
     }
-  }, [toast])
+  }, [isAuthenticated, fetchCart, toast])
 
-  const itemCount = items.reduce((total, item) => total + item.quantity, 0)
-  const subtotal = items.reduce((total, item) => total + item.price_snapshot * item.quantity, 0)
+  const itemCount = isAuthenticated
+    ? items.reduce((total, item) => total + item.quantity, 0)
+    : 0
+
+  const subtotal = isAuthenticated
+    ? items.reduce((total, item) => total + item.price_snapshot * item.quantity, 0)
+    : 0
 
   return (
     <CartContext.Provider
-      value={{ items, itemCount, subtotal, addItem, removeItem, updateQuantity, clearCart }}
+      value={{ items, itemCount, subtotal, isLoading, addItem, removeItem, updateQuantity, clearCart }}
     >
       {children}
     </CartContext.Provider>
