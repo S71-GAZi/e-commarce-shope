@@ -80,7 +80,7 @@ export default function CheckoutPage() {
   const { toast } = useToast()
 
   const [mounted, setMounted] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cod")
+  const [paymentMethod, seIPaymentMethod] = useState<PaymentMethod>("cod")
   const [isProcessing, setIsProcessing] = useState(false)
 
   // Mobile banking specific state
@@ -141,7 +141,6 @@ export default function CheckoutPage() {
       }
       // if (!isCartLoading && (!items || items.length === 0)) {
       //   router.push("/cart")
-      //   console.log(items)
       //   return
       // }
     }
@@ -193,7 +192,6 @@ export default function CheckoutPage() {
       tax,
       total,
     }
-    console.log(orderData)
 
     // validate mobile banking fields
     if (paymentMethod === "mobile_banking") {
@@ -211,15 +209,11 @@ export default function CheckoutPage() {
 
     setIsProcessing(true);
     try {
-      console.log("Submitting order data:", orderData)
-      // Replace with your actual API call:
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
       })
-      console.log(res)
-      // await new Promise((resolve) => setTimeout(resolve, 2000))
       if (res.ok) {
 
         clearCart()
@@ -412,7 +406,7 @@ export default function CheckoutPage() {
                   {/* Method selector cards */}
                   <RadioGroup
                     value={paymentMethod}
-                    onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}
+                    onValueChange={(v) => seIPaymentMethod(v as PaymentMethod)}
                     className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                   >
                     {/* COD option */}

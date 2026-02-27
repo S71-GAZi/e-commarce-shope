@@ -88,9 +88,9 @@ export function ProductCard({ product }: IProductCardProps) {
         </div>
 
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold">${Number(product.price).toFixed(2)}</span>
+          <span className="text-2xl font-bold">BDT{Number(product.price).toFixed(2)}</span>
           {product.compare_at_price && (
-            <span className="text-sm text-muted-foreground line-through">${Number(product.compare_at_price).toFixed(2)}</span>
+            <span className="text-sm text-muted-foreground line-through">BDT{Number(product.compare_at_price).toFixed(2)}</span>
           )}
         </div>
       </CardContent>

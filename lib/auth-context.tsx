@@ -105,7 +105,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         return { success: false, error: data.error || "Login failed" }
       }
-      console.log("Login user :", data);
       setUser(data.data.user)
       setAccessToken(data.data.token)
 

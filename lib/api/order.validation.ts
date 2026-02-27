@@ -92,8 +92,26 @@ export const CreateOrderSchema = z
         }
     });
 
+export const UpdateOrderStatusSchema = z.object({
+    order_id: z.string().min(1, "Order ID is required"),
+
+    // Order status could be pending, processing, completed, cancelled, refunded, etc.
+    status: z.enum(["pending", "processing", "completed", "cancelled", "refunded"]),
+
+    // Optional payment status update
+    payment_status: z.enum(["pending", "paid", "failed", "refunded"]).nullable().optional(),
+
+    // Optional shipping status update
+    shipping_status: z.enum(["pending", "shipped", "delivered", "returned", "cancelled"]).nullable().optional(),
+
+    // Optional note for status update
+    note: z.string().max(500, "Note must be under 500 characters").nullable().optional(),
+});
+
+
 // ✅ Inferred types from schema
 export type TCreateOrderInput = z.infer<typeof CreateOrderSchema>;
 export type TOrderItemInput = z.infer<typeof OrderItemSchema>;
 export type TShippingInfoInput = z.infer<typeof ShippingInfoSchema>;
 export type TPaymentInput = z.infer<typeof PaymentSchema>;
+export type TUpdateOrderStatusInput = z.infer<typeof UpdateOrderStatusSchema>;

@@ -25,7 +25,7 @@ export default function AnalyticsPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatsCard
               title="Revenue"
-              value="$45,231.89"
+              value="BDT45,231.89"
               description="Last 30 days"
               icon={DollarSign}
               trend={{ value: 20.1, isPositive: true }}

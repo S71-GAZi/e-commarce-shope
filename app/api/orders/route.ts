@@ -48,7 +48,6 @@ export async function POST(request: NextRequest) {
       return errorResponse("Unauthorized", 401);
     }
     const validation = await validateRequestBody(request, CreateOrderSchema);
-    console.log("Order validation result:", validation);
     if (!validation.valid) {
       return errorResponse(validation.error, 400);
     }
@@ -65,7 +64,7 @@ export async function POST(request: NextRequest) {
       payment_sender_account: payment.payment_sender_account,
       payment_transaction_id: payment.payment_transaction_id,
       discount,
-      payment_status: payment.payment_method === "mobile_banking" ? "pending" : "paid", // ✅ COD is paid immediately, mobile banking starts as pending
+      payment_status: "pending", // ✅ COD is paid immediately, mobile banking starts as pending
       status: "pending", // ✅ default status for new orders
       ip_address: null, // You can capture real IP from request in route handler and pass it here
       create_at: new Date(),

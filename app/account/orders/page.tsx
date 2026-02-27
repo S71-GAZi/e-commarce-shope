@@ -48,7 +48,7 @@ export default function OrdersPage() {
                         <p className="text-sm text-muted-foreground">
                           Placed on {new Date(order.created_at).toLocaleDateString()}
                         </p>
-                        <p className="font-semibold mt-1">${order.total_amount.toFixed(2)}</p>
+                        <p className="font-semibold mt-1">BDT{order.total_amount.toFixed(2)}</p>
                       </div>
                       <Button variant="outline" size="sm">
                         <Eye className="mr-2 h-4 w-4" />

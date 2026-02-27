@@ -10,82 +10,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Eye, Download, Filter } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import type { IOrder, IOrderStatus } from "@/lib/types/intrerface"
+import { IOrder, IOrderStatus } from "@/lib/types/order.interface"
+// import type { IOrder, IOrderStatus } from "@/lib/types/intrerface"
 
 export default function OrdersPage() {
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState("")
 
   // Mock orders data - replace with real data from database
-  const [orders] = useState<IOrder[]>([
-    {
-      id: "1",
-      order_number: "ORD-2024-001",
-      user_id: "user-1",
-      status: "processing",
-      payment_status: "paid",
-      payment_method: "Credit Card",
-      subtotal: 299.99,
-      discount_amount: 0,
-      tax_amount: 30.0,
-      shipping_amount: 9.99,
-      total_amount: 339.98,
-      currency: "USD",
-      created_at: "2024-01-15T10:30:00Z",
-      updated_at: "2024-01-15T10:30:00Z",
-    },
-    {
-      id: "2",
-      order_number: "ORD-2024-002",
-      user_id: "user-2",
-      status: "shipped",
-      payment_status: "paid",
-      payment_method: "PayPal",
-      subtotal: 149.99,
-      discount_amount: 15.0,
-      tax_amount: 13.5,
-      shipping_amount: 0,
-      total_amount: 148.49,
-      currency: "USD",
-      tracking_number: "1Z999AA10123456784",
-      created_at: "2024-01-14T15:20:00Z",
-      updated_at: "2024-01-15T09:00:00Z",
-    },
-    {
-      id: "3",
-      order_number: "ORD-2024-003",
-      user_id: "user-3",
-      status: "delivered",
-      payment_status: "paid",
-      payment_method: "Credit Card",
-      subtotal: 499.99,
-      discount_amount: 0,
-      tax_amount: 50.0,
-      shipping_amount: 9.99,
-      total_amount: 559.98,
-      currency: "USD",
-      tracking_number: "1Z999AA10123456785",
-      delivered_at: "2024-01-13T14:30:00Z",
-      created_at: "2024-01-10T11:00:00Z",
-      updated_at: "2024-01-13T14:30:00Z",
-    },
-    {
-      id: "4",
-      order_number: "ORD-2024-004",
-      user_id: "user-4",
-      status: "pending",
-      payment_status: "pending",
-      payment_method: "Credit Card",
-      subtotal: 89.99,
-      discount_amount: 0,
-      tax_amount: 9.0,
-      shipping_amount: 9.99,
-      total_amount: 108.98,
-      currency: "USD",
-      created_at: "2024-01-15T16:45:00Z",
-      updated_at: "2024-01-15T16:45:00Z",
-    },
-  ])
+  const [orders] = useState<IOrder[]>([])
 
   const [statusFilter, setStatusFilter] = useState<string>("all")
 
@@ -97,6 +30,8 @@ export default function OrdersPage() {
       delivered: "default",
       cancelled: "destructive",
       refunded: "destructive",
+      confirmed: "default",
+      returned: "destructive",
     }
     return colors[status] || "secondary"
   }
@@ -117,7 +52,7 @@ export default function OrdersPage() {
           order.order_number,
           new Date(order.created_at).toLocaleDateString(),
           `Customer #${order.user_id}`,
-          order.total_amount.toFixed(2),
+          order.total.toFixed(2),
           order.payment_status,
           order.status,
         ].join(","),
@@ -204,7 +139,7 @@ export default function OrdersPage() {
                     <TableCell className="font-medium">{order.order_number}</TableCell>
                     <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>Customer #{order.user_id}</TableCell>
-                    <TableCell>${order.total_amount.toFixed(2)}</TableCell>
+                    <TableCell>BDT{order.total.toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge variant={order.payment_status === "paid" ? "default" : "secondary"}>
                         {order.payment_status}

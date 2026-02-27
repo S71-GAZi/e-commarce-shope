@@ -160,7 +160,7 @@ export default function CustomersPage() {
                     <TableCell className="font-medium">{customer.full_name}</TableCell>
                     <TableCell>{customer.email}</TableCell>
                     <TableCell>{customer.orders}</TableCell>
-                    <TableCell>  ${Number(customer.total_spent).toFixed(2)}</TableCell>
+                    <TableCell>  BDT{Number(customer.total_spent).toFixed(2)}</TableCell>
                     <TableCell>
                       <Button
                         variant={customer.status === "active" ? "default" : "destructive"}
@@ -229,8 +229,8 @@ export default function CustomersPage() {
                 <div>
                   <p className="text-sm font-medium">Total Spent</p>
                   <p className="text-sm text-muted-foreground">
-                    ${Number(selectedCustomer.total_spent).toFixed(2)}
-                    {/* ${Number(selectedCustomer.total_spent.toFixed(2))} */}
+                    BDT{Number(selectedCustomer.total_spent).toFixed(2)}
+                    {/* BDT{Number(selectedCustomer.total_spent.toFixed(2))} */}
                   </p>
                 </div>
               </div>

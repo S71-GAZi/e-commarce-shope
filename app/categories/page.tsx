@@ -8,10 +8,6 @@ import { ICategory } from "@/lib/types/intrerface";
 
 export const dynamic = "force-dynamic";
 
-// export const metadata = {
-//   title: "Categories - E-Commerce Store",
-//   description: "Browse products by category",
-// }
 
 export default async function CategoriesPage() {
   const {

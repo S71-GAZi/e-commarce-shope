@@ -83,11 +83,11 @@ export default async function ProductDetailPage({ params, }: { params: { slug: s
 
               <div className="flex items-baseline gap-3 mb-4">
                 <span className="text-4xl font-bold">
-                  ${Number(product.price).toFixed(2)}
+                  BDT{Number(product.price).toFixed(2)}
                 </span>
                 {product.compare_at_price && (
                   <span className="text-xl text-muted-foreground line-through">
-                    ${Number(product.compare_at_price).toFixed(2)}
+                    BDT{Number(product.compare_at_price).toFixed(2)}
                   </span>
                 )}
               </div>

@@ -17,7 +17,6 @@ export async function POST(request: NextRequest) {
         const orderId = data.payment_intent?.metadata?.order_id
         if (orderId) {
           await orderQueries.updateStatus(orderId, "processing", "paid")
-          console.log("Order marked as paid:", orderId)
         }
         break
       }
@@ -25,12 +24,11 @@ export async function POST(request: NextRequest) {
         const orderId = data.payment_intent?.metadata?.order_id
         if (orderId) {
           await orderQueries.updateStatus(orderId, "cancelled", "failed")
-          console.log("Order marked as failed:", orderId)
         }
         break
       }
       default:
-        console.log("Unhandled webhook type:", type)
+        console.error("Unhandled webhook type:", type)
     }
 
     return successResponse({ received: true })
