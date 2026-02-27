@@ -91,6 +91,8 @@ export interface IOrderShipping {
 }
 
 export interface IOrderFull extends IOrder {
-    items: IOrderItem[];
-    shipping_info: IOrderShipping; // ✅ single object, array নয় — সঠিক আছে
+    order_items: IOrderItem[];
+    shipping_info: IOrderShipping;
+    customer_name?: "string";
+    customer_phone?: "string";
 }

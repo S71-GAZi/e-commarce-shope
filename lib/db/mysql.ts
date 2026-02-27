@@ -4,15 +4,17 @@ let pool: mysql.Pool | null = null
 
 export function getMySQLPool(): mysql.Pool {
   if (!pool) {
+    // host: "sql.freedb.tech",
+    // port: 3306,
+    // user: "freedb_dbroot1",
+    // password: "k5CEfrR?Mns6BuU",
+
+    // Imran DB
     // const config = {
-    //   host: "sql.freedb.tech",
+    //   host: "localhost",      // ✅ change
     //   port: 3306,
-    //   user: "freedb_dbroot1",
-    //   password: "k5CEfrR?Mns6BuU",
-    //   // host: "localhost",      // ✅ change
-    //   // port: 3306,
-    //   // user: "root",           // ✅ default in XAMPP
-    //   // password: "",           // ✅ default empty in XAMPP
+    //   user: "root",           // ✅ default in XAMPP
+    //   password: "",           // ✅ default empty in XAMPP
     //   database: "freedb_eCom_Db",
     //   waitForConnections: true,
     //   connectionLimit: 10,
@@ -41,7 +43,7 @@ export function getMySQLPool(): mysql.Pool {
     //   queueLimit: 0,
     // }
 
-     //     const config = {
+    //     const config = {
     //   host: "localhost",
     //   port: 3306,
     //   user: "friendso_wp674",
@@ -51,18 +53,30 @@ export function getMySQLPool(): mysql.Pool {
     //   connectionLimit: 10,
     //   queueLimit: 0,
     // }
-// =========VPS DB ==============
+    // =========VPS DB ==============
+    // const config = {
+    //   host: "127.0.0.1",
+    //   port: 3306,
+    //   user: "dbroot",
+    //   password: "Root@123",
+    //   database: "eCom_Db",
+    //   waitForConnections: true,
+    //   connectionLimit: 10,
+    //   queueLimit: 0,
+    // }
+
+    // =========combine==============
     const config = {
-      host: "127.0.0.1",
-      port: 3306,
-      user: "dbroot",
-      password: "Root@123",
-      database: "eCom_Db",
+      host: process.env.NODE_ENV === "development" ? "localhost" : "127.0.0.1",
+      port: 3307,
+      user: process.env.NODE_ENV === "development" ? "root" : "dbroot",
+      password: process.env.NODE_ENV === "development" ? "root" : "Root@123",
+      database: process.env.NODE_ENV === "development" ? "eCom_Db" : "eCom_Db",
       waitForConnections: true,
       connectionLimit: 10,
       queueLimit: 0,
     }
-    
+
     pool = mysql.createPool(config)
     // console.log("MySQL pool created with config:", config)
     // console.log("MySQL pool :", pool)
