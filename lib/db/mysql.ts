@@ -4,20 +4,20 @@ let pool: mysql.Pool | null = null
 
 export function getMySQLPool(): mysql.Pool {
   if (!pool) {
-    const config = {
-      // host: "sql.freedb.tech",
-      // port: 3306,
-      // user: "freedb_dbroot1",
-      // password: "k5CEfrR?Mns6BuU",
-      host: "localhost",      // ✅ change
-      port: 3306,
-      user: "root",           // ✅ default in XAMPP
-      password: "",           // ✅ default empty in XAMPP
-      database: "freedb_eCom_Db",
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-    }
+    // const config = {
+    //   host: "sql.freedb.tech",
+    //   port: 3306,
+    //   user: "freedb_dbroot1",
+    //   password: "k5CEfrR?Mns6BuU",
+    //   // host: "localhost",      // ✅ change
+    //   // port: 3306,
+    //   // user: "root",           // ✅ default in XAMPP
+    //   // password: "",           // ✅ default empty in XAMPP
+    //   database: "freedb_eCom_Db",
+    //   waitForConnections: true,
+    //   connectionLimit: 10,
+    //   queueLimit: 0,
+    // }
 
     // const config = {
     //   host: "localhost",
@@ -40,6 +40,29 @@ export function getMySQLPool(): mysql.Pool {
     //   connectionLimit: 10,
     //   queueLimit: 0,
     // }
+
+     //     const config = {
+    //   host: "localhost",
+    //   port: 3306,
+    //   user: "friendso_wp674",
+    //   password: "S5Z)]p34hV",
+    //   database: "friendso_eCom_Db",
+    //   waitForConnections: true,
+    //   connectionLimit: 10,
+    //   queueLimit: 0,
+    // }
+// =========VPS DB ==============
+    const config = {
+      host: "127.0.0.1",
+      port: 3306,
+      user: "dbroot",
+      password: "Root@123",
+      database: "eCom_Db",
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+    }
+    
     pool = mysql.createPool(config)
     // console.log("MySQL pool created with config:", config)
     // console.log("MySQL pool :", pool)
