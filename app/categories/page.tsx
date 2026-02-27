@@ -8,6 +8,7 @@ import { ICategory } from "@/lib/types/intrerface";
 
 export const dynamic = "force-dynamic";
 
+
 export default async function CategoriesPage() {
   const {
     data: categories,
