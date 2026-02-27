@@ -25,9 +25,15 @@ export async function GET(request: NextRequest) {
 
     const { limit, offset } = getPaginationParams(request)
 
-    const orders = isAdmin(user)
+    const result: any = isAdmin(user)
       ? await orderQueries.listAll(limit, offset)
       : await orderQueries.findByUserId(user.id, limit, offset)
+
+    const orders = result.map((o: { shipping_info: string; order_items: string }) => ({
+      ...o,
+      shipping_info: o.shipping_info ? JSON.parse(o.shipping_info) : null,
+      order_items: o.order_items ? JSON.parse(o.order_items) : []
+    }))
 
     return successResponse({
       orders,

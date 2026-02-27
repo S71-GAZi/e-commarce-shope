@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,15 +10,33 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search, Eye, Download, Filter } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { IOrder, IOrderStatus } from "@/lib/types/order.interface"
+import { IOrder, IOrderFull, IOrderStatus } from "@/lib/types/order.interface"
+import { useFetchResource } from "@/hooks/useFetchResource"
 // import type { IOrder, IOrderStatus } from "@/lib/types/intrerface"
 
 export default function OrdersPage() {
   const { toast } = useToast()
   const [searchQuery, setSearchQuery] = useState("")
+  // Fetch Order
+  const {
+    data: rawOrders,
+    isLoading,
+    fetchData: fetchOrders,
+  } = useFetchResource<IOrderFull>({
+    url: "/api/orders",
+    extractData: (result) =>
+      Array.isArray(result)
+        ? result
+        : Array.isArray(result?.data?.orders)
+          ? result.data.orders
+          : [],
+  })
 
-  // Mock orders data - replace with real data from database
-  const [orders] = useState<IOrder[]>([])
+  useEffect(() => {
+    fetchOrders()
+  }, [fetchOrders])
+
+  const orders = JSON.parse(JSON.stringify(rawOrders)) as IOrderFull[]
 
   const [statusFilter, setStatusFilter] = useState<string>("all")
 
@@ -36,6 +54,8 @@ export default function OrdersPage() {
     return colors[status] || "secondary"
   }
 
+  console.log(orders)
+
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.order_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -52,7 +72,7 @@ export default function OrdersPage() {
           order.order_number,
           new Date(order.created_at).toLocaleDateString(),
           `Customer #${order.user_id}`,
-          order.total.toFixed(2),
+          Number(order.total).toFixed(2),
           order.payment_status,
           order.status,
         ].join(","),
@@ -104,7 +124,7 @@ export default function OrdersPage() {
             </div>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-45">
                 <Filter className="mr-2 h-4 w-4" />
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
@@ -127,7 +147,7 @@ export default function OrdersPage() {
                   <TableHead>Order Number</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Customer</TableHead>
-                  <TableHead>Total</TableHead>
+                  <TableHead>Total (BDT)</TableHead>
                   <TableHead>Payment</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -138,8 +158,8 @@ export default function OrdersPage() {
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">{order.order_number}</TableCell>
                     <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell>Customer #{order.user_id}</TableCell>
-                    <TableCell>BDT{order.total.toFixed(2)}</TableCell>
+                    <TableCell>{order.customer_name}<br /> {order.customer_phone}</TableCell>
+                    <TableCell>{Number(order.total).toFixed(2)}</TableCell>
                     <TableCell>
                       <Badge variant={order.payment_status === "paid" ? "default" : "secondary"}>
                         {order.payment_status}

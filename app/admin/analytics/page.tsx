@@ -60,7 +60,7 @@ export default function AnalyticsPage() {
                 <CardDescription>Monthly revenue over time</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
+                <div className="h-75 flex items-center justify-center border-2 border-dashed rounded-lg">
                   <p className="text-muted-foreground">Revenue chart placeholder</p>
                 </div>
               </CardContent>
@@ -72,7 +72,7 @@ export default function AnalyticsPage() {
                 <CardDescription>Best selling products this month</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[300px] flex items-center justify-center border-2 border-dashed rounded-lg">
+                <div className="h-75 flex items-center justify-center border-2 border-dashed rounded-lg">
                   <p className="text-muted-foreground">Top products chart placeholder</p>
                 </div>
               </CardContent>
@@ -87,7 +87,7 @@ export default function AnalyticsPage() {
               <CardDescription>Detailed sales performance metrics</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px] flex items-center justify-center border-2 border-dashed rounded-lg">
+              <div className="h-80 flex items-center justify-center border-2 border-dashed rounded-lg">
                 <p className="text-muted-foreground">Sales analytics content</p>
               </div>
             </CardContent>
@@ -101,7 +101,7 @@ export default function AnalyticsPage() {
               <CardDescription>Product performance and inventory insights</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px] flex items-center justify-center border-2 border-dashed rounded-lg">
+              <div className="h-80 flex items-center justify-center border-2 border-dashed rounded-lg">
                 <p className="text-muted-foreground">Product analytics content</p>
               </div>
             </CardContent>
@@ -115,7 +115,7 @@ export default function AnalyticsPage() {
               <CardDescription>Customer behavior and demographics</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[400px] flex items-center justify-center border-2 border-dashed rounded-lg">
+              <div className="h-80 flex items-center justify-center border-2 border-dashed rounded-lg">
                 <p className="text-muted-foreground">Customer analytics content</p>
               </div>
             </CardContent>
