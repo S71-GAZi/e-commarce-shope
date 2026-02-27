@@ -6,6 +6,35 @@ import Slider from "react-slick"
 import { Card, CardContent } from "../ui/card"
 import Image from "next/image"
 import Link from "next/link"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+
+const CustomArrow = ({ onClick, direction }: any) => {
+    const isNext = direction === "next"
+
+    return (
+        <button
+            onClick={onClick}
+            className={`absolute top-1/2 -translate-y-1/2 z-50 
+        ${isNext ? "-right-6 md:-right-10" : "-left-6 md:-left-10"}
+        flex items-center justify-center
+        h-10 w-10 rounded-full
+        bg-white/90 backdrop-blur-sm
+        border border-gray-200
+        shadow-lg
+        cursor-pointer
+        hover:bg-black hover:text-white
+        transition-all duration-300
+        hover:scale-110`}
+        >
+            {isNext ? (
+                <ChevronRight className="h-5 w-5" />
+            ) : (
+                <ChevronLeft className="h-5 w-5" />
+            )}
+        </button>
+    )
+
+}
 
 function CategoriesSection() {
     const { data: categories, isLoading, fetchData: fetchCategories } =
@@ -37,6 +66,8 @@ function CategoriesSection() {
         touchThreshold: 10,
         beforeChange: () => setDragging(true),
         afterChange: () => setDragging(false),
+        nextArrow: <CustomArrow direction="next" />,
+        prevArrow: <CustomArrow direction="prev" />,
         responsive: [
             { breakpoint: 1440, settings: { slidesToShow: 4 } },
             { breakpoint: 1024, settings: { slidesToShow: 3 } },
