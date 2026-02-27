@@ -89,12 +89,12 @@ export function LoginForm() {
               disabled={isLoading}
             />
           </div>
-
+          {/* 
           <div className="rounded-lg bg-muted p-3 text-sm">
             <p className="font-medium mb-1">Demo Credentials:</p>
             <p className="text-muted-foreground">Customer: demo@example.com / demo123</p>
             <p className="text-muted-foreground">Admin: admin@example.com / admin123</p>
-          </div>
+          </div> */}
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4 mt-4">

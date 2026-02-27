@@ -2,8 +2,9 @@
 
 import type { NextRequest } from "next/server"
 import { getTokenFromRequest, getUserFromToken, isAdmin, errorResponse, successResponse } from "@/lib/api/middleware"
-import { validateRequestBody, UpdateOrderStatusSchema } from "@/lib/api/validation"
+import { validateRequestBody } from "@/lib/api/validation"
 import { orderQueries } from "@/lib/db/queries"
+import { UpdateOrderStatusSchema } from "@/lib/api/order.validation"
 
 type RouteParams = { params: { id: string } }
 

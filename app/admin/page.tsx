@@ -10,7 +10,7 @@ export default function AdminDashboardPage() {
   // Mock data - replace with real data from database
   const stats = {
     revenue: {
-      value: "$45,231.89",
+      value: "BDT45,231.89",
       trend: { value: 20.1, isPositive: true },
     },
     orders: {
@@ -116,7 +116,7 @@ export default function AdminDashboardPage() {
                     <p className="text-xs text-muted-foreground">{order.date}</p>
                   </div>
                   <div className="text-right space-y-1">
-                    <p className="font-semibold">${order.total.toFixed(2)}</p>
+                    <p className="font-semibold">BDT{order.total.toFixed(2)}</p>
                     <Badge
                       variant={
                         order.status === "delivered" ? "default" : order.status === "shipped" ? "secondary" : "outline"

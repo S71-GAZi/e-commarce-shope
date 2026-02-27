@@ -7,17 +7,35 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import ProductCatrgory from "@/components/home/ProductCategory"
+import ProductPrice from "@/components/home/ProductPrice"
 
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; category?: string; featured?: string }>
+  searchParams: {
+    search?: string
+    category?: string | string[]
+    featured?: string
+    minPrice?: string
+    maxPrice?: string
+  }
 }) {
-  const params = await searchParams
+  console.log("Server params:", searchParams)
+
+  // Convert URL params
+  const category = searchParams.category
+  const minPrice = searchParams.minPrice ? Number(searchParams.minPrice) : undefined
+  const maxPrice = searchParams.maxPrice ? Number(searchParams.maxPrice) : undefined
+  const featured = searchParams.featured === "true"
+
+  // Call server function with filters
   const products = await getProducts({
-    search: params.search,
-    category: params.category,
-    featured: params.featured === "true",
+    search: searchParams.search,
+    category,
+    featured,
+    minPrice,
+    maxPrice,
+    limit: 50, // optional pagination
   })
 
   return (
@@ -28,7 +46,7 @@ export default async function ProductsPage({
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Products</h1>
           <p className="text-muted-foreground">
-            {params.search ? `Search results for "${params.search}"` : "Browse our collection"}
+            {searchParams.search ? `Search results for "${searchParams.search}"` : "Browse our collection"}
           </p>
         </div>
 
@@ -42,32 +60,7 @@ export default async function ProductsPage({
 
             <div>
               <h3 className="font-semibold mb-4">Price Range</h3>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="under-50" />
-                  <Label htmlFor="under-50" className="text-sm cursor-pointer">
-                    Under $50
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="50-100" />
-                  <Label htmlFor="50-100" className="text-sm cursor-pointer">
-                    $50 - $100
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="100-200" />
-                  <Label htmlFor="100-200" className="text-sm cursor-pointer">
-                    $100 - $200
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="over-200" />
-                  <Label htmlFor="over-200" className="text-sm cursor-pointer">
-                    Over $200
-                  </Label>
-                </div>
-              </div>
+              <ProductPrice />
             </div>
 
             <div>

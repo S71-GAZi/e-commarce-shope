@@ -1,4 +1,4 @@
-export type TOrderStatus =
+export type IOrderStatus =
     | "pending"
     | "confirmed"
     | "processing"
@@ -7,15 +7,15 @@ export type TOrderStatus =
     | "cancelled"
     | "returned";
 
-export type TPaymentMethod = "cod" | "mobile_banking";
+export type IPaymentMethod = "cod" | "mobile_banking";
 
-export type TPaymentStatus =
+export type IPaymentStatus =
     | "pending"
     | "paid"
     | "failed"
     | "refunded";
 
-export type TShippingStatus =
+export type IShippingStatus =
     | "pending"
     | "picked"
     | "in_transit"
@@ -25,9 +25,9 @@ export type TShippingStatus =
 
 
 export interface IOrder {
-    id: number;
+    id: string;
     order_number: string;
-    user_id: number; // ✅ number, string নয় (FK হলে consistent রাখো)
+    user_id: string;
 
     subtotal: number;
     shipping: number;
@@ -35,11 +35,11 @@ export interface IOrder {
     discount: number;
     coupon_code: string | null;
 
-    status: TOrderStatus;
+    status: IOrderStatus;
     total: number;
 
-    payment_method: TPaymentMethod;
-    payment_status: TPaymentStatus;
+    payment_method: IPaymentMethod;
+    payment_status: IPaymentStatus;
 
     payment_provider: string | null;
     payment_sender_account: string | null;
@@ -87,7 +87,7 @@ export interface IOrderShipping {
     courier_name: string | null;
     tracking_code: string | null;
 
-    shipping_status: TShippingStatus;
+    shipping_status: IShippingStatus;
 }
 
 export interface IOrderFull extends IOrder {

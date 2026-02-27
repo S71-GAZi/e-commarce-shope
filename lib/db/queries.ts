@@ -1,5 +1,5 @@
 import { TOrderItemInput, TShippingInfoInput } from "../api/order.validation"
-import { IOrderFull, IOrderItem, IOrderShipping, TOrderStatus, TPaymentMethod, TPaymentStatus } from "../types/order.interface"
+import { IOrderFull, IOrderItem, IOrderShipping, IOrderStatus, IPaymentMethod, IPaymentStatus } from "../types/order.interface"
 import { executeQuery, executeQuerySingle, getMySQLPool } from "./mysql"
 import type { IUser, IProduct, ICategory, ICoupon, ICartItem, } from "@/lib/types/intrerface"
 
@@ -169,9 +169,6 @@ export const productQueries = {
   },
 }
 
-// import { IOrderFull, IOrderItem, IOrderShipping, TPaymentMethod } from "./types";
-// import { TOrderItemInput, TShippingInfoInput, TPaymentInput } from "./validation";
-
 // ✅ Use inferred types from Zod schema instead of redefining
 export interface ICreateFullOrderParams {
   user_id: string; // ✅ number (not string)
@@ -180,12 +177,12 @@ export interface ICreateFullOrderParams {
   tax: number;
   discount: number; // ✅ required (default(0) in schema)
   coupon_code?: string | null;
-  status: TOrderStatus;
+  status: IOrderStatus;
   total: number;
   note?: string | null;
   note_image?: string | null;
-  payment_method: TPaymentMethod;
-  payment_status: TPaymentStatus;
+  payment_method: IPaymentMethod;
+  payment_status: IPaymentStatus;
   payment_provider?: string | null;
   payment_sender_account?: string | null;
   payment_transaction_id?: string | null;
@@ -206,7 +203,7 @@ function generateOrderNumber(): string {
 }
 
 export const orderQueries = {
-  async findById(id: number): Promise<IOrderFull | null> {
+  async findById(id: string): Promise<IOrderFull | null> {
     const order = await executeQuerySingle<IOrderFull>(
       `SELECT * FROM orders WHERE id = ? LIMIT 1`,
       [id]
@@ -243,7 +240,7 @@ export const orderQueries = {
     const order_number = generateOrderNumber();
 
     // 1️⃣ Insert order
-    const orderResult = await executeQuery<{ insertId: number }>(
+    const orderResult: any = await executeQuery<{ insertId: number }>(
       `INSERT INTO orders (
             order_number,
             user_id,
@@ -287,9 +284,7 @@ export const orderQueries = {
         data.updated_at ?? new Date(),
       ]
     );
-    console.log("Order insert result:", orderResult);
     const orderId = orderResult.insertId;
-    console.log("Created order ID:", orderId);
 
 
     await Promise.all(
@@ -479,10 +474,14 @@ export const categoryQueries = {
     const safeLimit = Number(limit ?? 100);
     const safeOffset = Number(offset ?? 0);
 
-
     return executeQuery<ICategory>(
-      `SELECT * FROM categories WHERE is_active = true ORDER BY display_order ASC LIMIT ${safeLimit} OFFSET ${safeOffset}`
-    )
+      `SELECT * 
+     FROM categories 
+     WHERE is_active = true 
+     ORDER BY display_order ASC 
+     LIMIT ? OFFSET ?`,
+      [safeLimit, safeOffset]
+    );
   },
 
   async findById(id: string) {

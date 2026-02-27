@@ -180,7 +180,7 @@ export default function ProductsPage() {
                       <TableCell className="font-medium">{product.name}</TableCell>
                       <TableCell>{product.sku || "N/A"}</TableCell>
                       <TableCell>
-                        ${Number(product.price)?.toFixed(2) || "0.00"}
+                        BDT{Number(product.price)?.toFixed(2) || "0.00"}
                       </TableCell>
                       <TableCell>
                         <Badge

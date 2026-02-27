@@ -86,7 +86,7 @@ export default function CartPage() {
                           <h3 className="font-semibold mb-1 line-clamp-2">{item.name}</h3>
                         </Link>
                         {item.variant && <p className="text-sm text-muted-foreground mb-2">{item.variant.name}</p>}
-                        <p className="font-bold text-lg">${Number(price).toFixed(2)}</p>
+                        <p className="font-bold text-lg">BDT{Number(price).toFixed(2)}</p>
                       </div>
 
                       <div className="flex flex-col items-end justify-between">

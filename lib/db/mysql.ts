@@ -41,17 +41,17 @@ export function getMySQLPool(): mysql.Pool {
     //   queueLimit: 0,
     // }
     pool = mysql.createPool(config)
-    console.log("MySQL pool created with config:", config)
-    console.log("MySQL pool :", pool)
+    // console.log("MySQL pool created with config:", config)
+    // console.log("MySQL pool :", pool)
   }
 
   return pool
 }
 
 export async function executeQuery<T = any>(query: string, params?: any[]): Promise<T[]> {
-  console.log("Executing query:", query, "params:", params)
+  // console.log("Executing query:", query, "params:", params)
   const connection = await getMySQLPool().getConnection()
-  console.log("Executing connection:", connection)
+  // console.log("Executing connection:", connection)
   try {
     const [rows] = await connection.execute(query, params || [])
     return rows as T[]

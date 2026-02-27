@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, Package, CreditCard, User, MapPin, Loader2, Mail, Printer } from "lucide-react"
-import type { IOrderStatus } from "@/lib/types/intrerface"
+// import type { IOrderStatus } from "@/lib/types/intrerface"
 
 export default function OrderDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter()
@@ -63,7 +63,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
     notes: "",
   }
 
-  const [orderStatus, setOrderStatus] = useState<IOrderStatus>(order.status)
+  const [orderStatus, seIOrderStatus] = useState<IOrderStatus>(order.status)
   const [trackingNumber, setTrackingNumber] = useState(order.tracking_number)
 
   const handleUpdateOrder = async () => {
@@ -139,8 +139,8 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                       <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">${Number(item.total_price).toFixed(2)}</p>
-                      <p className="text-sm text-muted-foreground">${Number(item.unit_price).toFixed(2)} each</p>
+                      <p className="font-semibold">BDT{Number(item.total_price).toFixed(2)}</p>
+                      <p className="text-sm text-muted-foreground">BDT{Number(item.unit_price).toFixed(2)} each</p>
                     </div>
                   </div>
                 ))}
@@ -225,7 +225,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select value={orderStatus} onValueChange={(value) => setOrderStatus(value as IOrderStatus)}>
+                <Select value={orderStatus} onValueChange={(value) => seIOrderStatus(value as IOrderStatus)}>
                   <SelectTrigger id="status">
                     <SelectValue />
                   </SelectTrigger>

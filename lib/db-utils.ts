@@ -12,9 +12,13 @@ const USE_MOCK_DATA = true
 // import { productQueries } from "@/lib/db/queries"
 
 export async function getProducts(filters?: {
-  category?: string
+  category?: string | string[] // slug(s)
   search?: string
   featured?: boolean
+  minPrice?: number
+  maxPrice?: number
+  rating?: number
+  sort?: "newest" | "price-low" | "price-high" | "rating"
   limit?: number
   offset?: number
 }): Promise<IProduct[]> {
@@ -22,29 +26,69 @@ export async function getProducts(filters?: {
   const limit = filters?.limit ?? 20
   const offset = filters?.offset ?? 0
 
-  // 🔎 If search exists → use FULLTEXT search
+  // FULLTEXT search
   if (filters?.search && filters.search.length >= 2) {
     return await productQueries.search(filters.search, limit)
   }
 
-  // 🧠 Otherwise use normal filtered query
   let query = `
-    SELECT *
-    FROM products
-    WHERE is_active = 1
+    SELECT p.*, c.name as category_name, c.slug as category_slug
+    FROM products p
+    LEFT JOIN categories c ON p.category_id = c.id
+    WHERE p.is_active = 1
   `
   const params: any[] = []
 
+  /* ================= CATEGORY FILTER ================= */
   if (filters?.category) {
-    query += ` AND category_id = ?`
-    params.push(filters.category)
+    if (Array.isArray(filters.category)) {
+      const placeholders = filters.category.map(() => "?").join(", ")
+      query += ` AND c.slug IN (${placeholders})`
+      params.push(...filters.category)
+    } else {
+      query += ` AND c.slug = ?`
+      params.push(filters.category)
+    }
   }
 
+  /* ================= FEATURED ================= */
   if (filters?.featured) {
-    query += ` AND is_featured = 1`
+    query += ` AND p.is_featured = 1`
   }
 
-  query += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`
+  /* ================= PRICE RANGE ================= */
+  if (filters?.minPrice !== undefined) {
+    query += ` AND p.price >= ?`
+    params.push(filters.minPrice)
+  }
+  if (filters?.maxPrice !== undefined) {
+    query += ` AND p.price <= ?`
+    params.push(filters.maxPrice)
+  }
+
+  /* ================= RATING ================= */
+  if (filters?.rating) {
+    query += ` AND p.rating >= ?`
+    params.push(filters.rating)
+  }
+
+  /* ================= SORT ================= */
+  switch (filters?.sort) {
+    case "price-low":
+      query += ` ORDER BY p.price ASC`
+      break
+    case "price-high":
+      query += ` ORDER BY p.price DESC`
+      break
+    case "rating":
+      query += ` ORDER BY p.rating DESC`
+      break
+    case "newest":
+    default:
+      query += ` ORDER BY p.created_at DESC`
+  }
+
+  query += ` LIMIT ? OFFSET ?`
   params.push(limit, offset)
 
   return await executeQuery<IProduct>(query, params)

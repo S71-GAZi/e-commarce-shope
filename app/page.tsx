@@ -82,7 +82,7 @@ export default async function HomePage() {
                   </svg>
                 </div>
                 <h3 className="font-semibold text-lg mb-2">Free Shipping</h3>
-                <p className="text-muted-foreground">On orders over $50</p>
+                <p className="text-muted-foreground">On orders over BDT50</p>
               </div>
 
               <div className="text-center">
