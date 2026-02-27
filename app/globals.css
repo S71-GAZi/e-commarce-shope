@@ -2,17 +2,6 @@
 @import "tw-animate-css";
 @import "slick-carousel/slick/slick.css";
 @import "slick-carousel/slick/slick-theme.css";
-/* globals.css or component style */
-.slick-prev,
-.slick-next {
-  z-index: 50; /* make sure arrows are above cards */
-}
-
-.slick-prev:before,
-.slick-next:before {
-  color: #000; /* or white depending on your theme */
-  font-size: 30px;
-}
 
 @custom-variant dark (&:is(.dark *));
 
