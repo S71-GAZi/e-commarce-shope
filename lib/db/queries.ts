@@ -211,19 +211,19 @@ export const orderQueries = {
 
     if (!order) return null;
 
-    const items = await executeQuery<IOrderItem>(
+    const order_items = await executeQuery<IOrderItem>(
       `SELECT * FROM order_items WHERE order_id = ?`,
       [id]
     );
 
     const shipping_info = await executeQuerySingle<IOrderShipping>(
-      `SELECT * FROM order_shipping WHERE order_id = ? LIMIT 1`,
+      `SELECT * FROM shipping_info WHERE order_id = ? LIMIT 1`,
       [id]
     );
 
     if (!shipping_info) throw new Error(`Shipping info not found for order ${id}`);
 
-    return { ...order, items, shipping_info };
+    return { ...order, order_items, shipping_info };
   },
   async findByUserId(userId: string, limit = 20, offset = 0) {
     return executeQuery<IOrderFull>("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?", [
@@ -233,7 +233,56 @@ export const orderQueries = {
     ])
   },
   async listAll(limit = 20, offset = 0) {
-    return executeQuery<IOrderFull>("SELECT * FROM orders ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit, offset])
+    return executeQuery<IOrderFull>(
+      `
+    SELECT 
+      o.*,
+
+      -- Customer
+      u.full_name AS customer_name,
+      u.phone AS customer_phone,
+
+      -- Shipping (single object)
+           JSON_OBJECT(
+        'name', s.name,
+        'email', s.email,
+        'phone', s.phone,
+        'division', s.division,
+        'district', s.district,
+        'upazila', s.upazila,
+        'address', s.address,
+        'shipping_method', s.shipping_method,
+        'courier_name', s.courier_name,
+        'tracking_code', s.tracking_code,
+        'shipping_status', s.shipping_status
+      ) AS shipping_info,
+
+      -- Order Items Array
+      (
+        SELECT JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'product_id', oi.product_id,
+            'variant_id', oi.variant_id,
+            'name', oi.name,
+            'slug', oi.slug,
+            'price_snapshot', oi.price_snapshot,
+            'quantity', oi.quantity,
+            'images', oi.images
+          )
+        )
+        FROM order_items oi
+        WHERE oi.order_id = o.id
+      ) AS order_items
+    FROM orders o
+
+    LEFT JOIN users u ON o.user_id = u.id
+    LEFT JOIN shipping_info s ON o.id = s.order_id
+
+    ORDER BY o.created_at DESC
+    LIMIT ? OFFSET ?
+    `,
+      [limit, offset]
+    )
   },
 
   async createFullOrder(data: ICreateFullOrderParams): Promise<IOrderFull> {
@@ -317,7 +366,7 @@ export const orderQueries = {
     // 3️⃣ Insert shipping info
     const s = data.shipping_info;
     await executeQuery(
-      `INSERT INTO order_shipping (
+      `INSERT INTO shipping_info (
             order_id,
             name,
             email,
