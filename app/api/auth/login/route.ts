@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         email_verified: user.email_verified,
       },
       token,
-      expiresIn: process.env.NEXT_PUBLIC_JWT_EXPIRES_IN,
+      expiresIn: process.env.JWT_EXPIRES_IN,
     })
   } catch (error) {
     return errorResponse("Internal server error", 500)

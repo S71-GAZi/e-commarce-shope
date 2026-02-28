@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const refreshSession = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/refresh`, {
+        const res = await fetch(`/api/auth/refresh`, {
           method: "POST",
           credentials: "include",
         })
@@ -93,7 +93,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/login`, {
+      // use relative path rather than relying on a server-only env variable
+      // if you really need an absolute URL, expose it via NEXT_PUBLIC_BASE_URL
+      // and reference process.env.NEXT_PUBLIC_BASE_URL here.
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -116,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (email: string, password: string, fullName: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/register`, {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, full_name: fullName }),
@@ -147,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // }
 
   const logout = async () => {
-    await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/logout`, { method: "POST" })
+    await fetch("/api/auth/logout", { method: "POST" })
 
     setUser(null)
     setAccessToken(null)
