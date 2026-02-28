@@ -86,6 +86,7 @@ export const CreateCategorySchema = z.object({
   parent_id: z.string().optional(),
   display_order: z.number().int().default(0),
   is_active: z.boolean().default(true),
+  image_url: z.string().min(1, "Image URL is required"),
 })
 
 // Coupon schemas

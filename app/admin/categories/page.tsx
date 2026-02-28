@@ -31,7 +31,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
-import { Plus, Edit, Trash2, Loader2 } from "lucide-react"
+import { Plus, Edit, Trash2, Loader2, Upload, X } from "lucide-react"
 import Image from "next/image"
 import type { ICategory } from "@/lib/types/intrerface"
 import { useFetchResource } from "@/hooks/useFetchResource"
@@ -43,6 +43,7 @@ export default function CategoriesPage() {
   const [editingCategory, setEditingCategory] = useState<ICategory | null>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [categoryToDelete, setCategoryToDelete] = useState<ICategory | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   /* ================= FETCH CATEGORIES ================= */
   const {
     data: categories,
@@ -62,24 +63,112 @@ export default function CategoriesPage() {
     fetchCategories()
   }, [fetchCategories])
 
+
+  //--------- Image Uploade 
+  const [image, setImage] = useState<File | null>(null);
+
+  // const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+
+  //   if (!file) return;
+
+  //   // Optional: Validate size (600KB max)
+  //   if (file.size > 600 * 1024) {
+  //     alert("Image must be 600 KB or less");
+  //     return;
+  //   }
+
+  //   setImage(file);
+  // };
+
+  // const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  //   e.preventDefault();
+  //   const file = e.dataTransfer.files?.[0];
+
+  //   if (!file) return;
+
+  //   if (file.size > 600 * 1024) {
+  //     alert("Image must be 600 KB or less");
+  //     return;
+  //   }
+
+  //   setImage(file);
+  // };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    if (file.size > 600 * 1024) {
+      alert("Image must be 600 KB or less");
+      return;
+    }
+
+    setImage(file);
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  // const removeImage = () => {
+  //   setImage(null);
+  // };
+
+  const removeImage = () => {
+    setImage(null);
+    setPreviewUrl(null);
+  };
+
+  const handleEdit = (category: ICategory) => {
+    setEditingCategory(category);
+    setPreviewUrl(category.image_url || null); // 👈 SET OLD IMAGE
+    setIsOpen(true);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 600 * 1024) {
+      alert("Image must be 600 KB or less");
+      return;
+    }
+
+    setImage(file);
+    setPreviewUrl(URL.createObjectURL(file)); // 👈 SET PREVIEW
+  };
+  //--------- Image Uploade end
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     try {
       const formData = new FormData(e.currentTarget)
-      const categoryData = {
-        name: formData.get("categoryName"),
-        slug: formData.get("categorySlug"),
-        description: formData.get("categoryDescription") || null,
-      }
+      // const categoryData = {
+      //   name: formData.get("categoryName"),
+      //   slug: formData.get("categorySlug"),
+      //   description: formData.get("categoryDescription") || null,
+      // }
 
+      const name = (formData.get("categoryName") as string) || ""
+      const slug = name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+
+      formData.append("categorySlug", slug)
+      formData.append("image", image as any)
       const method = editingCategory ? "PATCH" : "POST"
       const url = editingCategory ? `/api/admin/categories/${editingCategory.id}` : "/api/admin/categories"
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(categoryData),
+        // headers: { "Content-Type": "multipart/form-data" },
+        body: formData,
       })
 
       const data = await response.json()
@@ -112,10 +201,10 @@ export default function CategoriesPage() {
     }
   }
 
-  const handleEdit = (category: ICategory) => {
-    setEditingCategory(category)
-    setIsOpen(true)
-  }
+  // const handleEdit = (category: ICategory) => {
+  //   setEditingCategory(category)
+  //   setIsOpen(true)
+  // }
 
   const handleDelete = (category: ICategory) => {
     setCategoryToDelete(category)
@@ -165,6 +254,8 @@ export default function CategoriesPage() {
     }
   }
 
+
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -199,7 +290,7 @@ export default function CategoriesPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label htmlFor="categorySlug">Slug</Label>
                   <Input
                     id="categorySlug"
@@ -208,7 +299,7 @@ export default function CategoriesPage() {
                     defaultValue={editingCategory?.slug}
                     required
                   />
-                </div>
+                </div> */}
 
                 <div className="space-y-2">
                   <Label htmlFor="categoryDescription">Description</Label>
@@ -219,6 +310,60 @@ export default function CategoriesPage() {
                     defaultValue={editingCategory?.description || ""}
                   />
                 </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Product Image</CardTitle>
+                    <CardDescription>Upload 1 image (max 600 KB)</CardDescription>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    {/* Upload Zone (Hide if image exists) */}
+                    {!image && (
+                      <div
+                        className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                        onClick={() => document.getElementById("product-image")?.click()}
+                      >
+                        <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                        <p className="text-sm text-muted-foreground mb-2">
+                          Drag and drop image here, or click to browse
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Only 1 image allowed · ≤ 600 KB
+                        </p>
+
+                        <input
+                          type="file"
+                          accept="image/*"
+                          id="product-image"
+                          className="hidden"
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                    )}
+
+                    {/* Image Preview */}
+                    {previewUrl && (
+                      <div className="relative w-40 h-40 rounded-md overflow-hidden border">
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute top-1 right-1 z-10 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+
+                        <img
+                          src={previewUrl}
+                          alt="category-preview"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => handleDialogChange(false)}>

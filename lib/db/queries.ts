@@ -547,41 +547,96 @@ export const categoryQueries = {
 
   async create(data: Partial<ICategory>) {
     const result = await executeQuery<ICategory>(
-      "INSERT INTO categories (name, slug, description, is_active) VALUES (?, ?, ?, ?)",
-      [data.name, data.slug, data.description, data.is_active !== false ? 1 : 0],
+      "INSERT INTO categories (name, slug, description,parent_id, image_url, display_order, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [data.name, data.slug, data.description, data.parent_id || "", data.image_url, data.display_order || 0, data.is_active === true ? 1 : 0],
     )
     return result[0]
   },
 
-  async update(id: string, data: Partial<ICategory>) {
-    const fields: string[] = []
-    const values: any[] = []
+  // async update(id: string, data: Partial<ICategory>) {
+  //   const fields: string[] = []
+  //   const values: any[] = []
 
-    if (data.name !== undefined) {
-      fields.push("name = ?")
-      values.push(data.name)
-    }
-    if (data.slug !== undefined) {
-      fields.push("slug = ?")
-      values.push(data.slug)
-    }
-    if (data.description !== undefined) {
-      fields.push("description = ?")
-      values.push(data.description)
-    }
-    if (data.is_active !== undefined) {
-      fields.push("is_active = ?")
-      values.push(data.is_active ? 1 : 0)
-    }
+  //   if (data.name !== undefined) {
+  //     fields.push("name = ?")
+  //     values.push(data.name)
+  //   }
+  //   if (data.slug !== undefined) {
+  //     fields.push("slug = ?")
+  //     values.push(data.slug)
+  //   }
+  //   if (data.description !== undefined) {
+  //     fields.push("description = ?")
+  //     values.push(data.description)
+  //   }
+  //   if (data.is_active !== undefined) {
+  //     fields.push("is_active = ?")
+  //     values.push(data.is_active ? 1 : 0)
+  //   }
 
-    if (fields.length === 0) return undefined
+  //   if (fields.length === 0) return undefined
 
-    values.push(id)
-    const query = `UPDATE categories SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
-    await executeQuery(query, values)
-    return executeQuerySingle<ICategory>("SELECT * FROM categories WHERE id = ?", [id])
-  },
+  //   values.push(id)
+  //   const query = `UPDATE categories SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
+  //   await executeQuery(query, values)
+  //   return executeQuerySingle<ICategory>("SELECT * FROM categories WHERE id = ?", [id])
+  // },
+async update(id: string, data: Partial<ICategory>) {
+  const fields: string[] = [];
+  const values: any[] = [];
 
+  if (data.name !== undefined) {
+    fields.push("name = ?");
+    values.push(data.name);
+  }
+
+  if (data.slug !== undefined) {
+    fields.push("slug = ?");
+    values.push(data.slug);
+  }
+
+  if (data.description !== undefined) {
+    fields.push("description = ?");
+    values.push(data.description);
+  }
+
+  if (data.parent_id !== undefined) {
+    fields.push("parent_id = ?");
+    values.push(data.parent_id);
+  }
+
+  if (data.display_order !== undefined) {
+    fields.push("display_order = ?");
+    values.push(data.display_order);
+  }
+
+  if (data.image_url !== undefined) {
+    fields.push("image_url = ?");
+    values.push(data.image_url);
+  }
+
+  if (data.is_active !== undefined) {
+    fields.push("is_active = ?");
+    values.push(data.is_active ? 1 : 1);
+  }
+
+  if (fields.length === 0) return undefined;
+
+  values.push(id);
+
+  const query = `
+    UPDATE categories 
+    SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP 
+    WHERE id = ?
+  `;
+
+  await executeQuery(query, values);
+
+  return executeQuerySingle<ICategory>(
+    "SELECT * FROM categories WHERE id = ?",
+    [id]
+  );
+},
   async delete(id: string) {
     await executeQuery("DELETE FROM categories WHERE id = ?", [id])
   },

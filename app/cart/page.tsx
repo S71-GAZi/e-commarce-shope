@@ -86,7 +86,7 @@ export default function CartPage() {
                           <h3 className="font-semibold mb-1 line-clamp-2">{item.name}</h3>
                         </Link>
                         {item.variant && <p className="text-sm text-muted-foreground mb-2">{item.variant.name}</p>}
-                        <p className="font-bold text-lg">BDT{Number(price).toFixed(2)}</p>
+                        <p className="font-bold text-lg">BDT {Number(price).toFixed(2)}</p>
                       </div>
 
                       <div className="flex flex-col items-end justify-between">
@@ -129,7 +129,7 @@ export default function CartPage() {
                           </Button>
                         </div>
 
-                        <p className="font-semibold">${itemTotal.toFixed(2)}</p>
+                        <p className="font-semibold">BDT {itemTotal.toFixed(2)}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -158,15 +158,15 @@ export default function CartPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    <span className="font-medium">BDT {subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span className="font-medium">{shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}</span>
+                    <span className="font-medium">{shipping === 0 ? "FREE" : `BDT ${shipping.toFixed(2)}`}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax (10%)</span>
-                    <span className="font-medium">${tax.toFixed(2)}</span>
+                    <span className="font-medium">BDT {tax.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -174,12 +174,12 @@ export default function CartPage() {
 
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>BDT {total.toFixed(2)}</span>
                 </div>
 
                 {subtotal < 50 && (
                   <p className="text-sm text-muted-foreground">
-                    Add ${(50 - subtotal).toFixed(2)} more to get free shipping!
+                    Add BDT {(50 - subtotal).toFixed(2)} more to get free shipping!
                   </p>
                 )}
 

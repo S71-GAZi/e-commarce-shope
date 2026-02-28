@@ -42,7 +42,7 @@ export default function OrderConfirmationPage() {
             {/* Success Section */}
             <div className="text-center space-y-4">
                 <CheckCircle className="mx-auto h-16 w-16 text-green-500" />
-                <h1 className="text-3xl font-bold">Order Confirmed 🎉</h1>
+                <h1 className="text-3xl font-bold">Order Placed 🎉</h1>
                 <p className="text-muted-foreground">
                     Thank you for your purchase. Your order has been successfully placed.
                 </p>

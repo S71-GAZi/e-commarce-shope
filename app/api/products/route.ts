@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
       cost_price: formData.get("cost_price") ? parseFloat(formData.get("costPrice") as string) : null,
       sku: formData.get("sku") || null,
       barcode: formData.get("barcode") || null,
-      stock_quantity: formData.get("stock_quantity") ? parseInt(formData.get("stock") as string) : 0,
+      stock_quantity: formData.get("stock_quantity") ? parseInt(formData.get("stock_quantity") as string) : 0,
       low_stock_threshold: formData.get("low_stock_threshold") ? parseInt(formData.get("low_stock_threshold") as string) : 0,
       weight: formData.get("weight") ? parseFloat(formData.get("weight") as string) : null,
       length: formData.get("length") ? parseFloat(formData.get("length") as string) : null,
