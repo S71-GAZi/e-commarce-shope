@@ -53,7 +53,7 @@ export default function CustomersPage() {
     const newStatus = currentStatus === "active" ? "inactive" : "active";
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/admin/customers/${id}/status`, {
+      const res = await fetch(`${process.env.BASE_URL}/api/admin/customers/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
