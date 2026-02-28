@@ -3,7 +3,9 @@
 export const dynamic = "force-dynamic";
 
 import type React from "react"
-
+import divisionsData from "./division.json";
+import districtsData from "./district.json";
+import upazilasData from "./upazila.json";
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Header } from "@/components/layout/header"
@@ -73,6 +75,12 @@ const MOBILE_BANKING_PROVIDERS = [
 
 type PaymentMethod = "cod" | "mobile_banking"
 
+interface IDivision {
+  id: string
+  name: string
+  name_bn: string
+}
+
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, subtotal, clearCart, isLoading: isCartLoading } = useCart()
@@ -89,38 +97,35 @@ export default function CheckoutPage() {
   const [transactionNo, setTransactionNo] = useState("")
   const [copiedAccount, setCopiedAccount] = useState(false)
 
-  const [divisions, setDivisions] = useState<any[]>([])
-  const [districts, setDistricts] = useState<any[]>([])
-  const [upazilas, setUpazilas] = useState<any[]>([])
+  const [divisions, setDivisions] = useState<IDivision[]>([])
+  const [districts, setDistricts] = useState<IDivision[]>([])
+  const [upazilas, setUpazilas] = useState<IDivision[]>([])
 
-  const [selectedDivision, setSelectedDivision] = useState("")
-  const [selectedDistrict, setSelectedDistrict] = useState("")
-  const [selectedUpazila, setSelectedUpazila] = useState("")
+  const [selectedDivision, setSelectedDivision] = useState<IDivision | undefined>(undefined)
+  const [selectedDistrict, setSelectedDistrict] = useState<IDivision | undefined>(undefined)
+  const [selectedUpazila, setSelectedUpazila] = useState<IDivision | undefined>(undefined)
 
-  // Fetch divisions on mount
   useEffect(() => {
-    fetch("https://sohojapi.vercel.app/api/divisions")
-      .then(res => res.json())
-      .then((res) => setDivisions(res || [])) // always an array
-      .catch(err => console.error(err))
-  })
-  // Fetch districts when division changes
-  useEffect(() => {
-    if (!selectedDivision) return
-    fetch(`https://sohojapi.vercel.app/api/districts/${selectedDivision}`)
-      .then(res => res.json())
-      .then(data => setDistricts(data))
-      .catch(err => console.error(err))
-  }, [selectedDivision])
+    setDivisions(divisionsData);
+  }, []);
 
-  // Fetch upazilas when district changes
+
   useEffect(() => {
-    if (!selectedDistrict) return
-    fetch(`https://sohojapi.vercel.app/api/upzilas/${selectedDistrict}`)
-      .then(res => res.json())
-      .then(data => setUpazilas(data))
-      .catch(err => console.error(err))
-  }, [selectedDistrict])
+    if (!selectedDivision) return;
+    const filteredDistricts = districtsData.filter(
+      (d) => d.division_id === selectedDivision.id
+    );
+    setDistricts(filteredDistricts);
+  }, [selectedDivision]);
+
+
+  useEffect(() => {
+    if (!selectedDistrict) return;
+    const filteredUpazilas = upazilasData.filter(
+      (u) => u.district_id === selectedDistrict.id
+    );
+    setUpazilas(filteredUpazilas);
+  }, [selectedDistrict]);
 
   // Computed order values
   const shipping = subtotal >= 75 ? 0 : 9.99
@@ -172,9 +177,9 @@ export default function CheckoutPage() {
         name: formData.get("name"),
         email: formData.get("email"),
         phone: formData.get("phone"),
-        division: selectedDivision,
-        district: selectedDistrict,
-        upazila: selectedUpazila,
+        division: selectedDivision?.name,
+        district: selectedDistrict?.name,
+        upazila: selectedUpazila?.name,
         address: formData.get("address"),
 
       },
@@ -209,14 +214,14 @@ export default function CheckoutPage() {
 
     setIsProcessing(true);
     try {
-      const res = await fetch("/api/orders", {
+      const res: any = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
       })
       if (res.ok) {
 
-        clearCart()
+        // clearCart()
         toast({
           title: "Order placed successfully! 🎉",
           description:
@@ -224,7 +229,9 @@ export default function CheckoutPage() {
               ? "Pay when your order arrives."
               : "We'll verify your payment and confirm your order shortly.",
         })
-        // router.push("/orders/confirmation")
+        const newOrder = await res.json()
+        // console.log("New order ID:", newOrderId.data.id)
+        router.push(`/orders/confirmation/${newOrder.data.id}`)
       }
     } catch (error) {
       console.error("Order failed:", error)
@@ -290,93 +297,148 @@ export default function CheckoutPage() {
                     Shipping Information
                   </CardTitle>
                 </CardHeader>
+
                 <CardContent className="space-y-4">
+
+                  {/* Name */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                    <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="name" className="text-sm font-medium">
                         Name <span className="text-red-500">*</span>
                       </Label>
-                      <Input id="name" name="name" required defaultValue={user?.full_name} className="h-10" placeholder="John" />
+                      <Input
+                        id="name"
+                        name="name"
+                        required
+                        defaultValue={user?.full_name}
+                        className="w-full h-10"
+                        placeholder="John"
+                      />
                     </div>
                   </div>
 
+                  {/* Email + Phone */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-sm font-medium">
                         Email <span className="text-red-500">*</span>
                       </Label>
-                      <Input id="email" name="email" type="email" required defaultValue={user?.email} className="h-10" placeholder="john@example.com" />
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        defaultValue={user?.email}
+                        className="w-full h-10"
+                        placeholder="john@example.com"
+                      />
                     </div>
+
                     <div className="space-y-2">
                       <Label htmlFor="phone" className="text-sm font-medium">
                         Phone <span className="text-red-500">*</span>
                       </Label>
-                      <Input id="phone" name="phone" type="tel" required defaultValue={user?.phone} className="h-10" placeholder="+880 1XXX-XXXXXX" />
+                      <Input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        required
+                        defaultValue={user?.phone}
+                        className="w-full h-10"
+                        placeholder="+880 1XXX-XXXXXX"
+                      />
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  {/* Division + District + Upazila + Address */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                    {/* Division Dropdown */}
+                    {/* Division */}
                     <div className="space-y-2">
                       <Label htmlFor="division">Division <span className="text-red-500">*</span></Label>
-                      <Select value={selectedDivision} onValueChange={(v) => {
-                        setSelectedDivision(v)
-                        setSelectedDistrict("")
-                        setSelectedUpazila("")
-                      }}>
+                      <Select
+                        value={selectedDivision?.id}
+                        onValueChange={(id) => {
+                          const division = divisions.find((d) => d.id === id);
+                          setSelectedDivision(division);
+                          setSelectedDistrict(undefined);
+                          setSelectedUpazila(undefined);
+                        }}
+                      >
                         <SelectTrigger id="division" className="w-full h-10">
                           <SelectValue placeholder="Select Division" />
                         </SelectTrigger>
                         <SelectContent>
-                          {divisions?.map((d: any) => (
-                            <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                          {divisions.map((d) => (
+                            <SelectItem key={d.id} value={d.id}>
+                              {d.name} ({d.name_bn})
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {/* District Dropdown */}
+                    {/* District */}
                     <div className="space-y-2">
                       <Label htmlFor="district">District <span className="text-red-500">*</span></Label>
-                      <Select value={selectedDistrict} onValueChange={(v) => {
-                        setSelectedDistrict(v)
-                        setSelectedUpazila("")
-                      }}>
+                      <Select
+                        value={selectedDistrict?.id}
+                        onValueChange={(id) => {
+                          const district = districts.find((d) => d.id === id);
+                          setSelectedDistrict(district);
+                          setSelectedUpazila(undefined);
+                        }}
+                      >
                         <SelectTrigger id="district" className="w-full h-10">
                           <SelectValue placeholder="Select District" />
                         </SelectTrigger>
                         <SelectContent>
-                          {districts.map((d: any) => (
-                            <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                          {districts.map((d) => (
+                            <SelectItem key={d.id} value={d.id}>
+                              {d.name} ({d.name_bn})
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    {/* Upazila Dropdown */}
+                    {/* Upazila */}
                     <div className="space-y-2">
                       <Label htmlFor="upazila">Thana / Upazila <span className="text-red-500">*</span></Label>
-                      <Select value={selectedUpazila} onValueChange={setSelectedUpazila}>
+                      <Select
+                        value={selectedUpazila?.id}
+                        onValueChange={(id) => {
+                          const upazila = upazilas.find((u) => u.id === id);
+                          setSelectedUpazila(upazila);
+                        }}
+                      >
                         <SelectTrigger id="upazila" className="w-full h-10">
                           <SelectValue placeholder="Select Upazila / Thana" />
                         </SelectTrigger>
                         <SelectContent>
-                          {upazilas.map((u: any) => (
-                            <SelectItem key={u.id} value={u.name}>{u.name}</SelectItem>
+                          {upazilas.map((u) => (
+                            <SelectItem key={u.id} value={u.id}>
+                              {u.name} ({u.name_bn})
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
                     {/* Street Address */}
-                    <div className="space-y-2">
+                    <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="address">Street Address <span className="text-red-500">*</span></Label>
-                      <Input id="address" name="address" required className="h-10" placeholder="House #, Road #, Area" />
+                      <Input
+                        id="address"
+                        name="address"
+                        required
+                        className="w-full h-10"
+                        placeholder="House #, Road #, Area"
+                      />
                     </div>
                   </div>
 
-
+                  {/* Shipping Info */}
                   {shipping === 0 ? (
                     <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 rounded-lg px-3 py-2">
                       <Truck className="h-4 w-4" />
@@ -385,9 +447,12 @@ export default function CheckoutPage() {
                   ) : (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
                       <Tag className="h-4 w-4" />
-                      <span>Spend <strong>${(75 - subtotal).toFixed(2)}</strong> more for free shipping</span>
+                      <span>
+                        Spend <strong>${(75 - subtotal).toFixed(2)}</strong> more for free shipping
+                      </span>
                     </div>
                   )}
+
                 </CardContent>
               </Card>
 

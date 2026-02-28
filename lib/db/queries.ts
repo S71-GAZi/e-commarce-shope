@@ -205,7 +205,14 @@ function generateOrderNumber(): string {
 export const orderQueries = {
   async findById(id: string): Promise<IOrderFull | null> {
     const order = await executeQuerySingle<IOrderFull>(
-      `SELECT * FROM orders WHERE id = ? LIMIT 1`,
+      `SELECT 
+        o.*,  
+        u.full_name AS customer_name,
+        u.phone AS customer_phone
+     FROM orders o
+     LEFT JOIN users u ON o.user_id = u.id 
+     WHERE o.id = ? 
+     LIMIT 1`,
       [id]
     );
 
@@ -221,7 +228,8 @@ export const orderQueries = {
       [id]
     );
 
-    if (!shipping_info) throw new Error(`Shipping info not found for order ${id}`);
+    if (!shipping_info)
+      throw new Error(`Shipping info not found for order ${id}`);
 
     return { ...order, order_items, shipping_info };
   },

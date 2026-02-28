@@ -1,10 +1,11 @@
 //export const dynamic = "force-dynamic";
 
 import type { NextRequest } from "next/server"
-import { getTokenFromRequest, getUserFromToken, isAdmin, errorResponse, successResponse } from "@/lib/api/middleware"
+import { getTokenFromRequest, isAdmin, errorResponse, successResponse } from "@/lib/api/middleware"
 import { validateRequestBody } from "@/lib/api/validation"
 import { orderQueries } from "@/lib/db/queries"
 import { UpdateOrderStatusSchema } from "@/lib/api/order.validation"
+import { getUserFromToken } from "@/lib/jwt"
 
 type RouteParams = { params: { id: string } }
 
