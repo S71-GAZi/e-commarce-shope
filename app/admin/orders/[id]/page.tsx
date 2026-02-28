@@ -1,105 +1,111 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { useParams } from "next/navigation"
 import Link from "next/link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
-import { ArrowLeft, Package, CreditCard, User, MapPin, Loader2, Mail, Printer } from "lucide-react"
-// import type { IOrderStatus } from "@/lib/types/intrerface"
+import {
+  ArrowLeft,
+  Package,
+  CreditCard,
+  User,
+  MapPin,
+  Loader2,
+  Mail,
+  Printer,
+  Clock,
+} from "lucide-react"
+import { IOrderFull, IOrderStatus } from "@/lib/types/order.interface"
+import { useFetchById } from "@/hooks/useFetchById"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-export default function OrderDetailPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
+export default function OrderDetailPage() {
+  const { id } = useParams() as { id: string }
   const { toast } = useToast()
-  const [isLoading, setIsLoading] = useState(false)
 
-  // Mock order data - replace with real data from database
-  const order = {
-    id: params.id,
-    order_number: "ORD-2024-001",
-    status: "processing" as IOrderStatus,
-    payment_status: "paid",
-    payment_method: "Credit Card",
-    subtotal: 299.99,
-    discount_amount: 0,
-    tax_amount: 30.0,
-    shipping_amount: 9.99,
-    total_amount: 339.98,
-    currency: "USD",
-    created_at: "2024-01-15T10:30:00Z",
-    customer: {
-      name: "John Doe",
-      email: "john@example.com",
-      phone: "+1 (555) 123-4567",
-    },
-    shipping_address: {
-      full_name: "John Doe",
-      address_line1: "123 Main Street",
-      address_line2: "Apt 4B",
-      city: "New York",
-      state: "NY",
-      postal_code: "10001",
-      country: "United States",
-    },
-    items: [
-      {
-        id: "1",
-        product_name: "Wireless Noise-Cancelling Headphones",
-        variant_name: null,
-        sku: "WH-1000XM5",
-        quantity: 1,
-        unit_price: 299.99,
-        total_price: 299.99,
-      },
-    ],
-    tracking_number: "",
-    notes: "",
+  const [isLoading, setIsLoading] = useState(false)
+  const [orderStatus, setOrderStatus] = useState<IOrderStatus>("pending")
+  const [trackingNumber, setTrackingNumber] = useState("")
+
+  const { data: order, isLoading: fetchLoading } = useFetchById<IOrderFull>({
+    url: `/api/orders/${id}`,
+    extractData: (res) => res.data,
+  })
+
+  // Sync state after fetch
+  useEffect(() => {
+    if (order) {
+      setOrderStatus(order.status)
+      setTrackingNumber(order.shipping_info?.tracking_code || "")
+    }
+  }, [order])
+
+  if (fetchLoading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="animate-spin h-6 w-6" />
+      </div>
+    )
   }
 
-  const [orderStatus, seIOrderStatus] = useState<IOrderStatus>(order.status)
-  const [trackingNumber, setTrackingNumber] = useState(order.tracking_number)
+  if (!order) {
+    return <div className="text-center py-20">Order not found</div>
+  }
 
   const handleUpdateOrder = async () => {
     setIsLoading(true)
-
-    // Mock update - implement real database update
-    setTimeout(() => {
+    try {
+      // TODO: replace with real API call
+      await new Promise((res) => setTimeout(res, 1000))
       toast({
         title: "Order updated",
-        description: "Order status has been updated successfully.",
+        description: "Order status updated successfully.",
       })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update order.",
+        variant: "destructive",
+      })
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   const handleSendEmail = () => {
     toast({
       title: "Email sent",
-      description: "Order confirmation email has been sent to the customer.",
+      description: "Order confirmation email sent.",
     })
   }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/admin/orders">
               <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">Back</span>
             </Link>
           </Button>
           <div>
             <h1 className="text-3xl font-bold">{order.order_number}</h1>
             <p className="text-muted-foreground">
-              Placed on {new Date(order.created_at).toLocaleDateString()} at{" "}
+              Placed on{" "}
+              {new Date(order.created_at).toLocaleDateString()} at{" "}
               {new Date(order.created_at).toLocaleTimeString()}
             </p>
           </div>
@@ -118,7 +124,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Content */}
+        {/* LEFT SIDE */}
         <div className="lg:col-span-2 space-y-6">
           {/* Order Items */}
           <Card>
@@ -130,17 +136,24 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {order.items.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between border-b pb-4 last:border-0">
-                    <div className="flex-1">
-                      <p className="font-medium">{item.product_name}</p>
-                      {item.variant_name && <p className="text-sm text-muted-foreground">{item.variant_name}</p>}
-                      <p className="text-sm text-muted-foreground">SKU: {item.sku}</p>
-                      <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
+                {order.order_items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex justify-between border-b pb-4 last:border-0"
+                  >
+                    <div>
+                      <p className="font-medium">{item.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Quantity: {item.quantity}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Price: ৳ {Number(item.price_snapshot).toFixed(2)}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold">BDT{Number(item.total_price).toFixed(2)}</p>
-                      <p className="text-sm text-muted-foreground">BDT{Number(item.unit_price).toFixed(2)} each</p>
+                      <p className="font-semibold">
+                        ৳ {(Number(item.price_snapshot) * item.quantity).toFixed(2)}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -148,35 +161,35 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
 
               <Separator className="my-4" />
 
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>${order.subtotal.toFixed(2)}</span>
+              {/* Totals */}
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>৳ {Number(order.subtotal).toFixed(2)}</span>
                 </div>
-                {order.discount_amount > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Discount</span>
-                    <span className="text-green-600">-${order.discount_amount.toFixed(2)}</span>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span>৳ {Number(order.shipping).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Tax</span>
+                  <span>৳ {Number(order.tax).toFixed(2)}</span>
+                </div>
+                {order.discount && Number(order.discount) > 0 && (
+                  <div className="flex justify-between text-red-500">
+                    <span>Discount</span>
+                    <span>- ৳ {Number(order.discount).toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Shipping</span>
-                  <span>{order.shipping_amount === 0 ? "FREE" : `$${order.shipping_amount.toFixed(2)}`}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Tax</span>
-                  <span>${order.tax_amount.toFixed(2)}</span>
-                </div>
-                <Separator className="my-2" />
-                <div className="flex justify-between font-bold text-lg">
+                <div className="flex justify-between font-bold border-t pt-2 text-lg">
                   <span>Total</span>
-                  <span>${order.total_amount.toFixed(2)}</span>
+                  <span>৳ {Number(order.total).toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Customer Information */}
+          {/* Customer Info */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -184,38 +197,36 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 Customer Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="font-medium">{order.customer.name}</p>
-                <p className="text-sm text-muted-foreground">{order.customer.email}</p>
-                <p className="text-sm text-muted-foreground">{order.customer.phone}</p>
-              </div>
+            <CardContent className="space-y-2 text-sm">
+              <p className="font-medium">{order.customer_name}</p>
+              <p>Email: {order.shipping_info.email}</p>
+              <p>Phone: {order.customer_phone}</p>
             </CardContent>
           </Card>
 
-          {/* Shipping Address */}
+          {/* Shipping Info */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                Shipping Address
+                Shipping Information
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-sm">
-                <p className="font-medium">{order.shipping_address.full_name}</p>
-                <p>{order.shipping_address.address_line1}</p>
-                {order.shipping_address.address_line2 && <p>{order.shipping_address.address_line2}</p>}
-                <p>
-                  {order.shipping_address.city}, {order.shipping_address.state} {order.shipping_address.postal_code}
-                </p>
-                <p>{order.shipping_address.country}</p>
-              </div>
+            <CardContent className="space-y-2 text-sm">
+              <p className="font-medium">{order.shipping_info.name}</p>
+              <p>Phone: {order.shipping_info.phone}</p>
+              <p>Email: {order.shipping_info.email}</p>
+              <p>Address: {order.shipping_info.address}, {order.shipping_info.upazila}, {order.shipping_info.district}, Division: {order.shipping_info.division}</p>
+              <p>Shipping Method: {order.shipping_info.shipping_method}</p>
+              <p>Tracking Code: {order.shipping_info.tracking_code || "N/A"}</p>
+              <Badge variant={order.shipping_info.shipping_status === "pending" ? "secondary" : "default"}>
+                {order.shipping_info.shipping_status}
+              </Badge>
             </CardContent>
           </Card>
         </div>
 
-        {/* Sidebar */}
+        {/* RIGHT SIDE */}
         <div className="space-y-6">
           {/* Order Status */}
           <Card>
@@ -223,9 +234,13 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
               <CardTitle>Order Status</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Status Dropdown */}
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
-                <Select value={orderStatus} onValueChange={(value) => seIOrderStatus(value as IOrderStatus)}>
+                <Select
+                  value={orderStatus}
+                  onValueChange={(value) => setOrderStatus(value as IOrderStatus)}
+                >
                   <SelectTrigger id="status">
                     <SelectValue />
                   </SelectTrigger>
@@ -240,6 +255,7 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 </Select>
               </div>
 
+              {/* Tracking Number */}
               <div className="space-y-2">
                 <Label htmlFor="tracking">Tracking Number</Label>
                 <Input
@@ -250,14 +266,18 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 />
               </div>
 
-              <Button onClick={handleUpdateOrder} className="w-full" disabled={isLoading}>
+              <Button
+                onClick={handleUpdateOrder}
+                className="w-full"
+                disabled={isLoading}
+              >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Update Order
               </Button>
             </CardContent>
           </Card>
 
-          {/* Payment Information */}
+          {/* Payment Info */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -265,13 +285,13 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
                 Payment
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Method</span>
-                <span className="text-sm font-medium">{order.payment_method}</span>
+                <span>Method</span>
+                <span>{order.payment_method}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Status</span>
+                <span>Status</span>
                 <Badge variant={order.payment_status === "paid" ? "default" : "secondary"}>
                   {order.payment_status}
                 </Badge>
@@ -279,14 +299,14 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
             </CardContent>
           </Card>
 
-          {/* Order Notes */}
+          {/* Notes */}
           <Card>
             <CardHeader>
               <CardTitle>Order Notes</CardTitle>
             </CardHeader>
             <CardContent>
-              <Textarea placeholder="Add notes about this order..." rows={4} defaultValue={order.notes} />
-              <Button variant="outline" className="w-full mt-2 bg-transparent">
+              <Textarea placeholder="Add notes..." rows={4} defaultValue={order.note || ""} />
+              <Button variant="outline" className="w-full mt-2">
                 Save Notes
               </Button>
             </CardContent>
@@ -295,30 +315,14 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
           {/* Timeline */}
           <Card>
             <CardHeader>
-              <CardTitle>Order Timeline</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Order Timeline
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
-                    <div className="w-px h-full bg-border" />
-                  </div>
-                  <div className="flex-1 pb-4">
-                    <p className="text-sm font-medium">Order placed</p>
-                    <p className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleString()}</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="flex flex-col items-center">
-                    <div className="w-2 h-2 rounded-full bg-muted" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-muted-foreground">Awaiting updates...</p>
-                  </div>
-                </div>
-              </div>
+            <CardContent className="space-y-4 text-sm">
+              <p>Order placed on: {new Date(order.created_at).toLocaleString()}</p>
+              <p>Last updated: {new Date(order.updated_at).toLocaleString()}</p>
             </CardContent>
           </Card>
         </div>

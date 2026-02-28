@@ -8,10 +8,29 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Package, Eye } from "lucide-react"
 import Link from "next/link"
+import { useEffect } from "react"
+import { useFetchResource } from "@/hooks/useFetchResource"
+import { IOrderFull } from "@/lib/types/order.interface"
 
 export default function OrdersPage() {
   // Mock orders - implement with real data later
-  const orders: any[] = []
+  const {
+    data: orders,
+    isLoading,
+    fetchData: fetchOrders,
+  } = useFetchResource<IOrderFull>({
+    url: "/api/orders",
+    extractData: (result) =>
+      Array.isArray(result)
+        ? result
+        : Array.isArray(result?.data?.orders)
+          ? result.data.orders
+          : [],
+  })
+
+  useEffect(() => {
+    fetchOrders()
+  }, [fetchOrders])
 
   return (
     <ProtectedRoute>
@@ -48,7 +67,7 @@ export default function OrdersPage() {
                         <p className="text-sm text-muted-foreground">
                           Placed on {new Date(order.created_at).toLocaleDateString()}
                         </p>
-                        <p className="font-semibold mt-1">BDT{order.total_amount.toFixed(2)}</p>
+                        <p className="font-semibold mt-1">BDT{Number(order.total).toFixed(2)}</p>
                       </div>
                       <Button variant="outline" size="sm">
                         <Eye className="mr-2 h-4 w-4" />

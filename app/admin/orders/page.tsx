@@ -19,7 +19,7 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState("")
   // Fetch Order
   const {
-    data: rawOrders,
+    data: orders,
     isLoading,
     fetchData: fetchOrders,
   } = useFetchResource<IOrderFull>({
@@ -36,7 +36,7 @@ export default function OrdersPage() {
     fetchOrders()
   }, [fetchOrders])
 
-  const orders = JSON.parse(JSON.stringify(rawOrders)) as IOrderFull[]
+  // const orders = JSON.parse(JSON.stringify(rawOrders)) as IOrderFull[]
 
   const [statusFilter, setStatusFilter] = useState<string>("all")
 
@@ -112,80 +112,87 @@ export default function OrdersPage() {
           <CardDescription>View and manage customer orders</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4 mb-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search orders..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary"></div>
+            </div>
+          ) : (
+            <>          <div className="flex gap-4 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search orders..."
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-45">
+                  <Filter className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Orders</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="processing">Processing</SelectItem>
+                  <SelectItem value="shipped">Shipped</SelectItem>
+                  <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                  <SelectItem value="refunded">Refunded</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-45">
-                <Filter className="mr-2 h-4 w-4" />
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Orders</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="processing">Processing</SelectItem>
-                <SelectItem value="shipped">Shipped</SelectItem>
-                <SelectItem value="delivered">Delivered</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-                <SelectItem value="refunded">Refunded</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order Number</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Total (BDT)</TableHead>
+                      <TableHead>Payment</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">{order.order_number}</TableCell>
+                        <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell>{order.customer_name}<br /> {order.customer_phone}</TableCell>
+                        <TableCell>{Number(order.total).toFixed(2)}</TableCell>
+                        <TableCell>
+                          <Badge variant={order.payment_status === "paid" ? "default" : "secondary"}>
+                            {order.payment_status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={getStatusColor(order.status) as any}>{order.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" asChild>
+                            <Link href={`/admin/orders/${order.id}`}>
+                              <Eye className="h-4 w-4" />
+                              <span className="sr-only">View details</span>
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order Number</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Total (BDT)</TableHead>
-                  <TableHead>Payment</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.order_number}</TableCell>
-                    <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell>{order.customer_name}<br /> {order.customer_phone}</TableCell>
-                    <TableCell>{Number(order.total).toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Badge variant={order.payment_status === "paid" ? "default" : "secondary"}>
-                        {order.payment_status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusColor(order.status) as any}>{order.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" asChild>
-                        <Link href={`/admin/orders/${order.id}`}>
-                          <Eye className="h-4 w-4" />
-                          <span className="sr-only">View details</span>
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-          {filteredOrders.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No orders found</p>
-            </div>
+              {filteredOrders.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground">No orders found</p>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
