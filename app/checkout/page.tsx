@@ -44,33 +44,33 @@ const MOBILE_BANKING_PROVIDERS = [
     name: "bKash",
     logo: "https://freelogopng.com/images/all_img/1656227518bkash-logo-png.png",
     activeBg: "bg-pink-50",
-    accountNo: "01700-000000",
+    accountNo: "01833662270",
     type: "Personal",
   },
-  {
-    id: "nagad",
-    name: "Nagad",
-    logo: "https://nagad.com.bd/_nuxt/img/new-logo.14fe8a5.png",
-    activeBg: "bg-orange-50",
-    accountNo: "01700-111111",
-    type: "Personal",
-  },
-  {
-    id: "rocket",
-    name: "Rocket",
-    logo: "https://www.dutchbanglabank.com/img/mlogo.png",
-    activeBg: "bg-purple-50",
-    accountNo: "01700-222222",
-    type: "Personal",
-  },
-  {
-    id: "upay",
-    name: "Upay",
-    logo: "https://www.upaybd.com/images/Upay-logo-revised-new.png",
-    activeBg: "bg-blue-50",
-    accountNo: "01700-333333",
-    type: "Personal",
-  },
+  // {
+  //   id: "nagad",
+  //   name: "Nagad",
+  //   logo: "https://nagad.com.bd/_nuxt/img/new-logo.14fe8a5.png",
+  //   activeBg: "bg-orange-50",
+  //   accountNo: "01700-111111",
+  //   type: "Personal",
+  // },
+  // {
+  //   id: "rocket",
+  //   name: "Rocket",
+  //   logo: "https://www.dutchbanglabank.com/img/mlogo.png",
+  //   activeBg: "bg-purple-50",
+  //   accountNo: "01700-222222",
+  //   type: "Personal",
+  // },
+  // {
+  //   id: "upay",
+  //   name: "Upay",
+  //   logo: "https://www.upaybd.com/images/Upay-logo-revised-new.png",
+  //   activeBg: "bg-blue-50",
+  //   accountNo: "01700-333333",
+  //   type: "Personal",
+  // },
 ]
 
 type PaymentMethod = "cod" | "mobile_banking"
@@ -724,7 +724,7 @@ export default function CheckoutPage() {
                             {item.variant && (
                               <p className="text-xs text-muted-foreground mt-0.5">{item.variant.name}</p>
                             )}
-                            <p className="text-sm font-semibold mt-1">${(item.price_snapshot * item.quantity).toFixed(2)}</p>
+                            <p className="text-sm font-semibold mt-1">BDT {(item.price_snapshot * item.quantity).toFixed(2)}</p>
                           </div>
                         </div>
                       )
@@ -737,17 +737,17 @@ export default function CheckoutPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span>${subtotal.toFixed(2)}</span>
+                      <span>BDT {subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Shipping</span>
                       <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>
-                        {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+                        {shipping === 0 ? "FREE" : `BDT ${shipping.toFixed(2)}`}
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Tax (8%)</span>
-                      <span>${tax.toFixed(2)}</span>
+                      <span>BDT {tax.toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -755,7 +755,7 @@ export default function CheckoutPage() {
 
                   <div className="flex justify-between text-base font-bold">
                     <span>Total</span>
-                    <span className="text-lg">${total.toFixed(2)}</span>
+                    <span className="text-lg">BDT {total.toFixed(2)}</span>
                   </div>
 
                   {/* Active payment method badge */}
