@@ -4,99 +4,114 @@ import { StatsCard } from "@/components/admin/stats-card"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { DollarSign, ShoppingCart, Package, Users, TrendingUp, AlertCircle } from "lucide-react"
+import { DollarSign, ShoppingCart, Package, Users, TrendingUp, AlertCircle, LucideAlertCircle } from "lucide-react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
 
 export default function AdminDashboardPage() {
-  // Mock data - replace with real data from database
-  const stats = {
-    revenue: {
-      value: "BDT45,231.89",
-      trend: { value: 20.1, isPositive: true },
-    },
-    orders: {
-      value: "234",
-      trend: { value: 12.5, isPositive: true },
-    },
-    products: {
-      value: "1,234",
-      trend: { value: 5.2, isPositive: true },
-    },
-    customers: {
-      value: "892",
-      trend: { value: 8.3, isPositive: true },
-    },
+  const [dashboardData, setDashboardData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/admin/dashboard")
+        if (!res.ok) throw new Error("Failed to fetch dashboard data")
+        const result = await res.json()
+        setDashboardData(result.data)
+      } catch (err: any) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const StockBadge = ({ stock, threshold }: { stock: number; threshold: number }) => {
+    let variant: "destructive" | "secondary" | "default" | "outline" = "secondary"
+    let icon = null
+    if (stock === 0) {
+      variant = "destructive"
+      icon = <LucideAlertCircle className="w-4 h-4 mr-1" />
+    } else if (stock <= threshold) {
+      variant = "destructive"
+    } else {
+      variant = "secondary"
+    }
+
+    return (
+      <Badge
+        variant={variant}
+        className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium shadow-sm"
+      >
+        {icon}
+        {stock === 0 ? "Out of Stock" : `${stock} left`}
+      </Badge>
+    )
   }
 
-  const recentOrders = [
-    {
-      id: "1",
-      orderNumber: "ORD-2024-001",
-      customer: "John Doe",
-      total: 299.99,
-      status: "processing",
-      date: "2024-01-15",
-    },
-    {
-      id: "2",
-      orderNumber: "ORD-2024-002",
-      customer: "Jane Smith",
-      total: 149.99,
-      status: "shipped",
-      date: "2024-01-15",
-    },
-    {
-      id: "3",
-      orderNumber: "ORD-2024-003",
-      customer: "Bob Johnson",
-      total: 499.99,
-      status: "delivered",
-      date: "2024-01-14",
-    },
-  ]
-
-  const lowStockProducts = [
-    { id: "1", name: "Wireless Headphones", stock: 5, threshold: 10 },
-    { id: "2", name: "Smart Watch Pro", stock: 8, threshold: 10 },
-    { id: "3", name: "Premium Leather Jacket", stock: 3, threshold: 10 },
-  ]
+  const SkeletonCard = () => (
+    <div className="animate-pulse space-y-2">
+      <div className="h-6 w-3/4 bg-gray-300 rounded" />
+      <div className="h-4 w-1/2 bg-gray-300 rounded" />
+    </div>
+  )
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back! Here's what's happening with your store.</p>
+        <p className="text-muted-foreground">
+          Welcome back! Here's what's happening with your store.
+        </p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Total Revenue"
-          value={stats.revenue.value}
-          description="Total sales this month"
-          icon={DollarSign}
-          trend={stats.revenue.trend}
-        />
-        <StatsCard
-          title="Orders"
-          value={stats.orders.value}
-          description="Orders this month"
-          icon={ShoppingCart}
-          trend={stats.orders.trend}
-        />
-        <StatsCard
-          title="Products"
-          value={stats.products.value}
-          description="Total products in store"
-          icon={Package}
-          trend={stats.products.trend}
-        />
-        <StatsCard
-          title="Customers"
-          value={stats.customers.value}
-          description="Total registered customers"
-          icon={Users}
-          trend={stats.customers.trend}
-        />
+        {loading
+          ? [1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent>
+                <SkeletonCard />
+              </CardContent>
+            </Card>
+          ))
+          : [
+            {
+              title: "Total Revenue",
+              value: dashboardData?.totalRevenue ?? 0,
+              description: "Total sales this month",
+              icon: DollarSign,
+            },
+            {
+              title: "Orders",
+              value: dashboardData?.totalOrder ?? 0,
+              description: "Orders this month",
+              icon: ShoppingCart,
+            },
+            {
+              title: "Products",
+              value: dashboardData?.totalProduct ?? 0,
+              description: "Total products in store",
+              icon: Package,
+            },
+            {
+              title: "Customers",
+              value: dashboardData?.totalCustomer ?? 0,
+              description: "Total registered customers",
+              icon: Users,
+            },
+          ].map((stat) => (
+            <StatsCard
+              key={stat.title}
+              title={stat.title}
+              value={stat.value}
+              description={stat.description}
+              icon={stat.icon}
+            />
+          ))}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -107,30 +122,61 @@ export default function AdminDashboardPage() {
             <CardDescription>Latest orders from your store</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between border-b pb-4 last:border-0">
-                  <div className="space-y-1">
-                    <p className="font-medium">{order.orderNumber}</p>
-                    <p className="text-sm text-muted-foreground">{order.customer}</p>
-                    <p className="text-xs text-muted-foreground">{order.date}</p>
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex justify-between items-center animate-pulse space-x-4">
+                    <div className="space-y-1 flex-1">
+                      <div className="h-4 w-1/3 bg-gray-300 rounded" />
+                      <div className="h-3 w-1/4 bg-gray-200 rounded" />
+                      <div className="h-2 w-1/5 bg-gray-200 rounded" />
+                    </div>
+                    <div className="space-y-1 text-right flex-shrink-0">
+                      <div className="h-4 w-12 bg-gray-300 rounded ml-auto" />
+                      <div className="h-3 w-10 bg-gray-200 rounded ml-auto" />
+                    </div>
                   </div>
-                  <div className="text-right space-y-1">
-                    <p className="font-semibold">BDT{order.total.toFixed(2)}</p>
-                    <Badge
-                      variant={
-                        order.status === "delivered" ? "default" : order.status === "shipped" ? "secondary" : "outline"
-                      }
-                    >
-                      {order.status}
-                    </Badge>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {dashboardData?.recentOrders.map((order: any) => (
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between border-b pb-4 last:border-0"
+                  >
+                    <div className="space-y-1">
+                      <p className="font-medium">{order.order_id}</p>
+                      <p className="text-sm text-muted-foreground">{order.customer_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(order.time).toLocaleString("en-BD", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
+                      </p>
+                    </div>
+                    <div className="text-right space-y-1">
+                      <p className="font-semibold">BDT{Number(order.total).toFixed(2)}</p>
+                      <Badge
+                        variant={
+                          order.status === "delivered"
+                            ? "default"
+                            : order.status === "shipped"
+                              ? "secondary"
+                              : "outline"
+                        }
+                      >
+                        {order.status}
+                      </Badge>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            <Button variant="outline" className="w-full mt-4 bg-transparent">
-              View All Orders
-            </Button>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -144,39 +190,45 @@ export default function AdminDashboardPage() {
             <CardDescription>Products running low on inventory</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {lowStockProducts.map((product) => (
-                <div key={product.id} className="flex items-center justify-between border-b pb-4 last:border-0">
-                  <div>
-                    <p className="font-medium">{product.name}</p>
-                    <p className="text-sm text-muted-foreground">Threshold: {product.threshold} units</p>
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div
+                    key={i}
+                    className="flex justify-between items-center animate-pulse space-x-4"
+                  >
+                    <div className="space-y-1 flex-1">
+                      <div className="h-4 w-2/3 bg-gray-300 rounded" />
+                      <div className="h-3 w-1/4 bg-gray-200 rounded" />
+                    </div>
+                    <div className="h-4 w-12 bg-gray-300 rounded" />
                   </div>
-                  <Badge variant="destructive">{product.stock} left</Badge>
-                </div>
-              ))}
-            </div>
-            <Button variant="outline" className="w-full mt-4 bg-transparent">
-              Manage Inventory
-            </Button>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {dashboardData?.lowStockProducts.map((product: any, i: number) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between border-b pb-4 last:border-0"
+                  >
+                    <div>
+                      <p className="font-medium">{product.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Threshold: {product.low_stock_threshold} units
+                      </p>
+                    </div>
+                    <StockBadge
+                      stock={product.stock_quantity}
+                      threshold={product.low_stock_threshold}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
-
-      {/* Sales Chart Placeholder */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5" />
-            Sales Overview
-          </CardTitle>
-          <CardDescription>Monthly sales performance</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-75 flex items-center justify-center border-2 border-dashed rounded-lg">
-            <p className="text-muted-foreground">Sales chart will be displayed here</p>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }

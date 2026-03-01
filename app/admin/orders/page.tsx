@@ -54,7 +54,6 @@ export default function OrdersPage() {
     return colors[status] || "secondary"
   }
 
-  console.log(orders)
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =

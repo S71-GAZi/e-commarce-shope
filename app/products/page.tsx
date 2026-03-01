@@ -20,7 +20,6 @@ export default async function ProductsPage({
     maxPrice?: string
   }
 }) {
-  console.log("Server params:", searchParams)
 
   // Convert URL params
   const category = searchParams.category

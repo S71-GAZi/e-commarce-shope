@@ -54,6 +54,71 @@ export const userQueries = {
     );
   }
 }
+export const dashboardQuery = {
+  async getDashboardStats() {
+    return executeQuery(`
+      SELECT
+        (SELECT COUNT(*) FROM users WHERE role = 'customer') AS totalCustomer,
+        (SELECT COUNT(*) FROM products) AS totalProduct,
+        (SELECT COUNT(*) FROM orders 
+          WHERE status NOT IN ('cancelled','returned')
+          AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        ) AS totalOrder,
+        (SELECT COALESCE(SUM(total), 0) FROM orders 
+          WHERE status NOT IN ('cancelled','returned')
+          AND created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        ) AS totalRevenue
+    `)
+  },
+  async getRecentOrders() {
+    return executeQuery(`
+       SELECT 
+        o.order_number AS order_id,
+        u.full_name AS customer_name,
+        o.created_at AS time,
+        o.total,
+        o.status
+      FROM orders o
+      JOIN users u ON o.user_id = u.id
+      ORDER BY o.created_at DESC
+      LIMIT 4
+    `)
+  },
+  async getLowStockProducts() {
+    // First: low stock products
+    const lowStock = await executeQuery(`
+    SELECT name, stock_quantity, low_stock_threshold
+    FROM products
+    WHERE is_active = true
+      AND stock_quantity <= low_stock_threshold
+    ORDER BY stock_quantity ASC
+    LIMIT 5
+  `)
+
+    // If we found low stock products, exclude them from fallback
+    if (lowStock.length > 0) {
+      const excludeIds = lowStock.map(p => `'${p.name}'`).join(', ')
+      const fallback = await executeQuery(`
+      SELECT name, stock_quantity, low_stock_threshold
+      FROM products
+      WHERE is_active = true
+        AND name NOT IN (${excludeIds})
+      ORDER BY stock_quantity ASC
+      LIMIT ${5 - lowStock.length}
+    `)
+      return [...lowStock, ...fallback]
+    }
+
+    // If no low stock products, return lowest stock products
+    return executeQuery(`
+    SELECT name, stock_quantity, low_stock_threshold
+    FROM products
+    WHERE is_active = true
+    ORDER BY stock_quantity ASC
+    LIMIT 5
+  `)
+  }
+}
 
 export const productQueries = {
   async findById(id: string) {
@@ -581,62 +646,62 @@ export const categoryQueries = {
   //   await executeQuery(query, values)
   //   return executeQuerySingle<ICategory>("SELECT * FROM categories WHERE id = ?", [id])
   // },
-async update(id: string, data: Partial<ICategory>) {
-  const fields: string[] = [];
-  const values: any[] = [];
+  async update(id: string, data: Partial<ICategory>) {
+    const fields: string[] = [];
+    const values: any[] = [];
 
-  if (data.name !== undefined) {
-    fields.push("name = ?");
-    values.push(data.name);
-  }
+    if (data.name !== undefined) {
+      fields.push("name = ?");
+      values.push(data.name);
+    }
 
-  if (data.slug !== undefined) {
-    fields.push("slug = ?");
-    values.push(data.slug);
-  }
+    if (data.slug !== undefined) {
+      fields.push("slug = ?");
+      values.push(data.slug);
+    }
 
-  if (data.description !== undefined) {
-    fields.push("description = ?");
-    values.push(data.description);
-  }
+    if (data.description !== undefined) {
+      fields.push("description = ?");
+      values.push(data.description);
+    }
 
-  if (data.parent_id !== undefined) {
-    fields.push("parent_id = ?");
-    values.push(data.parent_id);
-  }
+    if (data.parent_id !== undefined) {
+      fields.push("parent_id = ?");
+      values.push(data.parent_id);
+    }
 
-  if (data.display_order !== undefined) {
-    fields.push("display_order = ?");
-    values.push(data.display_order);
-  }
+    if (data.display_order !== undefined) {
+      fields.push("display_order = ?");
+      values.push(data.display_order);
+    }
 
-  if (data.image_url !== undefined) {
-    fields.push("image_url = ?");
-    values.push(data.image_url);
-  }
+    if (data.image_url !== undefined) {
+      fields.push("image_url = ?");
+      values.push(data.image_url);
+    }
 
-  if (data.is_active !== undefined) {
-    fields.push("is_active = ?");
-    values.push(data.is_active ? 1 : 1);
-  }
+    if (data.is_active !== undefined) {
+      fields.push("is_active = ?");
+      values.push(data.is_active ? 1 : 1);
+    }
 
-  if (fields.length === 0) return undefined;
+    if (fields.length === 0) return undefined;
 
-  values.push(id);
+    values.push(id);
 
-  const query = `
+    const query = `
     UPDATE categories 
     SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP 
     WHERE id = ?
   `;
 
-  await executeQuery(query, values);
+    await executeQuery(query, values);
 
-  return executeQuerySingle<ICategory>(
-    "SELECT * FROM categories WHERE id = ?",
-    [id]
-  );
-},
+    return executeQuerySingle<ICategory>(
+      "SELECT * FROM categories WHERE id = ?",
+      [id]
+    );
+  },
   async delete(id: string) {
     await executeQuery("DELETE FROM categories WHERE id = ?", [id])
   },
