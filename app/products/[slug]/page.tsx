@@ -11,6 +11,7 @@ import { getProducts } from "@/lib/db-utils"
 import { Star, ShoppingCart, Heart, Truck, Shield, RotateCcw } from "lucide-react"
 import { productQueries } from "@/lib/db"
 import { AddToCartButton } from "@/components/home/AddToCartButton"
+import ProductImageGallery from "@/components/products/ProductImageGallery"
 
 export default async function ProductDetailPage({ params, }: { params: { slug: string } }) {
   const product = await productQueries.findBySlug(params.slug)
@@ -42,7 +43,7 @@ export default async function ProductDetailPage({ params, }: { params: { slug: s
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Product Images */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
               <Image
                 src={imageUrl}
@@ -57,7 +58,14 @@ export default async function ProductDetailPage({ params, }: { params: { slug: s
                 </Badge>
               )}
             </div>
-          </div>
+          </div> */}
+
+          {/* Product Images */}
+            <ProductImageGallery
+              images={images.length > 0 ? images : ["/placeholder.svg"]}
+              productName={product.name}
+              discount={discount}
+            />
 
           {/* Product Info */}
           <div className="space-y-6">
@@ -136,8 +144,8 @@ export default async function ProductDetailPage({ params, }: { params: { slug: s
               <div className="flex items-center gap-3">
                 <Truck className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="font-medium text-sm">Free Shipping</p>
-                  <p className="text-xs text-muted-foreground">On orders over $50</p>
+                  <p className="font-medium text-sm">Shipping Fee</p>
+                  <p className="text-xs text-muted-foreground">ঢাকার ভিতরে ৭০ টাকা ঢাকার বাহিরে ১২০ টাকা </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -151,7 +159,7 @@ export default async function ProductDetailPage({ params, }: { params: { slug: s
                 <RotateCcw className="h-5 w-5 text-primary" />
                 <div>
                   <p className="font-medium text-sm">Easy Returns</p>
-                  <p className="text-xs text-muted-foreground">30-day policy</p>
+                  <p className="text-xs text-muted-foreground">XX-day policy</p>
                 </div>
               </div>
             </div>
@@ -168,7 +176,7 @@ export default async function ProductDetailPage({ params, }: { params: { slug: s
 
           <TabsContent value="description" className="mt-6">
             <div className="prose max-w-none">
-              <p className="text-muted-foreground leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
                 {product.description || "No description available."}
               </p>
             </div>
