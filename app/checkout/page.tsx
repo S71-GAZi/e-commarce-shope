@@ -230,7 +230,6 @@ export default function CheckoutPage() {
               : "We'll verify your payment and confirm your order shortly.",
         })
         const newOrder = await res.json()
-        // console.log("New order ID:", newOrderId.data.id)
         router.push(`/orders/confirmation/${newOrder.data.id}`)
       }
     } catch (error) {
