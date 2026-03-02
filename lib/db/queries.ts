@@ -245,7 +245,7 @@ export interface ICreateFullOrderParams {
   status: IOrderStatus;
   total: number;
   note?: string | null;
-  note_image?: string | null;
+  sample_image?: string | null;
   payment_method: IPaymentMethod;
   payment_status: IPaymentStatus;
   payment_provider?: string | null;
@@ -379,7 +379,7 @@ export const orderQueries = {
             payment_sender_account,
             payment_transaction_id,
             note,
-            note_image,
+            sample_image,
             ip_address,
             created_at,
             updated_at
@@ -400,7 +400,7 @@ export const orderQueries = {
         data.payment_sender_account ?? null,
         data.payment_transaction_id ?? null,
         data.note ?? null,
-        data.note_image ?? null,
+        data.sample_image ?? null,
         data.ip_address ?? null,
         data.create_at ?? new Date(),
         data.updated_at ?? new Date(),
@@ -420,8 +420,10 @@ export const orderQueries = {
                     slug,
                     price_snapshot,
                     quantity,
-                    images
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                    images,
+                    selected_size,
+                    product_code
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?,?)`,
           [
             orderId,
             item.product_id,
@@ -431,6 +433,8 @@ export const orderQueries = {
             item.price_snapshot,
             item.quantity,
             item.images ? JSON.stringify(item.images) : null,
+            item.selected_size,
+            item.product_code
           ]
         )
       )

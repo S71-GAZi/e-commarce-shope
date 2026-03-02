@@ -131,7 +131,7 @@ export default function AdminDashboardPage() {
                       <div className="h-3 w-1/4 bg-gray-200 rounded" />
                       <div className="h-2 w-1/5 bg-gray-200 rounded" />
                     </div>
-                    <div className="space-y-1 text-right flex-shrink-0">
+                    <div className="space-y-1 text-right shrink-0">
                       <div className="h-4 w-12 bg-gray-300 rounded ml-auto" />
                       <div className="h-3 w-10 bg-gray-200 rounded ml-auto" />
                     </div>

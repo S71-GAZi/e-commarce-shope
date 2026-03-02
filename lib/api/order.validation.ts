@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { nullable, z } from "zod";
 
 export const ShippingInfoSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -52,15 +52,17 @@ export const PaymentSchema = z
     });
 
 export const OrderItemSchema = z.object({
-    product_id: z.string().min(1, "Product Id is required"), // ✅ string → number (DB FK)
-    variant_id: z.number().int().positive().nullable().optional(), // ✅ string → number
+    product_id: z.string().min(1, "Product Id is required"),
+    variant_id: z.number().int().positive().nullable().optional(),
 
     name: z.string().min(1, "Item name is required"),
     slug: z.string().nullable().optional(),
     price_snapshot: z.coerce.number().nonnegative("Price must be non-negative"),
-    quantity: z.number().int().min(1, "Quantity must be at least 1"), // ✅ int enforced
+    quantity: z.number().int().min(1, "Quantity must be at least 1"),
 
-    images: z.string().nullable().optional(), // ✅ only string[] (stringify is backend's job)
+    images: z.string().nullable().optional(),
+    selected_size: z.string().nullable().optional(),
+    product_code: z.string().nullable().optional()
 });
 
 export const CreateOrderSchema = z
@@ -78,7 +80,7 @@ export const CreateOrderSchema = z
         total: z.number().nonnegative("Total must be non-negative"),
 
         note: z.string().max(500, "Note must be under 500 characters").nullable().optional(), // ✅ max length
-        note_image: z.string().url("Invalid image URL").nullable().optional(), // ✅ url validation
+        sample_image: z.string().url("Invalid image URL").nullable().optional(), // ✅ url validation
     })
     .superRefine((data, ctx) => {
         // ✅ total integrity check

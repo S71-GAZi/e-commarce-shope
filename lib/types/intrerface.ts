@@ -111,11 +111,18 @@ export interface ICartItem extends IProduct {
   product_id: string
   variant_id?: string
   quantity: number
-  price_snapshot: number    // snapshot of product price at the time of adding
+  price_snapshot: number
   created_at: string
   updated_at: string
-  // product?: IProduct        // full product info if needed
-  variant?: IProductVariant // full variant info if needed
+  variant?: IProductVariant
+  selected_size?: string
+  product_code?: string
+
+}
+
+export interface IBuyBowCartItem extends ICartItem {
+  note?: string
+  sample_image?: File | null
 }
 
 export interface IWishlistItem {
@@ -180,4 +187,13 @@ export interface IBanner {
   valid_until?: string
   created_at: string
   updated_at: string
+}
+
+
+export interface IAddToCartParams {
+  product: IProduct
+  variant?: IProductVariant
+  quantity?: number
+  selectedSize?: string
+  productCode?: string
 }

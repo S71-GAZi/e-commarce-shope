@@ -34,7 +34,7 @@ export function ProductCard({ product }: IProductCardProps) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
-    addItem(product)
+    addItem({ product })
   }
 
   return (
@@ -96,10 +96,15 @@ export function ProductCard({ product }: IProductCardProps) {
       </CardContent>
 
       <CardFooter className="p-4 pt-0 flex gap-2">
-        <Button className="flex-1 cursor-pointer" disabled={product.stock_quantity <= 0} onClick={handleAddToCart}>
+        <Button className=" cursor-pointer" disabled={product.stock_quantity <= 0} onClick={handleAddToCart}>
           <ShoppingCart className="mr-2 h-4 w-4" />
-          Add to Cart
         </Button>
+        <Link href={`/products/${product.slug}?buy_now`} className="flex-1 ">
+          <Button className=" w-full cursor-pointer" disabled={product.stock_quantity <= 0}>
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            Buy Now
+          </Button>
+        </Link>
         <Button variant="outline" size="icon" className="cursor-pointer">
           <Heart className="h-4 w-4" />
           <span className="sr-only">Add to wishlist</span>

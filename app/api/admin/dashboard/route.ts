@@ -3,6 +3,7 @@ import { dashboardQuery } from "@/lib/db"
 import { getTokenFromRequest, isAdmin } from "@/lib/api/middleware"
 import { getUserFromToken } from "@/lib/jwt"
 import { NextRequest } from "next/server"
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
     try {
