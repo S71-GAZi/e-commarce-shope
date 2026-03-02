@@ -70,29 +70,44 @@ const menuItems = [
   // },
 ]
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  closeSidebar?: () => void
+}
+
+export function AdminSidebar({ closeSidebar }: AdminSidebarProps) {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-muted/0">
-      <div className="p-6">
+    <div className="flex h-full w-64 flex-col border-r bg-background">
+
+      {/* Header */}
+      <div className="p-4 sm:p-6 border-b">
         <h2 className="text-lg font-semibold">Admin Panel</h2>
       </div>
-      <ScrollArea className="flex-1 px-3">
+
+      {/* Menu */}
+      <ScrollArea className="flex-1 px-3 py-4">
         <div className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
+
             return (
               <Button
                 key={item.href}
                 variant={isActive ? "secondary" : "ghost"}
-                className={cn("w-full justify-start", isActive && "bg-secondary")}
+                className={cn(
+                  "w-full justify-start transition-all duration-200",
+                  isActive && "bg-secondary font-medium border-l-4 border-primary"
+                )}
                 asChild
               >
-                <Link href={item.href}>
-                  <Icon className="mr-2 h-4 w-4" />
-                  {item.title}
+                <Link
+                  href={item.href}
+                  onClick={closeSidebar} // 👈 closes sidebar on mobile
+                >
+                  <Icon className="mr-2 h-4 w-4 shrink-0" />
+                  <span className="truncate">{item.title}</span>
                 </Link>
               </Button>
             )

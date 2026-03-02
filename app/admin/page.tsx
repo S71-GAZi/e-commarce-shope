@@ -3,10 +3,8 @@
 import { StatsCard } from "@/components/admin/stats-card"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { DollarSign, ShoppingCart, Package, Users, TrendingUp, AlertCircle, LucideAlertCircle } from "lucide-react"
+import { DollarSign, ShoppingCart, Package, Users, AlertCircle, LucideAlertCircle } from "lucide-react"
 import { useEffect, useState } from "react"
-import Link from "next/link"
 
 export default function AdminDashboardPage() {
   const [dashboardData, setDashboardData] = useState<any>(null)
@@ -69,7 +67,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {loading
           ? [1, 2, 3, 4].map((i) => (
             <Card key={i}>
@@ -114,14 +112,14 @@ export default function AdminDashboardPage() {
           ))}
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 md:grid-cols-2">
         {/* Recent Orders */}
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Recent Orders</CardTitle>
             <CardDescription>Latest orders from your store</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 py-4 sm:px-6">
             {loading ? (
               <div className="space-y-4">
                 {[1, 2, 3, 4].map((i) => (
@@ -143,11 +141,16 @@ export default function AdminDashboardPage() {
                 {dashboardData?.recentOrders.map((order: any) => (
                   <div
                     key={order.id}
-                    className="flex items-center justify-between border-b pb-4 last:border-0"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-4 last:border-0 gap-3"
                   >
-                    <div className="space-y-1">
-                      <p className="font-medium">{order.order_id}</p>
-                      <p className="text-sm text-muted-foreground">{order.customer_name}</p>
+                    {/* Left Side */}
+                    <div className="space-y-1 min-w-0">
+                      <p className="font-medium text-sm sm:text-base truncate">
+                        {order.order_id}
+                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                        {order.customer_name}
+                      </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(order.time).toLocaleString("en-BD", {
                           year: "numeric",
@@ -159,8 +162,12 @@ export default function AdminDashboardPage() {
                         })}
                       </p>
                     </div>
-                    <div className="text-right space-y-1">
-                      <p className="font-semibold">BDT{Number(order.total).toFixed(2)}</p>
+
+                    {/* Right Side */}
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2">
+                      <p className="font-semibold text-sm sm:text-base">
+                        BDT {Number(order.total).toFixed(2)}
+                      </p>
                       <Badge
                         variant={
                           order.status === "delivered"
@@ -169,6 +176,7 @@ export default function AdminDashboardPage() {
                               ? "secondary"
                               : "outline"
                         }
+                        className="capitalize text-xs"
                       >
                         {order.status}
                       </Badge>
@@ -181,7 +189,7 @@ export default function AdminDashboardPage() {
         </Card>
 
         {/* Low Stock Alert */}
-        <Card>
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-orange-500" />
@@ -189,7 +197,7 @@ export default function AdminDashboardPage() {
             </CardTitle>
             <CardDescription>Products running low on inventory</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 py-4 sm:px-6">
             {loading ? (
               <div className="space-y-4">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -210,18 +218,23 @@ export default function AdminDashboardPage() {
                 {dashboardData?.lowStockProducts.map((product: any, i: number) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between border-b pb-4 last:border-0"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-4 last:border-0 gap-3"
                   >
-                    <div>
-                      <p className="font-medium">{product.name}</p>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm sm:text-base truncate">
+                        {product.name}
+                      </p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         Threshold: {product.low_stock_threshold} units
                       </p>
                     </div>
-                    <StockBadge
-                      stock={product.stock_quantity}
-                      threshold={product.low_stock_threshold}
-                    />
+
+                    <div className="self-start sm:self-auto">
+                      <StockBadge
+                        stock={product.stock_quantity}
+                        threshold={product.low_stock_threshold}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
