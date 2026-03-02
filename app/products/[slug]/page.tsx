@@ -1,5 +1,4 @@
-import { notFound } from "next/navigation"
-import Image from "next/image"
+import { notFound, useSearchParams } from "next/navigation"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { ProductCard } from "@/components/products/product-card"
@@ -12,22 +11,22 @@ import { Star, ShoppingCart, Heart, Truck, Shield, RotateCcw } from "lucide-reac
 import { productQueries } from "@/lib/db"
 import { AddToCartButton } from "@/components/home/AddToCartButton"
 import ProductImageGallery from "@/components/products/ProductImageGallery"
+import Link from "next/link"
+import ProductPurchaseOptions from "../ProductPurchaseOptions"
 
-export default async function ProductDetailPage({ params, }: { params: { slug: string } }) {
+export default async function ProductDetailPage({ params, searchParams }: { params: { slug: string }, searchParams: { [key: string]: string | string[] | undefined } }) {
   const product = await productQueries.findBySlug(params.slug)
   if (!product) {
     notFound()
   }
-
+  // const resolvedSearchParams = await searchParams
+  const buy_now = "buy_now" in searchParams
   // ✅ Parse images safely
   const images: string[] = Array.isArray(product.images)
     ? product.images
     : typeof product.images === "string"
       ? JSON.parse(product.images)
       : [];
-
-  // ✅ Fallback image
-  const imageUrl = images.length > 0 ? images[0] : "/placeholder.svg?height=64&width=64";
 
   const relatedProducts = await getProducts({ category: product.category_id, limit: 4 })
   const filteredRelated = relatedProducts.filter((p) => p.id !== product.id).slice(0, 4)
@@ -61,11 +60,11 @@ export default async function ProductDetailPage({ params, }: { params: { slug: s
           </div> */}
 
           {/* Product Images */}
-            <ProductImageGallery
-              images={images.length > 0 ? images : ["/placeholder.svg"]}
-              productName={product.name}
-              discount={discount}
-            />
+          <ProductImageGallery
+            images={images.length > 0 ? images : ["/placeholder.svg"]}
+            productName={product.name}
+            discount={discount}
+          />
 
           {/* Product Info */}
           <div className="space-y-6">
@@ -128,17 +127,26 @@ export default async function ProductDetailPage({ params, }: { params: { slug: s
                 </div>
               )}
             </div>
-
+            {/* 
             <div className="flex gap-4">
-              {/* <Button size="lg" className="flex-1 cursor-pointer" disabled={product.stock_quantity <= 0} onClick={handleAddToCart}> */}
-              {/* <ShoppingCart className="mr-2 h-5 w-5" /> */}
-              <AddToCartButton product={product} />
-              {/* </Button> */}
+              {
+                buy_now ?
+                  <Link href="/checkout" className="flex-1">
+                    <Button size="lg" className="w-full cursor-pointer">
+                      <ShoppingCart className="mr-2 h-5 w-5" />
+                      Buy Now
+                    </Button>
+                  </Link>
+                  :
+                  <AddToCartButton product={product} />
+              }
               <Button size="lg" variant="outline" className="cursor-pointer">
                 <Heart className="h-5 w-5" />
                 <span className="sr-only">Add to wishlist</span>
               </Button>
-            </div>
+            </div> */}
+
+            <ProductPurchaseOptions product={product} buy_now={buy_now} />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6">
               <div className="flex items-center gap-3">

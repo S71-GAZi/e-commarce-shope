@@ -12,6 +12,8 @@ import { validateRequestBody } from "@/lib/api/validation"
 import { orderQueries } from "@/lib/db/queries"
 import { getUserFromToken } from "@/lib/jwt"
 import { CreateOrderSchema } from "@/lib/api/order.validation"
+import path from "path"
+import fs from "fs"
 
 // GET /api/orders - Get orders for authenticated user
 export async function GET(request: NextRequest) {
@@ -58,10 +60,28 @@ export async function POST(request: NextRequest) {
       return errorResponse(validation.error, 400);
     }
 
-    const {
-      payment,
-      discount = 0,
-    } = validation.data;
+    let { payment, discount = 0, sample_image } = validation.data;
+
+    // ✅ STEP 1: Save base64 image if exists
+    let imageUrl: string | null = null;
+
+    if (sample_image && sample_image.startsWith("data:image")) {
+      const base64Data = sample_image.replace(/^data:image\/\w+;base64,/, "");
+      const buffer = Buffer.from(base64Data, "base64");
+
+      const fileName = `order_${Date.now()}.jpg`;
+      const uploadDir = path.join(process.cwd(), "public/uploads/orders");
+
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const filePath = path.join(uploadDir, fileName);
+      fs.writeFileSync(filePath, buffer);
+
+      imageUrl = `/uploads/orders/${fileName}`;
+    }
+
 
     const fullOrder = await orderQueries.createFullOrder({
       user_id: user.id,  // ✅ number
@@ -75,9 +95,9 @@ export async function POST(request: NextRequest) {
       ip_address: null, // You can capture real IP from request in route handler and pass it here
       create_at: new Date(),
       updated_at: new Date(),
-      ...validation.data
+      ...validation.data,
+      sample_image: imageUrl,
     });
-
     return successResponse(fullOrder, 201);
 
   } catch (error) {

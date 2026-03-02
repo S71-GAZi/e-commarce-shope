@@ -1,17 +1,25 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, type ReactNode, useCallback } from "react"
-import type { ICartItem, IProduct, IProductVariant } from "./types/intrerface"
+import type { IAddToCartParams, IBuyBowCartItem, ICartItem, IProduct, IProductVariant } from "./types/intrerface"
 import { useToast } from "@/hooks/use-toast"
 import { useFetchResource } from "@/hooks/useFetchResource"
 import { useAuth } from "./auth-context"
 
+
+
 interface CartContextType {
   items: ICartItem[]
+  buyNowItem: IBuyBowCartItem | null
   itemCount: number
   subtotal: number
   isLoading: boolean
-  addItem: (product: IProduct, variant?: IProductVariant, quantity?: number) => void
+  addItem: (params: IAddToCartParams) => void
+  buyNow: (params: IAddToCartParams & {
+    note?: string
+    sampleImage?: File | null
+  }) => Promise<void>
+  clearBuyNow: () => void
   removeItem: (productId: string, variantId?: string) => void
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void
   clearCart: () => void
@@ -23,6 +31,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth()
   const { toast } = useToast()
   const [localItems, setLocalItems] = useState<ICartItem[]>([])
+  const [buyNowItems, setBuyNowItems] = useState<ICartItem | null>(null)
+
+
+  /* ================= Local cart ================= */
 
   const LOCAL_CART_KEY = "guest_cart"
 
@@ -40,6 +52,80 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(LOCAL_CART_KEY)
   }
 
+
+  /* ================= BUY NOW CART ================= */
+
+  const BUY_NOW_KEY = "direct_buy_item"
+
+  function getBuyNow(): ICartItem | null {
+    if (typeof window === "undefined") return null
+    const data = localStorage.getItem(BUY_NOW_KEY)
+    return data ? JSON.parse(data) : null
+  }
+
+  function setBuyNow(item: ICartItem) {
+    localStorage.setItem(BUY_NOW_KEY, JSON.stringify(item))
+    setBuyNowItems(item)
+  }
+
+  function clearBuyNow() {
+    localStorage.removeItem(BUY_NOW_KEY)
+    setBuyNowItems(null)
+  }
+  useEffect(() => {
+    setBuyNowItems(getBuyNow())
+  }, [])
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = (error) => reject(error)
+    })
+  }
+
+  const buyNow = useCallback(
+    async ({
+      product,
+      variant,
+      quantity = 1,
+      selectedSize,
+      productCode,
+      note,
+      sampleImage,
+    }: IAddToCartParams & {
+      note?: string
+      sampleImage?: File | null
+    }) => {
+
+      let base64Image: string | null = null
+
+      if (sampleImage) {
+        base64Image = await fileToBase64(sampleImage)
+      }
+
+      const item: IBuyBowCartItem = {
+        id: crypto.randomUUID(),
+        product_id: product.id,
+        variant,
+        quantity,
+        price_snapshot: variant?.price || product.price,
+        name: product.name,
+        slug: product.slug,
+        selected_size: selectedSize,
+        product_code: productCode,
+        note: note || "",
+        sample_image: base64Image,
+        images: product.images,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as IBuyBowCartItem
+
+      setBuyNow(item)
+    },
+    []
+  )
   /* ================= FETCH CART ================= */
   const {
     data: serverItems,
@@ -94,7 +180,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   /* ================= ADD ITEM ================= */
   const addItem = useCallback(
-    async (product: IProduct, variant?: IProductVariant, quantity = 1) => {
+    async ({ product, variant, quantity = 1, selectedSize, productCode }: IAddToCartParams) => {
       if (!isAuthenticated) {
         const cart = getLocalCart()
 
@@ -115,6 +201,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
             price_snapshot: variant?.price || product.price,
             name: product.name,
             slug: product.slug,
+            selected_size: selectedSize,
+            product_code: productCode,
             images: product.images,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -313,7 +401,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   return (
     <CartContext.Provider
-      value={{ items: activeItems, itemCount, subtotal, isLoading, addItem, removeItem, updateQuantity, clearCart }}
+      value={{
+        items: activeItems,
+        buyNowItem: buyNowItems,
+        itemCount,
+        subtotal,
+        isLoading,
+        addItem,
+        buyNow,
+        clearBuyNow,
+        removeItem,
+        updateQuantity,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>

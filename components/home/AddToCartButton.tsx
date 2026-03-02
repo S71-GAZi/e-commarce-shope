@@ -3,16 +3,21 @@
 import { useCart } from "@/lib/cart-context"
 import { Button } from "@/components/ui/button"
 import { ShoppingCart } from "lucide-react"
+import { IAddToCartParams } from "@/lib/types/intrerface"
 
-interface AddToCartButtonProps {
-    product: any
-}
 
-export function AddToCartButton({ product }: AddToCartButtonProps) {
+export function AddToCartButton(
+    {
+        product,
+        selectedSize,
+        quantity = 1,
+        productCode,
+    }: IAddToCartParams) {
+
     const { addItem } = useCart()
 
     const handleAddToCart = () => {
-        addItem(product)
+        addItem({ product, selectedSize, quantity, productCode })
     }
 
     return (

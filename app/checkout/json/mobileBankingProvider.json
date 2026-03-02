@@ -1,0 +1,38 @@
+[
+  {
+    "id": "bkash",
+    "name": "bKash",
+    "logo": "https://freelogopng.com/images/all_img/1656227518bkash-logo-png.png",
+    "activeBg": "bg-pink-50",
+    "accountNo": "01833662270",
+    "type": "Personal",
+    "active": true
+  },
+  {
+    "id": "nagad",
+    "name": "Nagad",
+    "logo": "https://nagad.com.bd/_nuxt/img/new-logo.14fe8a5.png",
+    "activeBg": "bg-orange-50",
+    "accountNo": "01700-111111",
+    "type": "Personal",
+    "active": false
+  },
+  {
+    "id": "rocket",
+    "name": "Rocket",
+    "logo": "https://www.dutchbanglabank.com/img/mlogo.png",
+    "activeBg": "bg-purple-50",
+    "accountNo": "01700-222222",
+    "type": "Personal",
+    "active": false
+  },
+  {
+    "id": "upay",
+    "name": "Upay",
+    "logo": "http://www.upaybd.com/images/Upay-logo-revised-new.png",
+    "activeBg": "bg-blue-50",
+    "accountNo": "01700-333333",
+    "type": "Personal",
+    "active": false
+  }
+]

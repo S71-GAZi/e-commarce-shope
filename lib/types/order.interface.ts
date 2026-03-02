@@ -46,7 +46,7 @@ export interface IOrder {
     payment_transaction_id: string | null;
 
     note: string | null;
-    note_image: string | null;
+    sample_image: string | null;
     ip_address: string | null;
 
     created_at: string;
