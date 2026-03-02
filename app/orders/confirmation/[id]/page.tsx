@@ -8,8 +8,11 @@ import { CheckCircle, Loader2 } from "lucide-react"
 import { useFetchById } from "@/hooks/useFetchById"
 import { IOrderFull } from "@/lib/types/order.interface"
 import { useParams } from "next/navigation"
+import { useAuth } from "@/lib/auth-context"
 
 export default function OrderConfirmationPage() {
+    const { isAuthenticated } = useAuth()
+
     const params = useParams()
     const orderId = params.id as string
 
@@ -163,11 +166,14 @@ export default function OrderConfirmationPage() {
                     <Link href="/">Continue Shopping</Link>
                 </Button>
 
-                <Button variant="outline" asChild>
-                    <Link href="/account/orders">
-                        View Orders
-                    </Link>
-                </Button>
+                {
+                    isAuthenticated &&
+                    <Button variant="outline" asChild>
+                        <Link href="/account/orders">
+                            View Orders
+                        </Link>
+                    </Button>
+                }
             </div>
         </div>
     )

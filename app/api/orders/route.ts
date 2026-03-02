@@ -9,11 +9,12 @@ import {
   getPaginationParams,
 } from "@/lib/api/middleware"
 import { validateRequestBody } from "@/lib/api/validation"
-import { orderQueries } from "@/lib/db/queries"
+import { orderQueries, userQueries } from "@/lib/db/queries"
 import { getUserFromToken } from "@/lib/jwt"
 import { CreateOrderSchema } from "@/lib/api/order.validation"
 import path from "path"
 import fs from "fs"
+import { hashPassword } from "../auth/register/route"
 
 // GET /api/orders - Get orders for authenticated user
 export async function GET(request: NextRequest) {
@@ -49,18 +50,45 @@ export async function GET(request: NextRequest) {
 // POST /api/orders - Create new order (transaction-safe)
 export async function POST(request: NextRequest) {
   try {
-    const token = getTokenFromRequest(request);
-    const user = token ? getUserFromToken(token) : null;
-
-    if (!user) {
-      return errorResponse("Unauthorized", 401);
-    }
     const validation = await validateRequestBody(request, CreateOrderSchema);
     if (!validation.valid) {
       return errorResponse(validation.error, 400);
     }
+    let { payment, discount = 0, sample_image, shipping_info } = validation.data;
 
-    let { payment, discount = 0, sample_image } = validation.data;
+
+    const token = getTokenFromRequest(request);
+    let user = token ? await getUserFromToken(token) : null;
+
+    if (!user) {
+      if (!shipping_info?.email) {
+        return errorResponse("Email is required", 400);
+      }
+
+      const existingUser = await userQueries.findByEmail(shipping_info.email);
+
+      if (existingUser) {
+        user = existingUser;
+      } else {
+        const passwordHash = await hashPassword("12345");
+        user = await userQueries.create(
+          shipping_info.email,
+          shipping_info.name,
+          passwordHash
+        );
+      }
+    }
+
+    // 🔒 Final Safety Check
+    if (!user) {
+      return errorResponse("User creation failed", 500);
+    }
+
+    // if (!user) {
+    //   return errorResponse("Unauthorized", 401);
+    // }
+
+
 
     // ✅ STEP 1: Save base64 image if exists
     let imageUrl: string | null = null;
@@ -84,15 +112,15 @@ export async function POST(request: NextRequest) {
 
 
     const fullOrder = await orderQueries.createFullOrder({
-      user_id: user.id,  // ✅ number
+      user_id: user.id,
       payment_method: payment.payment_method,
       payment_provider: payment.payment_provider,
       payment_sender_account: payment.payment_sender_account,
       payment_transaction_id: payment.payment_transaction_id,
       discount,
-      payment_status: "pending", // ✅ COD is paid immediately, mobile banking starts as pending
-      status: "pending", // ✅ default status for new orders
-      ip_address: null, // You can capture real IP from request in route handler and pass it here
+      payment_status: "pending",
+      status: "pending",
+      ip_address: null,
       create_at: new Date(),
       updated_at: new Date(),
       ...validation.data,

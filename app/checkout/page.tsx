@@ -40,7 +40,7 @@ export interface PaymentData {
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, subtotal: itemSubtotal, clearCart, isLoading: isCartLoading, buyNowItem } = useCart()
+  const { items, subtotal: itemSubtotal, clearCart, isLoading: isCartLoading, buyNowItem, clearBuyNow } = useCart()
   const { user, isAuthenticated, isLoading } = useAuth()
 
   const [mounted, setMounted] = useState(false)
@@ -62,13 +62,14 @@ export default function CheckoutPage() {
     setMounted(true)
   }, [])
 
+  // ================for Authenticated================
 
-  useEffect(() => {
-    if (!mounted) return
-    if (!isLoading && !isCartLoading && !isAuthenticated) {
-      router.push("/auth/login?redirect=/checkout")
-    }
-  }, [mounted, isLoading, isAuthenticated, router, isCartLoading])
+  // useEffect(() => {
+  //   if (!mounted) return
+  //   if (!isLoading && !isCartLoading && !isAuthenticated) {
+  //     router.push("/auth/login?redirect=/checkout")
+  //   }
+  // }, [mounted, isLoading, isAuthenticated, router, isCartLoading])
 
   const handlePlaceOrder = async () => {
 
@@ -109,9 +110,10 @@ export default function CheckoutPage() {
       })
 
       if (!res.ok) throw new Error("Order failed")
-      const data = await res.json()
 
-      clearCart()
+      const data = await res.json()
+      if (buyNowItem) { clearBuyNow() }
+      else { clearCart() }
       router.push(`/orders/confirmation/${data.data.id}`)
     } catch (err) {
       console.error(err)

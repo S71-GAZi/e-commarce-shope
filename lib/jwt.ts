@@ -26,7 +26,7 @@ export const generateToken = (user: IUserPayload): string => {
 
 
 
-export const verifyToken = (token: string): IUserPayload | null => {
+export const verifyToken = (token: string): IUserPayload | null | undefined => {
   try {
     return jwt.verify(token, SECRET_KEY) as IUserPayload;
   } catch (err) {
@@ -37,7 +37,7 @@ export const verifyToken = (token: string): IUserPayload | null => {
 
 
 
-export function getUserFromToken(token: string): IUserPayload | null {
+export function getUserFromToken(token: string): IUserPayload | null | undefined {
   try {
     const decoded = jwt.verify(token, SECRET_KEY) as IUserPayload;
     return decoded;
