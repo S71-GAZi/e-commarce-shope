@@ -82,7 +82,7 @@ export default function OrderSummary({
                                         <p className="text-xs text-muted-foreground mt-0.5">{item.variant.name}</p>
                                     )}
                                     <p className="text-sm font-semibold mt-1">
-                                        ${(item.price_snapshot * item.quantity).toFixed(2)}
+                                        BDT {(item.price_snapshot * item.quantity).toFixed(2)}
                                     </p>
                                 </div>
                             </div>
@@ -96,17 +96,17 @@ export default function OrderSummary({
                 <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Subtotal</span>
-                        <span>${subtotal.toFixed(2)}</span>
+                        <span>BDT {subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Shipping</span>
                         <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>
-                            {shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}
+                            {shipping === 0 ? "FREE" : `BDT ${shipping.toFixed(2)}`}
                         </span>
                     </div>
                     <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Tax (8%)</span>
-                        <span>${tax.toFixed(2)}</span>
+                        <span>BDT {tax.toFixed(2)}</span>
                     </div>
                 </div>
 
