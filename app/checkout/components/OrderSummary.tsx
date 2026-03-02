@@ -114,7 +114,7 @@ export default function OrderSummary({
 
                 <div className="flex justify-between text-base font-bold">
                     <span>Total</span>
-                    <span className="text-lg">${total.toFixed(2)}</span>
+                    <span className="text-lg">BDT {total.toFixed(2)}</span>
                 </div>
 
                 {/* Active payment method badge */}
