@@ -6,7 +6,7 @@ import { errorResponse, successResponse } from "@/lib/api/middleware"
 import { userQueries } from "@/lib/db/queries"
 import crypto from "crypto"
 
-function hashPassword(password: string): string {
+export function hashPassword(password: string): string {
   return crypto.createHash("sha256").update(password).digest("hex")
 }
 

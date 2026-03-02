@@ -76,8 +76,8 @@ function CategoriesSection() {
         ],
     }
 
-    if (isLoading) return <p>Loading categories...</p>
-    if (!categories || categories.length === 0) return <p>No categories found.</p>
+    // if (isLoading) return <p>Loading categories...</p>
+    if (!categories || categories.length === 0 || isLoading) return null
 
     return (
         <div className="container mx-auto px-4 py-12" style={{ touchAction: "pan-y" }}>

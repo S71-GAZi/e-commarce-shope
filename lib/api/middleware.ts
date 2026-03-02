@@ -39,7 +39,7 @@ export function getUserFromToken(token: string): IUser | null {
 }
 
 // Check if user has admin access
-export function isAdmin(user: IUserPayload | null): boolean {
+export function isAdmin(user: IUserPayload | null | undefined): boolean {
   return user?.role === "admin" || user?.role === "manager"
 }
 

@@ -7,6 +7,7 @@ import { AddToCartButton } from "@/components/home/AddToCartButton"
 import { ShoppingCart } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/lib/cart-context"
+import { toast } from "@/hooks/use-toast"
 
 const sizes = ["SM", "S", "M", "LG", "XL", "XXL", "XXXL"]
 
@@ -27,7 +28,11 @@ export default function ProductPurchaseOptions({
     const { buyNow } = useCart()
     const handleBuyNow = async () => {
         if (!selectedSize) {
-            alert("Please select a size")
+            toast({
+                title: "Error",
+                description: "Please select a size",
+                variant: "destructive",
+            })
             return
         }
 
