@@ -16,11 +16,10 @@ import { base64ToFile } from "@/app/utils/image-utils"
 
 interface Props {
     user: any
-    subtotal: number
     onChange: (data: any) => void
 }
 
-export default function ShippingForm({ user, subtotal, onChange }: Props) {
+export default function ShippingForm({ user, onChange }: Props) {
     const [selectedDivision, setSelectedDivision] = useState<any>()
     const [selectedDistrict, setSelectedDistrict] = useState<any>()
     const [selectedUpazila, setSelectedUpazila] = useState<any>()
@@ -42,7 +41,7 @@ export default function ShippingForm({ user, subtotal, onChange }: Props) {
         buyNowItem?.sample_image || null
     )
 
-    const shipping = subtotal >= 75 ? 0 : 9.99
+    // const shipping = subtotal >= 75 ? 0 : 9.99
 
     const notify = (extra: any = {}) => {
         onChange({
@@ -322,7 +321,7 @@ export default function ShippingForm({ user, subtotal, onChange }: Props) {
                 </div>
 
                 {/* Shipping badge */}
-                {shipping === 0 ? (
+                {/* {shipping === 0 ? (
                     <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 rounded-lg px-3 py-2">
                         <Truck className="h-4 w-4" />
                         <span className="font-medium">You qualify for FREE shipping!</span>
@@ -334,7 +333,7 @@ export default function ShippingForm({ user, subtotal, onChange }: Props) {
                             Spend <strong>${(75 - subtotal).toFixed(2)}</strong> more for free shipping
                         </span>
                     </div>
-                )}
+                )} */}
 
             </CardContent>
         </Card>
