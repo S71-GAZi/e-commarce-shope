@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation"
 import { useCart } from "@/lib/cart-context"
 import { toast } from "@/hooks/use-toast"
 
-const sizes = ["SM", "S", "M", "LG", "XL", "XXL", "XXXL"]
+const sizes = ["S", "M", "L", "XL", "XXL", "XXXL"]
 
 export default function ProductPurchaseOptions({
     product,
