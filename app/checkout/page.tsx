@@ -55,8 +55,8 @@ export default function CheckoutPage() {
   const subtotal = buyNowItem ? buyNowItem.price_snapshot * buyNowItem.quantity : itemSubtotal
 
   const shipping = shippingData?.district === "Dhaka" ? 70 : 120
-  const tax = subtotal * 0.08
-  const total = subtotal + shipping + tax
+  // const tax = subtotal * 0.08
+  const total = subtotal + shipping
 
   useEffect(() => {
     setMounted(true)
@@ -80,7 +80,7 @@ export default function CheckoutPage() {
       items: buyNowItem ? [cleanedBuyNowItem] : items,
       subtotal,
       shipping,
-      tax,
+      // tax,
       total,
       note: shippingData?.note || "",
       sample_image: shippingData?.imagePreview,
