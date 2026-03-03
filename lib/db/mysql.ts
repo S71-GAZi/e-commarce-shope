@@ -68,7 +68,7 @@ export function getMySQLPool(): mysql.Pool {
     // =========combine==============
     const config = {
       host: process.env.NODE_ENV === "development" ? "localhost" : "127.0.0.1",
-      port: 3307,
+      port: 3306,
       user: process.env.NODE_ENV === "development" ? "root" : "dbroot",
       password: process.env.NODE_ENV === "development" ? "root" : "Root@123",
       database: process.env.NODE_ENV === "development" ? "eCom_Db" : "eCom_Db",
