@@ -26,6 +26,7 @@ interface Props {
     paymentMethod?: "cod" | "mobile_banking"
     activeProviderName?: string
     isProcessing?: boolean
+    shipping: number
 }
 
 export default function OrderSummary({
@@ -34,12 +35,12 @@ export default function OrderSummary({
     paymentMethod,
     activeProviderName,
     isProcessing = false,
+    shipping = 120
 }: Props) {
 
     const { buyNowItem } = useCart()
     const activeItems = buyNowItem ? [buyNowItem] : items
 
-    const shipping = subtotal >= 75 ? 0 : 9.99
     const tax = subtotal * 0.08
     const total = subtotal + shipping + tax
 
@@ -154,7 +155,7 @@ export default function OrderSummary({
                     ) : (
                         <>
                             <ShieldCheck className="mr-2 h-4 w-4" />
-                            Place Order · ${total.toFixed(2)}
+                            Place Order · BDT {total.toFixed(2)}
                         </>
                     )}
                 </Button>

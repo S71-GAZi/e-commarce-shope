@@ -54,7 +54,7 @@ export default function CheckoutPage() {
     : null;
   const subtotal = buyNowItem ? buyNowItem.price_snapshot * buyNowItem.quantity : itemSubtotal
 
-  const shipping = subtotal >= 75 ? 0 : 9.99
+  const shipping = shippingData?.district === "Dhaka" ? 70 : 120
   const tax = subtotal * 0.08
   const total = subtotal + shipping + tax
 
@@ -146,7 +146,7 @@ export default function CheckoutPage() {
 
         <form onSubmit={(e) => { e.preventDefault(); handlePlaceOrder(); }} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <ShippingForm user={user} subtotal={subtotal} onChange={setShippingData} />
+            <ShippingForm user={user} onChange={setShippingData} />
             <PaymentForm total={total} onChange={setPaymentData} />
           </div>
           <div className="lg:col-span-1">
@@ -156,6 +156,7 @@ export default function CheckoutPage() {
               paymentMethod={paymentData?.payment_method}
               activeProviderName={paymentData?.provider}
               isProcessing={isSubmitting}
+              shipping={shipping}
             // onPlaceOrder={() => { }} // No-op if form handles submit
             />
           </div>

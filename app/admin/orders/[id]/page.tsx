@@ -90,6 +90,151 @@ export default function OrderDetailPage() {
       description: "Order confirmation email sent.",
     })
   }
+  const handlePrint = () => {
+    const printWindow = window.open("", "_blank")
+    if (!printWindow) return
+
+    const itemsHTML = order.order_items
+      .map(
+        (item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>
+            <strong>${item.name}</strong><br/>
+            <span class="muted"># ${item.product_code}</span>
+          </td>
+          <td>${item.selected_size}</td>
+          <td>${item.quantity}</td>
+          <td>৳ ${Number(item.price_snapshot).toFixed(2)}</td>
+          <td>৳ ${(Number(item.price_snapshot) * item.quantity).toFixed(2)}</td>
+        </tr>
+      `
+      )
+      .join("")
+
+    const discountRow =
+      order.discount && Number(order.discount) > 0
+        ? `<tr class="discount"><td colspan="5">Discount</td><td>− ৳ ${Number(order.discount).toFixed(2)}</td></tr>`
+        : ""
+
+    printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Order ${order.order_number}</title>
+      <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; font-size: 13px; color: #1a1a1a; padding: 40px; }
+        
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 2px solid #1e293b; }
+        .header h1 { font-size: 22px; font-weight: 700; color: #1e293b; }
+        .header .meta { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge-pending { background: #f1f5f9; color: #64748b; }
+        .badge-processing { background: #fef9c3; color: #92400e; }
+        .badge-shipped { background: #dbeafe; color: #1d4ed8; }
+        .badge-delivered { background: #dcfce7; color: #166534; }
+        .badge-cancelled { background: #fee2e2; color: #991b1b; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+        .info-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; }
+        .info-card h3 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 8px; }
+        .info-card p { font-size: 12.5px; color: #334155; line-height: 1.6; }
+        .info-card strong { color: #0f172a; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+        thead tr { background: #1e293b; color: white; }
+        thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+        tbody tr { border-bottom: 1px solid #f1f5f9; }
+        tbody tr:hover { background: #f8fafc; }
+        tbody td { padding: 11px 12px; font-size: 12.5px; color: #334155; vertical-align: top; }
+        tbody td .muted { color: #94a3b8; font-family: monospace; font-size: 11px; }
+
+        .totals { margin-top: 0; border-top: 2px solid #e2e8f0; background: #f8fafc; }
+        .totals td { padding: 8px 12px; font-size: 13px; }
+        .totals .label { color: #64748b; }
+        .totals .total-row td { font-size: 15px; font-weight: 700; color: #0f172a; border-top: 2px solid #cbd5e1; padding-top: 12px; }
+        .discount td { color: #16a34a; font-weight: 600; }
+
+        .table-wrap { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; margin-bottom: 28px; }
+
+        .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; }
+
+        @media print {
+          body { padding: 20px; }
+          @page { margin: 15mm; }
+        }
+      </style>
+    </head>
+    <body>
+
+      <div class="header">
+        <div>
+          <h1>${order.order_number}</h1>
+          <div class="meta">Placed on ${new Date(order.created_at).toLocaleDateString()} at ${new Date(order.created_at).toLocaleTimeString()}</div>
+        </div>
+        <div style="text-align:right">
+          <span class="badge badge-${order.status}">${order.status}</span><br/>
+          <span style="font-size:11px; color:#94a3b8; margin-top:6px; display:block">Payment: ${order.payment_status} · ${order.payment_method}</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="info-card">
+          <h3>Customer</h3>
+          <p><strong>${order.customer_name}</strong><br/>${order.shipping_info.email}<br/>${order.customer_phone}</p>
+        </div>
+        <div class="info-card">
+          <h3>Shipping Address</h3>
+          <p>${order.shipping_info.address},<br/>${order.shipping_info.upazila}, ${order.shipping_info.district}<br/>${order.shipping_info.division}</p>
+        </div>
+        <div class="info-card">
+          <h3>Delivery</h3>
+          <p><strong>${order.shipping_info.shipping_method}</strong><br/>
+          Tracking: ${order.shipping_info.tracking_code || "N/A"}<br/>
+          <span class="badge badge-${order.shipping_info.shipping_status}" style="margin-top:4px">${order.shipping_info.shipping_status}</span></p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Product</th>
+              <th>Size</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHTML}
+          </tbody>
+          <tfoot class="totals">
+            <tr><td colspan="5" class="label">Subtotal</td><td>৳ ${Number(order.subtotal).toFixed(2)}</td></tr>
+            <tr><td colspan="5" class="label">Shipping</td><td>৳ ${Number(order.shipping).toFixed(2)}</td></tr>
+            <tr><td colspan="5" class="label">Tax</td><td>৳ ${Number(order.tax).toFixed(2)}</td></tr>
+            ${discountRow}
+            <tr class="total-row"><td colspan="5">Total</td><td>৳ ${Number(order.total).toFixed(2)}</td></tr>
+          </tfoot>
+        </table>
+      </div>
+
+      ${order.note ? `<div class="info-card" style="margin-bottom:20px"><h3>Order Note</h3><p>${order.note}</p></div>` : ""}
+
+      <div class="footer">
+        <span>Printed on ${new Date().toLocaleString()}</span>
+        <span>Order ID: ${order.id ?? order.order_number}</span>
+      </div>
+
+      <script>window.onload = () => { window.print(); window.onafterprint = () => window.close(); }</script>
+    </body>
+    </html>
+  `)
+
+    printWindow.document.close()
+  }
 
   return (
     <div className="space-y-6">
@@ -112,11 +257,11 @@ export default function OrderDetailPage() {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleSendEmail}>
+          {/* <Button variant="outline" onClick={handleSendEmail}>
             <Mail className="mr-2 h-4 w-4" />
             Send Email
-          </Button>
-          <Button variant="outline">
+          </Button> */}
+          <Button variant="outline" onClick={handlePrint}>
             <Printer className="mr-2 h-4 w-4" />
             Print
           </Button>
@@ -134,59 +279,79 @@ export default function OrderDetailPage() {
                 Order Items
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {order.order_items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex justify-between border-b pb-4 last:border-0"
-                  >
-                    <div>
-                      <p className="font-medium">{item.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        Quantity: {item.quantity}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Price: ৳ {Number(item.price_snapshot).toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold">
-                        ৳ {(Number(item.price_snapshot) * item.quantity).toFixed(2)}
-                      </p>
-                    </div>
+            <Card className="overflow-hidden border-0 shadow-lg bg-white">
+              <CardHeader className="bg-linear-to-r from-slate-900 to-slate-700 text-white px-6 py-4">
+                <CardTitle className="flex items-center gap-2.5 text-base font-semibold tracking-wide">
+                  <div className="p-1.5 bg-white/15 rounded-md">
+                    <Package className="h-4 w-4" />
                   </div>
-                ))}
-              </div>
+                  Order Items
+                  <span className="ml-auto text-xs font-normal bg-white/20 px-2.5 py-1 rounded-full">
+                    {order.order_items.length} item{order.order_items.length !== 1 ? "s" : ""}
+                  </span>
+                </CardTitle>
+              </CardHeader>
 
-              <Separator className="my-4" />
+              <CardContent className="p-0">
+                {/* Items List */}
+                <div className="divide-y divide-slate-100">
+                  {order.order_items.map((item, index) => (
+                    <div key={index} className="flex items-start gap-4 px-6 py-4 hover:bg-slate-50/70 transition-colors">
+                      {/* Index badge */}
+                      <div className="shrink-0 w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-semibold mt-0.5">
+                        {index + 1}
+                      </div>
 
-              {/* Totals */}
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Subtotal</span>
-                  <span>৳ {Number(order.subtotal).toFixed(2)}</span>
+                      {/* Item details */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-900 truncate">{item.name}</p>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                          <span className="inline-flex items-center gap-1 text-xs text-slate-400 font-mono bg-slate-100 px-2 py-0.5 rounded">
+                            Product Code: {item.product_code}
+                          </span>
+                          <span className="text-xs text-slate-500">Size: <span className="font-medium text-slate-700">{item.selected_size}</span></span>
+                          <span className="text-xs text-slate-500">Qty: <span className="font-medium text-slate-700">{item.quantity}</span></span>
+                        </div>
+                      </div>
+
+                      {/* Price */}
+                      <div className="shrink-0 text-right">
+                        <p className="font-semibold text-slate-900">৳ {(Number(item.price_snapshot) * item.quantity).toFixed(2)}</p>
+                        <p className="text-xs text-slate-400 mt-0.5">৳ {Number(item.price_snapshot).toFixed(2)} × {item.quantity}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex justify-between">
-                  <span>Shipping</span>
-                  <span>৳ {Number(order.shipping).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Tax</span>
-                  <span>৳ {Number(order.tax).toFixed(2)}</span>
-                </div>
-                {order.discount && Number(order.discount) > 0 && (
-                  <div className="flex justify-between text-red-500">
-                    <span>Discount</span>
-                    <span>- ৳ {Number(order.discount).toFixed(2)}</span>
+
+                {/* Totals */}
+                <div className="border-t border-slate-100 bg-slate-50/50 px-6 py-4 space-y-2.5">
+                  {[
+                    { label: "Subtotal", value: order.subtotal },
+                    { label: "Shipping", value: order.shipping },
+                    { label: "Tax", value: order.tax },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="flex justify-between items-center text-sm">
+                      <span className="text-slate-500">{label}</span>
+                      <span className="text-slate-700 font-medium">৳ {Number(value).toFixed(2)}</span>
+                    </div>
+                  ))}
+
+                  {order.discount && Number(order.discount) > 0 && (
+                    <div className="flex justify-between items-center text-sm">
+                      <span className="flex items-center gap-1.5 text-emerald-600">
+                        <span className="text-xs bg-emerald-100 px-1.5 py-0.5 rounded font-medium">DISCOUNT</span>
+                      </span>
+                      <span className="text-emerald-600 font-semibold">− ৳ {Number(order.discount).toFixed(2)}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-center pt-3 border-t border-slate-200">
+                    <span className="font-bold text-slate-900 text-base">Total</span>
+                    <span className="font-bold text-slate-900 text-xl tracking-tight">৳ {Number(order.total).toFixed(2)}</span>
                   </div>
-                )}
-                <div className="flex justify-between font-bold border-t pt-2 text-lg">
-                  <span>Total</span>
-                  <span>৳ {Number(order.total).toFixed(2)}</span>
                 </div>
-              </div>
-            </CardContent>
+              </CardContent>
+            </Card>
           </Card>
 
           {/* Customer Info */}
@@ -299,18 +464,39 @@ export default function OrderDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Notes */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Order Notes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea placeholder="Add notes..." rows={4} defaultValue={order.note || ""} />
-              <Button variant="outline" className="w-full mt-2">
-                Save Notes
-              </Button>
-            </CardContent>
-          </Card>
+          {(order?.note || order?.sample_image) && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Order Details</CardTitle>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+
+                {/* Note */}
+                {order?.note && (
+                  <div>
+                    <p className="text-sm font-medium mb-1">Note:</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-line">
+                      {order.note}
+                    </p>
+                  </div>
+                )}
+
+                {/* Sample Image */}
+                {order?.sample_image && (
+                  <div>
+                    <p className="text-sm font-medium mb-2">Sample Image:</p>
+                    <img
+                      src={order.sample_image}
+                      alt="Sample"
+                      className="max-w-xs rounded-lg border"
+                    />
+                  </div>
+                )}
+
+              </CardContent>
+            </Card>
+          )}
 
           {/* Timeline */}
           <Card>

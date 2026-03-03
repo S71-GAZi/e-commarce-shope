@@ -131,7 +131,7 @@ export default function PaymentForm({ total, onChange }: Props) {
                         </div>
                         <ul className="text-sm text-green-700 space-y-1.5 ml-6 list-disc">
                             <li>Pay in cash when your order is delivered to your door</li>
-                            <li>Please keep the exact amount ready: <strong>${total.toFixed(2)}</strong></li>
+                            <li>Please keep the exact amount ready: <strong>BDT {total.toFixed(2)}</strong></li>
                             <li>Our delivery agent will collect payment on arrival</li>
                         </ul>
                     </div>
@@ -149,33 +149,34 @@ export default function PaymentForm({ total, onChange }: Props) {
                             </div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                {mobileBankingProvider.map((p) => (
-                                    <button
-                                        key={p.id}
-                                        type="button"
-                                        onClick={() => {
-                                            setProvider(p.id)
-                                            notify({ provider: p.id })
-                                        }}
-                                        className={`relative flex flex-col items-center gap-1.5 border-2 rounded-xl p-3 transition-all text-center ${provider === p.id
-                                            ? `border-primary ${p.activeBg ?? "bg-primary/5"}`
-                                            : "border-border hover:border-primary/40 bg-white"
-                                            }`}
-                                    >
-                                        <div className="w-12 h-12 relative">
-                                            <Image
-                                                src={p.logo}
-                                                alt={p.name}
-                                                fill
-                                                className="object-contain"
-                                            />
-                                        </div>
-                                        <span className="text-xs font-semibold">{p.name}</span>
-                                        {provider === p.id && (
-                                            <CheckCircle2 className="h-3.5 w-3.5 text-primary absolute top-1.5 right-1.5" />
-                                        )}
-                                    </button>
-                                ))}
+                                {mobileBankingProvider
+                                    .filter((provider) => provider.active).map((p) => (
+                                        <button
+                                            key={p.id}
+                                            type="button"
+                                            onClick={() => {
+                                                setProvider(p.id)
+                                                notify({ provider: p.id })
+                                            }}
+                                            className={`relative flex flex-col items-center gap-1.5 border-2 rounded-xl p-3 transition-all text-center ${provider === p.id
+                                                ? `border-primary ${p.activeBg ?? "bg-primary/5"}`
+                                                : "border-border hover:border-primary/40 bg-white"
+                                                }`}
+                                        >
+                                            <div className="w-12 h-12 relative">
+                                                <Image
+                                                    src={p.logo}
+                                                    alt={p.name}
+                                                    fill
+                                                    className="object-contain"
+                                                />
+                                            </div>
+                                            <span className="text-xs font-semibold">{p.name}</span>
+                                            {provider === p.id && (
+                                                <CheckCircle2 className="h-3.5 w-3.5 text-primary absolute top-1.5 right-1.5" />
+                                            )}
+                                        </button>
+                                    ))}
                             </div>
                         </div>
 
@@ -185,7 +186,7 @@ export default function PaymentForm({ total, onChange }: Props) {
                                 <div className="flex items-center gap-2">
                                     <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold shrink-0">2</span>
                                     <p className="text-sm font-semibold">
-                                        Send <span className="text-primary font-bold">${total.toFixed(2)}</span> to our {activeProvider.name} number
+                                        Send <span className="text-primary font-bold">BDT {total.toFixed(2)}</span> to our {activeProvider.name} number
                                     </p>
                                 </div>
 
@@ -224,7 +225,7 @@ export default function PaymentForm({ total, onChange }: Props) {
                                         <Info className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                                         <p className="text-xs text-amber-700 leading-relaxed">
                                             Use <strong>Send Money</strong> option (not Payment). Send exactly{" "}
-                                            <strong>${total.toFixed(2)}</strong> and note down your <strong>Transaction ID</strong> from the confirmation SMS.
+                                            <strong>BDT {total.toFixed(2)}</strong> and note down your <strong>Transaction ID</strong> from the confirmation SMS.
                                         </p>
                                     </div>
                                 </div>
