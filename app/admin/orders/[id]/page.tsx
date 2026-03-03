@@ -214,7 +214,6 @@ export default function OrderDetailPage() {
           <tfoot class="totals">
             <tr><td colspan="5" class="label">Subtotal</td><td>৳ ${Number(order.subtotal).toFixed(2)}</td></tr>
             <tr><td colspan="5" class="label">Shipping</td><td>৳ ${Number(order.shipping).toFixed(2)}</td></tr>
-            <tr><td colspan="5" class="label">Tax</td><td>৳ ${Number(order.tax).toFixed(2)}</td></tr>
             ${discountRow}
             <tr class="total-row"><td colspan="5">Total</td><td>৳ ${Number(order.total).toFixed(2)}</td></tr>
           </tfoot>
@@ -328,7 +327,7 @@ export default function OrderDetailPage() {
                   {[
                     { label: "Subtotal", value: order.subtotal },
                     { label: "Shipping", value: order.shipping },
-                    { label: "Tax", value: order.tax },
+                    // { label: "Tax", value: order.tax },
                   ].map(({ label, value }) => (
                     <div key={label} className="flex justify-between items-center text-sm">
                       <span className="text-slate-500">{label}</span>

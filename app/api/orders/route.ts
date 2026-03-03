@@ -123,6 +123,7 @@ export async function POST(request: NextRequest) {
       ip_address: null,
       create_at: new Date(),
       updated_at: new Date(),
+      tax: validation.data.tax ?? 0,
       ...validation.data,
       sample_image: imageUrl,
     });

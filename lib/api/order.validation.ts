@@ -74,7 +74,7 @@ export const CreateOrderSchema = z
 
         subtotal: z.number().nonnegative("Subtotal must be non-negative"),
         shipping: z.number().nonnegative("Shipping must be non-negative"),
-        tax: z.number().nonnegative("Tax must be non-negative"),
+        tax: z.number().nonnegative("Tax must be non-negative").default(0),
         discount: z.number().nonnegative("Discount must be non-negative").default(0), // ✅ default(0) — always present
         coupon_code: z.string().nullable().optional(),
         total: z.number().nonnegative("Total must be non-negative"),

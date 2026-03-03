@@ -24,8 +24,8 @@ export default function CartPage() {
     return null // or loading spinner
   }
   const shipping = subtotal > 50 ? 0 : 9.99
-  const tax = subtotal * 0.1
-  const total = subtotal + shipping + tax
+  // const tax = subtotal * 0.1
+  const total = subtotal + shipping
 
   if (items.length === 0) {
     return (
@@ -164,10 +164,10 @@ export default function CartPage() {
                     <span className="text-muted-foreground">Shipping</span>
                     <span className="font-medium">{shipping === 0 ? "FREE" : `BDT ${shipping.toFixed(2)}`}</span>
                   </div>
-                  <div className="flex justify-between">
+                  {/* <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax (10%)</span>
                     <span className="font-medium">BDT {tax.toFixed(2)}</span>
-                  </div>
+                  </div> */}
                 </div>
 
                 <Separator />

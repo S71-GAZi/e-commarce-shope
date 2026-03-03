@@ -139,11 +139,11 @@ export default function OrderConfirmationPage() {
                             <span>Shipping</span>
                             <span>৳ {Number(order.shipping).toFixed(2)}</span>
                         </div>
-
+                        {/* 
                         <div className="flex justify-between">
                             <span>Tax</span>
                             <span>৳ {Number(order.tax).toFixed(2)}</span>
-                        </div>
+                        </div> */}
 
                         {Number(order.discount) > 0 && (
                             <div className="flex justify-between text-red-500">

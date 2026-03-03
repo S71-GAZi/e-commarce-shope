@@ -41,8 +41,8 @@ export default function OrderSummary({
     const { buyNowItem } = useCart()
     const activeItems = buyNowItem ? [buyNowItem] : items
 
-    const tax = subtotal * 0.08
-    const total = subtotal + shipping + tax
+    // const tax = subtotal * 0.08
+    const total = subtotal + shipping
 
     return (
         <Card className="sticky top-4 shadow-sm border-0 ring-1 ring-border">
@@ -105,10 +105,10 @@ export default function OrderSummary({
                             {shipping === 0 ? "FREE" : `BDT ${shipping.toFixed(2)}`}
                         </span>
                     </div>
-                    <div className="flex justify-between text-sm">
+                    {/* <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Tax (8%)</span>
                         <span>BDT {tax.toFixed(2)}</span>
-                    </div>
+                    </div> */}
                 </div>
 
                 <Separator />
