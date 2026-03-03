@@ -27,10 +27,10 @@ export default function ProductPurchaseOptions({
     const [sampleImage, setSampleImage] = useState<File | null>(null)
     const { buyNow } = useCart()
     const handleBuyNow = async () => {
-        if (!selectedSize) {
+        if (!selectedSize || !productCode) {
             toast({
                 title: "Error",
-                description: "Please select a size",
+                description: !selectedSize ? "Please select a size" : "Please enter product code",
                 variant: "destructive",
             })
             return
@@ -96,7 +96,7 @@ export default function ProductPurchaseOptions({
 
             {/* Product Code */}
             <div>
-                <p className="font-medium mb-2">Product Code:</p>
+                <p className="font-medium mb-2">Product Code: <span className="text-red-500">*</span></p>
                 <Input
                     placeholder="Enter product code"
                     value={productCode}

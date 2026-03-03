@@ -60,13 +60,15 @@ export interface IOrderItem {
     product_id: number; // ✅ string → number (DB FK)
     variant_id: number | null; // ✅ string → number (DB FK)
 
+    product_code: string
     name: string;
     slug: string | null;
 
     price_snapshot: number;
     quantity: number;
 
-    images: string[] | null; // ✅ longtext JSON → parse করলে string[] ভালো
+    images: string[] | null;
+    selected_size: string
 }
 
 
