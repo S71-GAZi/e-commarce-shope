@@ -1,3 +1,4 @@
+import { ISpecialDiscount } from "@/app/checkout/components/OrderSummary"
 import { TOrderItemInput, TShippingInfoInput } from "../api/order.validation"
 import { IOrderFull, IOrderItem, IOrderShipping, IOrderStatus, IPaymentMethod, IPaymentStatus } from "../types/order.interface"
 import { executeQuery, executeQuerySingle, getMySQLPool } from "./mysql"
@@ -231,6 +232,9 @@ export const productQueries = {
 
   async delete(id: string) {
     await executeQuery("DELETE FROM products WHERE id = ?", [id])
+  },
+  async getSpacialDiscount() {
+    return executeQuery<ISpecialDiscount>("SELECT * FROM special_discount ORDER BY id ASC LIMIT 1")
   },
 }
 

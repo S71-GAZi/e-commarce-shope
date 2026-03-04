@@ -12,7 +12,7 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
               <Package className="h-6 w-6 text-primary" />
-              <span className="font-bold text-xl">ShopHub</span>
+              <span className="font-bold text-xl">e-commerce shop</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Your trusted online shopping destination for quality products at great prices.
@@ -114,7 +114,7 @@ export function Footer() {
         </div>
 
         <div className="border-t mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>&copy; 2025 ShopHub. All rights reserved.</p>
+          <p>&copy; 2025 e-commerce shop. All rights reserved.</p>
           <div className="flex gap-4">
             <Link href="/privacy" className="hover:text-foreground transition-colors">
               Privacy Policy

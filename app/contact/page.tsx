@@ -158,10 +158,10 @@ export default function ContactPage() {
                     <div>
                       <div className="font-semibold mb-1">Email</div>
                       <a
-                        href="mailto:support@shophub.com"
+                        href="mailto:support@e-commerce shop.com"
                         className="text-muted-foreground hover:text-foreground transition-colors"
                       >
-                        support@shophub.com
+                        support@e-commerce shop.com
                       </a>
                     </div>
                   </div>
