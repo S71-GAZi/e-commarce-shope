@@ -51,12 +51,12 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="storeName">Store Name</Label>
-                <Input id="storeName" defaultValue="ShopHub" />
+                <Input id="storeName" defaultValue="e-commerce shop" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="storeEmail">Store Email</Label>
-                <Input id="storeEmail" type="email" defaultValue="contact@shophub.com" />
+                <Input id="storeEmail" type="email" defaultValue="contact@e-commerce shop.com" />
               </div>
 
               <div className="space-y-2">

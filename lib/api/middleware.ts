@@ -13,28 +13,28 @@ export function getTokenFromRequest(request: NextRequest): string | null {
 export function getUserFromToken(token: string): IUser | null {
   // In production, verify JWT token here
   // For now, returning mock user for demo
-  if (token === "mock-token-customer") {
-    return {
-      id: "user-1",
-      email: "demo@example.com",
-      full_name: "Demo User",
-      role: "customer",
-      email_verified: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  }
-  if (token === "mock-token-admin") {
-    return {
-      id: "user-2",
-      email: "admin@example.com",
-      full_name: "Admin User",
-      role: "admin",
-      email_verified: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-  }
+  // if (token === "mock-token-customer") {
+  //   return {
+  //     id: "user-1",
+  //     email: "demo@example.com",
+  //     full_name: "Demo User",
+  //     role: "customer",
+  //     email_verified: true,
+  //     created_at: new Date().toISOString(),
+  //     updated_at: new Date().toISOString(),
+  //   }
+  // }
+  // if (token === "mock-token-admin") {
+  //   return {
+  //     id: "user-2",
+  //     email: "admin@example.com",
+  //     full_name: "Admin User",
+  //     role: "admin",
+  //     email_verified: true,
+  //     created_at: new Date().toISOString(),
+  //     updated_at: new Date().toISOString(),
+  //   }
+  // }
   return null
 }
 

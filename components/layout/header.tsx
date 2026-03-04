@@ -80,8 +80,8 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             {/* <Package className="h-6 w-6 text-primary" /> */}
-            <img src="/e_com_brand_Logo.png" alt="ShopHub Logo" width={130} height={40} />
-            {/* <span className="font-bold text-xl hidden sm:inline-block">ShopHub</span> */}
+            <img src="/e_com_brand_Logo.png" alt="e-commerce shop Logo" width={130} height={40} />
+            {/* <span className="font-bold text-xl hidden sm:inline-block">e-commerce shop</span> */}
           </Link>
 
           {/* Desktop Navigation */}

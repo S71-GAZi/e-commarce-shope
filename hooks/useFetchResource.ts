@@ -32,7 +32,6 @@ export function useFetchResource<T>({
             if (!res.ok) {
                 throw new Error(result?.error || "Failed to load data")
             }
-
             const finalData = extractRef.current
                 ? extractRef.current(result)
                 : Array.isArray(result)

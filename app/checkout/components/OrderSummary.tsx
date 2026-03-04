@@ -10,15 +10,12 @@ import { Separator } from "@/components/ui/separator"
 import { ICartItem } from "@/lib/types/intrerface"
 import { useCart } from "@/lib/cart-context"
 
-// interface CartItem {
-//     product_id: string | number
-//     name: string
-//     images: string[] | string
-//     quantity: number
-//     price: number
-//     price_snapshot: number
-//     variant?: { id: string | number; name: string }
-// }
+
+export interface ISpecialDiscount {
+    offer_quantity: number
+    discount_percentage: number
+}
+
 
 interface Props {
     items: ICartItem[]
@@ -27,6 +24,7 @@ interface Props {
     activeProviderName?: string
     isProcessing?: boolean
     shipping: number
+    discount: number
 }
 
 export default function OrderSummary({
@@ -35,14 +33,17 @@ export default function OrderSummary({
     paymentMethod,
     activeProviderName,
     isProcessing = false,
-    shipping = 120
+    shipping = 120,
+    discount = 0
 }: Props) {
 
     const { buyNowItem } = useCart()
     const activeItems = buyNowItem ? [buyNowItem] : items
 
+
+
     // const tax = subtotal * 0.08
-    const total = subtotal + shipping
+    const total = subtotal + shipping - discount
 
     return (
         <Card className="sticky top-4 shadow-sm border-0 ring-1 ring-border">
@@ -105,10 +106,14 @@ export default function OrderSummary({
                             {shipping === 0 ? "FREE" : `BDT ${shipping.toFixed(2)}`}
                         </span>
                     </div>
-                    {/* <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Tax (8%)</span>
-                        <span>BDT {tax.toFixed(2)}</span>
-                    </div> */}
+                    {
+                        discount ?
+
+                            <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Discount</span>
+                                <span>BDT {discount.toFixed(2)}</span>
+                            </div> : <></>
+                    }
                 </div>
 
                 <Separator />

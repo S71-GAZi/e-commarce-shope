@@ -23,9 +23,9 @@ export default function CartPage() {
   if (!mounted) {
     return null // or loading spinner
   }
-  const shipping = subtotal > 50 ? 0 : 9.99
+  // const shipping = subtotal > 50 ? 0 : 9.99
   // const tax = subtotal * 0.1
-  const total = subtotal + shipping
+  const total = subtotal
 
   if (items.length === 0) {
     return (
@@ -160,10 +160,10 @@ export default function CartPage() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-medium">BDT {subtotal.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between">
+                  {/* <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
                     <span className="font-medium">{shipping === 0 ? "FREE" : `BDT ${shipping.toFixed(2)}`}</span>
-                  </div>
+                  </div> */}
                   {/* <div className="flex justify-between">
                     <span className="text-muted-foreground">Tax (10%)</span>
                     <span className="font-medium">BDT {tax.toFixed(2)}</span>
@@ -171,7 +171,7 @@ export default function CartPage() {
                 </div>
 
                 <Separator />
-
+                {/* 
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total</span>
                   <span>BDT {total.toFixed(2)}</span>
@@ -181,7 +181,7 @@ export default function CartPage() {
                   <p className="text-sm text-muted-foreground">
                     Add BDT {(50 - subtotal).toFixed(2)} more to get free shipping!
                   </p>
-                )}
+                )} */}
 
                 <Button asChild size="lg" className="w-full" cursor-pointer>
                   <Link href="/checkout">Proceed to Checkout</Link>

@@ -15,7 +15,7 @@ export default function AboutPage() {
         <section className="bg-muted/30 py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">About ShopHub</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 text-balance">About e-commerce shop</h1>
               <p className="text-lg text-muted-foreground text-pretty leading-relaxed">
                 We're on a mission to make online shopping simple, enjoyable, and accessible to everyone. Since our
                 founding, we've been committed to providing quality products at great prices with exceptional customer
@@ -32,7 +32,7 @@ export default function AboutPage() {
               <h2 className="text-3xl font-bold mb-6">Our Story</h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  Founded in 2020, ShopHub started with a simple idea: create an online marketplace that puts customers
+                  Founded in 2020, e-commerce shop started with a simple idea: create an online marketplace that puts customers
                   first. What began as a small operation has grown into a trusted destination for thousands of shoppers
                   worldwide.
                 </p>

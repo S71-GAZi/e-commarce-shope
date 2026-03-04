@@ -14,8 +14,9 @@ import { useAuth } from "@/lib/auth-context"
 
 import ShippingForm from "./components/ShippingForm"
 import PaymentForm from "./components/PaymentForm"
-import OrderSummary from "./components/OrderSummary"
+import OrderSummary, { ISpecialDiscount } from "./components/OrderSummary"
 import { toast } from "@/hooks/use-toast"
+import { useFetchResource } from "@/hooks/useFetchResource"
 
 // Optional: define types
 export interface ShippingData {
@@ -40,13 +41,43 @@ export interface PaymentData {
 
 export default function CheckoutPage() {
   const router = useRouter()
-  const { items, subtotal: itemSubtotal, clearCart, isLoading: isCartLoading, buyNowItem, clearBuyNow } = useCart()
-  const { user, isAuthenticated, isLoading } = useAuth()
+  const { items, subtotal: itemSubtotal, clearCart, buyNowItem, clearBuyNow } = useCart()
+  const { user } = useAuth()
 
   const [mounted, setMounted] = useState(false)
   const [shippingData, setShippingData] = useState<ShippingData | null>(null)
   const [paymentData, setPaymentData] = useState<PaymentData>({ payment_method: "cod" })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const {
+    data: specialDiscount,
+    fetchData: fetchSpecialDiscount,
+  } = useFetchResource<ISpecialDiscount>({
+    url: "/api/discount",
+    extractData: (result) => result.data || [],
+  })
+
+  useEffect(() => {
+    fetchSpecialDiscount()
+  }, [fetchSpecialDiscount])
+
+
+  const activeItems = buyNowItem ? [buyNowItem] : items
+
+
+  let discount = 0
+
+
+
+  if (specialDiscount) {
+    activeItems.forEach((item) => {
+      if (item.quantity >= specialDiscount.offer_quantity) {
+        discount +=
+          (item.price_snapshot * item.quantity * (Number(specialDiscount.discount_percentage))) /
+          100
+      }
+    })
+  }
 
   // Computed values
   const cleanedBuyNowItem = buyNowItem
@@ -56,8 +87,7 @@ export default function CheckoutPage() {
 
   const shipping = shippingData?.district === "Dhaka" ? 70 : 120
   // const tax = subtotal * 0.08
-  const total = subtotal + shipping
-
+  const total = subtotal + shipping - discount
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -157,6 +187,7 @@ export default function CheckoutPage() {
               activeProviderName={paymentData?.provider}
               isProcessing={isSubmitting}
               shipping={shipping}
+              discount={discount}
             // onPlaceOrder={() => { }} // No-op if form handles submit
             />
           </div>
