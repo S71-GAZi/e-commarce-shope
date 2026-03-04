@@ -119,14 +119,14 @@ export default function ShippingForm({ user, onChange }: Props) {
 
                 {/* Email + Phone */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                    <div className="space-y-2 hidden">
                         <Label htmlFor="s-email" className="text-sm font-medium">
                             Email <span className="text-red-500">*</span>
                         </Label>
                         <Input
                             id="s-email"
                             type="email"
-                            required
+                            value={"demo@example.com"}
                             defaultValue={user?.email}
                             className="w-full h-10"
                             placeholder="john@example.com"
